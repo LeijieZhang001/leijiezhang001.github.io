@@ -1269,7 +1269,6 @@ pre .javascript .function {
 .post-body p a {
   color: #0593d3;
   border-bottom: none;
-  border-bottom: 1px solid #0593d3;
 }
 .post-body p a:hover {
   color: #fc6423;
@@ -1281,7 +1280,7 @@ pre .javascript .function {
 }
 @media (max-width: 767px) {
   .posts-expand {
-    margin: 0 20px;
+    margin: 0 10px;
   }
   .post-body pre .gutter pre {
     padding-right: 10px;
@@ -1333,7 +1332,7 @@ pre .javascript .function {
   visibility: visible;
 }
 .posts-expand .post-body ul li {
-  list-style: circle;
+  list-style: disc;
 }
 .posts-expand .post-body img {
   box-sizing: border-box;
@@ -1959,7 +1958,7 @@ pre .javascript .function {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #55ff95;
+  background: #d4db88;
 }
 .links-of-blogroll {
   font-size: 13px;
@@ -3041,11 +3040,4 @@ hr {
     width: auto;
     text-align: center;
   }
-}
-.post-body p a {
-  color: #0593d3;
-  border-bottom: none;
-}
-.post-body p a:hover {
-  color: #0477ab;
 }
