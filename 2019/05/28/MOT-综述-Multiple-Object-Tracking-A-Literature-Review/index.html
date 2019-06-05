@@ -97,7 +97,7 @@
 <meta property="og:description" content="之前做 MOT 还是沿着 SOT 的思路，这篇文章对 MOT 有一个很深入且很有框架性的综述，以下对这篇文章做一个提炼，并加入一些自己的想法。　　MOT 作为一个中层任务，是一些高层任务的基础，比如行人的 pose estimation，action recognition，behavior analysis，车辆的 state estimation。单目标跟踪(SOT)主要关注 appear">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="https://leijiezhang001.github.io/2019/05/28/MOT-综述-Multiple-Object-Tracking-A-Literature-Review/metrics.png">
-<meta property="og:updated_time" content="2019-06-05T15:15:08.143Z">
+<meta property="og:updated_time" content="2019-06-05T15:17:36.085Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MOT 综述-&#39;Multiple Object Tracking: A Literature Review&#39;">
 <meta name="twitter:description" content="之前做 MOT 还是沿着 SOT 的思路，这篇文章对 MOT 有一个很深入且很有框架性的综述，以下对这篇文章做一个提炼，并加入一些自己的想法。　　MOT 作为一个中层任务，是一些高层任务的基础，比如行人的 pose estimation，action recognition，behavior analysis，车辆的 state estimation。单目标跟踪(SOT)主要关注 appear">
@@ -555,7 +555,7 @@
 <li>Buffer-and-recover, 在遮挡产生前，记录一定量的观测，遮挡后恢复；</li>
 <li>Others</li>
 </ul>
-<h3 id="3-6-ensp-Inference"><a href="#3-6-ensp-Inference" class="headerlink" title="3.6.&ensp;Inference"></a>3.6.&ensp;Inference</h3><h4 id="3-6-1-ensp-Probabilistic-Inference"><a href="#3-6-1-ensp-Probabilistic-Inference" class="headerlink" title="3.6.1.&ensp;Probabilistic Inference"></a>3.6.1.&ensp;Probabilistic Inference</h4><p>　　概率法只需要用到当前时刻之前的信息，所以适合用于 online tracking 任务。首先，如果假设一阶马尔科夫，当前目标的状态之依赖于前一时刻目标的状态，即 <em>dynamic model</em>:<br>$$P(S_t|S_{1:t-1})=P(S_t|S_{t-1})$$<br>其次，观测是独立的，即当前目标的观测只由当前目标的状态决定，<em>observation model</em>:<br>$$P(O_{1:t}|S_{1:t})=\prod_{i=1}^t P(O_t|S_t)$$<br>dynamic model 对应的就是跟踪算法策略，observation model 是状态观测手段，包括检测方法。目标状态估计的迭代过程为：</p>
+<h3 id="3-6-ensp-Inference"><a href="#3-6-ensp-Inference" class="headerlink" title="3.6.&ensp;Inference"></a>3.6.&ensp;Inference</h3><h4 id="3-6-1-ensp-Probabilistic-Inference"><a href="#3-6-1-ensp-Probabilistic-Inference" class="headerlink" title="3.6.1.&ensp;Probabilistic Inference"></a>3.6.1.&ensp;Probabilistic Inference</h4><p>　　概率法只需要用到当前时刻之前的信息，所以适合用于 online tracking 任务。首先，如果假设一阶马尔科夫，当前目标的状态之依赖于前一时刻目标的状态，即 <em>dynamic model</em>：<br>$$P(S_t|S_{1:t-1})=P(S_t|S_{t-1})$$<br>其次，观测是独立的，即当前目标的观测只由当前目标的状态决定，<em>observation model</em>：<br>$$P(O_{1:t}|S_{1:t})=\prod_{i=1}^t P(O_t|S_t)$$<br>dynamic model 对应的就是跟踪算法策略，observation model 是状态观测手段，包括检测方法。目标状态估计的迭代过程为：</p>
 <ul>
 <li><strong>predict step</strong><br>根据 dynamic model，由目标的上一状态预测当前状态的后验概率分布；</li>
 <li><strong>update step</strong><br>根据 observation model，更新当前目标状态的后验概率分布；</li>
