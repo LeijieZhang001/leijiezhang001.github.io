@@ -75,7 +75,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT">
+  <meta name="keywords" content="paper reading,MOT,tracking,">
 
 
 
@@ -88,17 +88,20 @@
 
 
 
-<meta name="description" content="本文罗列了相关领域知识的学习资料。 1.&amp;ensp;Detection1.1.&amp;ensp;2D Detection 入门 amusi Object Detection @handong Object Detection and Classification using R-CNNs Paper with Code  1.2.&amp;ensp;3D Detection Paper with Code">
+<meta name="description" content="之前做 MOT 还是沿着 SOT 的思路，这篇文章对 MOT 有一个很深入且很有框架性的综述，以下对这篇文章做一个提炼，并加入一些自己的想法。　　MOT 作为一个中层任务，是一些高层任务的基础，比如行人的 pose estimation，action recognition，behavior analysis，车辆的 state estimation。单目标跟踪(SOT)主要关注 appear">
+<meta name="keywords" content="paper reading,MOT,tracking">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Study Topic List">
-<meta property="og:url" content="https://leijiezhang001.github.io/2019-05-20/study-topic-list/index.html">
+<meta property="og:title" content="MOT 综述-&#39;Multiple Object Tracking: A Literature Review&#39;">
+<meta property="og:url" content="https://leijiezhang001.github.io/20190528/MOT-综述-Multiple-Object-Tracking-A-Literature-Review/index.html">
 <meta property="og:site_name" content="LeijieZhang">
-<meta property="og:description" content="本文罗列了相关领域知识的学习资料。 1.&amp;ensp;Detection1.1.&amp;ensp;2D Detection 入门 amusi Object Detection @handong Object Detection and Classification using R-CNNs Paper with Code  1.2.&amp;ensp;3D Detection Paper with Code">
+<meta property="og:description" content="之前做 MOT 还是沿着 SOT 的思路，这篇文章对 MOT 有一个很深入且很有框架性的综述，以下对这篇文章做一个提炼，并加入一些自己的想法。　　MOT 作为一个中层任务，是一些高层任务的基础，比如行人的 pose estimation，action recognition，behavior analysis，车辆的 state estimation。单目标跟踪(SOT)主要关注 appear">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-06-05T15:08:37.617Z">
+<meta property="og:image" content="https://leijiezhang001.github.io/20190528/MOT-综述-Multiple-Object-Tracking-A-Literature-Review/metrics.png">
+<meta property="og:updated_time" content="2019-06-05T15:17:36.085Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Study Topic List">
-<meta name="twitter:description" content="本文罗列了相关领域知识的学习资料。 1.&amp;ensp;Detection1.1.&amp;ensp;2D Detection 入门 amusi Object Detection @handong Object Detection and Classification using R-CNNs Paper with Code  1.2.&amp;ensp;3D Detection Paper with Code">
+<meta name="twitter:title" content="MOT 综述-&#39;Multiple Object Tracking: A Literature Review&#39;">
+<meta name="twitter:description" content="之前做 MOT 还是沿着 SOT 的思路，这篇文章对 MOT 有一个很深入且很有框架性的综述，以下对这篇文章做一个提炼，并加入一些自己的想法。　　MOT 作为一个中层任务，是一些高层任务的基础，比如行人的 pose estimation，action recognition，behavior analysis，车辆的 state estimation。单目标跟踪(SOT)主要关注 appear">
+<meta name="twitter:image" content="https://leijiezhang001.github.io/20190528/MOT-综述-Multiple-Object-Tracking-A-Literature-Review/metrics.png">
 
 
 
@@ -128,13 +131,13 @@
 
 
 
-  <link rel="canonical" href="https://leijiezhang001.github.io/2019-05-20/study-topic-list/">
+  <link rel="canonical" href="https://leijiezhang001.github.io/20190528/MOT-综述-Multiple-Object-Tracking-A-Literature-Review/">
 
 
 
 
 
-  <title>Study Topic List | LeijieZhang</title>
+  <title>MOT 综述-'Multiple Object Tracking: A Literature Review' | LeijieZhang</title>
   
 
 
@@ -350,7 +353,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://leijiezhang001.github.io/2019-05-20/study-topic-list/">
+    <link itemprop="mainEntityOfPage" href="https://leijiezhang001.github.io/20190528/MOT-综述-Multiple-Object-Tracking-A-Literature-Review/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Leijie">
@@ -367,7 +370,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Study Topic List</h1>
+          <h1 class="post-title" itemprop="name headline">MOT 综述-'Multiple Object Tracking: A Literature Review'</h1>
         
 
         <div class="post-meta">
@@ -379,8 +382,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-05-20T13:30:54+08:00">
-                2019-05-20
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-05-28T16:22:58+08:00">
+                2019-05-28
               </time>
             
 
@@ -389,6 +392,28 @@
             
           </span>
 
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/paper-reading/" itemprop="url" rel="index">
+                    <span itemprop="name">paper reading</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -416,7 +441,7 @@
                   <span class="post-meta-item-text">Words count in article&#58;</span>
                 
                 <span title="Words count in article">
-                  256 字
+                  2.6k 字
                 </span>
               
 
@@ -432,7 +457,7 @@
                   <span class="post-meta-item-text">Reading time &asymp;</span>
                 
                 <span title="Reading time">
-                  1 分钟
+                  10 分钟
                 </span>
               
             </div>
@@ -453,63 +478,150 @@
       
 
       
-        <p>　　本文罗列了相关领域知识的学习资料。</p>
-<h2 id="1-ensp-Detection"><a href="#1-ensp-Detection" class="headerlink" title="1.&ensp;Detection"></a>1.&ensp;Detection</h2><h3 id="1-1-ensp-2D-Detection"><a href="#1-1-ensp-2D-Detection" class="headerlink" title="1.1.&ensp;2D Detection"></a>1.1.&ensp;2D Detection</h3><ul>
-<li><a href="https://zhuanlan.zhihu.com/p/34142321" target="_blank" rel="noopener">入门</a></li>
-<li><a href="https://github.com/amusi/awesome-object-detection" target="_blank" rel="noopener">amusi</a></li>
-<li><a href="https://handong1587.github.io/deep_learning/2015/10/09/object-detection.html#yolov3" target="_blank" rel="noopener">Object Detection @handong</a></li>
-<li><a href="http://www.telesens.co/2018/03/11/object-detection-and-classification-using-r-cnns/" target="_blank" rel="noopener">Object Detection and Classification using R-CNNs</a></li>
-<li><a href="https://paperswithcode.com/task/object-detection" target="_blank" rel="noopener">Paper with Code</a></li>
+        <p>　　之前做 MOT 还是沿着 SOT 的思路，这篇文章对 MOT 有一个很深入且很有框架性的综述，以下对这篇文章做一个提炼，并加入一些自己的想法。<br>　　MOT 作为一个中层任务，是一些高层任务的基础，比如行人的 pose estimation，action recognition，behavior analysis，车辆的 state estimation。单目标跟踪(SOT)主要关注 appearance model 以及 motion model 的设计，解决尺度、旋转、光照等影响因素。而 MOT 包含两个任务：目标数量以及目标ID，这就要求 MOT 还需要解决其它问题：</p>
+<ul>
+<li>frequent occlusions</li>
+<li>initialization and termination of tracks</li>
+<li>similar appearance</li>
+<li>interactions among multiple objects</li>
 </ul>
-<h3 id="1-2-ensp-3D-Detection"><a href="#1-2-ensp-3D-Detection" class="headerlink" title="1.2.&ensp;3D Detection"></a>1.2.&ensp;3D Detection</h3><ul>
-<li><a href="https://paperswithcode.com/task/3d-object-detection" target="_blank" rel="noopener">Paper with Code</a></li>
-<li><a href="http://www.cvlibs.net/datasets/kitti/eval_object.php?obj_benchmark=3d" target="_blank" rel="noopener">KITTI Leaderboard</a></li>
+<h2 id="1-ensp-问题描述"><a href="#1-ensp-问题描述" class="headerlink" title="1.&ensp;问题描述"></a>1.&ensp;问题描述</h2><p>　　多目标跟踪实际上是多参数估计问题。给定图像序列\(\{I_1,I_2,…,I_t,…\}\)，第\(t\)帧中目标个数为\(M_t\)，第\(t\)帧中所有目标的状态表示为\(S_t=\{s_t^1,s_t^2,…,s_t^{M_t}\}\)，第\(i\)个目标的轨迹表示为\(s_{1:t}^i=\{s_1^i,s_2^i,…,s_t^i\}\)，所有图像中所有目标的状态序列为\(S_{1:t}=\{S_1,S_2,…,S_t\}\)。相应的，所有图像中所有目标观测到的状态序列为\(O_{1:t}=\{O_1,O_2,…,O_t\}\)。多目标跟踪的优化目标是求解最优的各目标状态，即求解一个后验概率问题，$$ \widehat{S} _ {1:t}=\mathop{\arg\max}_{S_{1:t}}P(S_{1:t}|O_{1:t})$$<br>这种形式有两种实现方法：</p>
+<ul>
+<li><strong>probabilistic inference</strong><br>适合用于 online tracking 任务，Dynamic Model 为 \(P(S_t|S_{t-1})\)，Observation Model 为 \(P(O_t|S_t)\)，两步求解过程：<br>　\(\circ\)　Predict: \(P(S_t|O_{1:t-1})=\int P(S_t|S_{t-1})dS_{t-1}\)<br>　\(\circ\)　Update: \(P(S_t|O_{1:t}) \propto P(O_t|S_t)P(S_t|O_{1:t-1})\)</li>
+<li><strong>deterministic optimization</strong><br>适合用于 offline tracking 任务，直接利用多帧信息进行最优化求解。</li>
 </ul>
-<hr>
-<h2 id="2-ensp-Tracking"><a href="#2-ensp-Tracking" class="headerlink" title="2.&ensp;Tracking"></a>2.&ensp;Tracking</h2><h3 id="2-1-ensp-Single-Object-Tracking"><a href="#2-1-ensp-Single-Object-Tracking" class="headerlink" title="2.1.&ensp;Single Object Tracking"></a>2.1.&ensp;Single Object Tracking</h3><ul>
-<li><a href="https://paperswithcode.com/task/visual-object-tracking" target="_blank" rel="noopener">Paper with Code</a></li>
+<h2 id="2-ensp-分类方法"><a href="#2-ensp-分类方法" class="headerlink" title="2.&ensp;分类方法"></a>2.&ensp;分类方法</h2><ul>
+<li><strong>initialization method</strong><br>初始化方式分为：<br>　\(\circ\)　Detection-Based Tracking，优势明显，除了只能处理特定的目标类型；<br>　\(\circ\)　Detection-Free Tracking，能处理任何目标类型；</li>
+<li><strong>processing mode</strong><br>根据是否使用未来的观测，处理方式可分为：<br>　\(\circ\)　online tracking，适合在线任务，缺点是观测量会比较少；<br>　\(\circ\)　offline tracking，输出结果存在时延，理论上能获得全局最优解；</li>
+<li><p><strong>type of output</strong><br>根据问题求解方式输出是否存在随机性：<br>　\(\circ\)　probabilistic inference，概率性推断；<br>　\(\circ\)　deterministic inference，求解最大后验概率；</p>
+<p><strong>自动驾驶等在线任务主要关注 Detection-Based，online tracking。</strong></p>
+</li>
 </ul>
-<h3 id="2-2-ensp-Multi-Object-Tracking"><a href="#2-2-ensp-Multi-Object-Tracking" class="headerlink" title="2.2.&ensp;Multi Object Tracking"></a>2.2.&ensp;Multi Object Tracking</h3><ul>
-<li><a href="https://paperswithcode.com/task/multiple-object-tracking" target="_blank" rel="noopener">Paper with Code</a></li>
-<li><a href="https://zhuanlan.zhihu.com/p/65177442" target="_blank" rel="noopener">Paper List</a></li>
+<h2 id="3-ensp-框架"><a href="#3-ensp-框架" class="headerlink" title="3.&ensp;框架"></a>3.&ensp;框架</h2><p>　　MOT 主要考虑两个问题：</p>
+<ul>
+<li>目标在不同帧之间的相似性度量，即对appearance, motion, interaction, exclusion, occlusion的建模；</li>
+<li>恢复出目标的ID，即 inference 过程；  </li>
+</ul>
+<h3 id="3-1-ensp-Appearance-Model"><a href="#3-1-ensp-Appearance-Model" class="headerlink" title="3.1.&ensp;Appearance Model"></a>3.1.&ensp;Appearance Model</h3><h4 id="3-1-1-ensp-Visual-Representation"><a href="#3-1-1-ensp-Visual-Representation" class="headerlink" title="3.1.1.&ensp;Visual Representation"></a>3.1.1.&ensp;Visual Representation</h4><p>　　视觉表达即目标的特征表示方式：</p>
+<ol>
+<li><strong>local features</strong><br>本质上是点特征，点特征由 corner+descriptor(角点+描述子) 组成。KLT(good features to track)在 SOT 中应用广泛，用它可以生成短轨迹，估计相机运动位姿，运动聚类等；Optical Flow也是一种局部特征，在数据关联之前也可用于将检测目标连接到短轨迹中去。</li>
+<li><strong>region features</strong><br>在一个块区域内提取特征，根据像素间作差的次数，可分为：<ul>
+<li>zero-order, color histogram &amp; raw pixel template</li>
+<li>first-order, HOG &amp; level-set formulation(?)</li>
+<li>up-to-second-order, Region covariance matrix</li>
+</ul>
+</li>
+<li><strong>others</strong><br>其它特征本质上也需要 local 或 region 的方式提取，只是原始信息并不是灰度或彩图。如 depth,probabilistic occupancy map, gait feature.  </li>
+</ol>
+<p>　　Local features，比如颜色特征，在计算上比较高效，但是对遮挡，旋转比较敏感；Region features 里，HOG 对光照有一定的鲁棒性，但是对遮挡及形变效果较差；Region covariance matrix 更加鲁棒，但是需要更高的计算量；深度特征也比较有效，但是需要额外的获取深度信息的代价。</p>
+<h4 id="3-1-2-ensp-Statistical-Measuring"><a href="#3-1-2-ensp-Statistical-Measuring" class="headerlink" title="3.1.2.&ensp;Statistical Measuring"></a>3.1.2.&ensp;Statistical Measuring</h4><p>　　有了目标的特征表示方式之后，就可以评价两个观察的目标的相似性。特征表示的线索(cue)可分为：</p>
+<ol>
+<li><strong>single cue</strong><br>因为只有一个线索，相似性(similarity)可以直接通过两个向量的距离转换得到。可以将距离指数化，高斯化。也可以将不相似度转为可能性，用协方差矩阵表示。</li>
+<li><strong>multiple cues</strong><br>多线索，即多种特征的融合，能极大提高鲁棒性，融合的策略有：<ul>
+<li>Boosting, 选取一系列的特征，用 boost 算法选取表达能力最强的特征；</li>
+<li>Concatenation, 各个特征直接在空间维度上串起来，形成一个 cue 的表达方式；</li>
+<li>Summation, 加权融合各个特征，形成一个 cue 的表达方式；</li>
+<li>Product, 各个特征相乘的方式，比如目标 \(s_0\) 的某个潜在匹配 \(s_1\) 的颜色，形状特征为 \(color\), \(shape\) 的概率为 \(p(color|s_0)\), \(p(shape|s_0)\), 假设特征独立，那么，<br>　　　　　　　$$p(s_1|s_0)=p(color, shape|s_0)=p(color|s_0)\cdot p(shape|s_0)$$</li>
+<li>Cascading, coarse-to-fine 的方式，逐步精细化搜索；</li>
+</ul>
+</li>
+</ol>
+<h3 id="3-2-ensp-Motion-Model"><a href="#3-2-ensp-Motion-Model" class="headerlink" title="3.2.&ensp;Motion Model"></a>3.2.&ensp;Motion Model</h3><p>　　运动模型对关联两个 tracklets 比较管用，而 online tracking 任务，对输出的时延要求较高，所以其中一个 tracklet 可以任务就是当前帧与上一帧形成的轨迹，所以这里很难去计算两个 tracklets 的相似度。能看到的一个应用点就是，通过 motion model 模型，预测下一时刻目标的位置，作为一个线索项目。以下讨论的各模型主要是为了度量 tracklets 的相似性，从而做 tracklets 的匹配。  </p>
+<h4 id="3-2-1-ensp-Linear"><a href="#3-2-1-ensp-Linear" class="headerlink" title="3.2.1.&ensp;Linear"></a>3.2.1.&ensp;Linear</h4><ul>
+<li>Velocity Smoothness. N 帧 M 个目标轨迹: \(C_{dyn}=\sum_{t=1}^{N-2}\sum_{i=1}^{M}\parallel v_i^t-v_i^{t+1}\parallel^2\)</li>
+<li>Position Smoothness. \(G(p^{tail}+v^{tail}\Delta t-p^{head}, \sum_p)\cdot G(p^{head}-v^{head}\Delta t-p^{tail}, \sum_p)\)</li>
+<li>Acceleration Smoothness.  </li>
+</ul>
+<h4 id="3-2-2-ensp-Non-linear"><a href="#3-2-2-ensp-Non-linear" class="headerlink" title="3.2.2.&ensp;Non-linear"></a>3.2.2.&ensp;Non-linear</h4><p>　　运动模型假设是非线性的，相似度计算还是按照以上高斯形式。引为中提到，非线性运动模型并不作为目标的惩罚因子，因为目标并不需要满足该模型，但是只要有目标满足，就降低惩罚系数。</p>
+<h3 id="3-3-ensp-Interaction-Model"><a href="#3-3-ensp-Interaction-Model" class="headerlink" title="3.3.&ensp;Interaction Model"></a>3.3.&ensp;Interaction Model</h3><h4 id="3-3-1-ensp-Social-Force-Models"><a href="#3-3-1-ensp-Social-Force-Models" class="headerlink" title="3.3.1.&ensp;Social Force Models"></a>3.3.1.&ensp;Social Force Models</h4><ol>
+<li><strong>Individual Force</strong><ul>
+<li>fidelity, 目标不会改变它的目的地方向；</li>
+<li>constancy, 目标不会突然改变速度和方向；</li>
+</ul>
+</li>
+<li><strong>Group Force</strong><ul>
+<li>attraction, 目标间应该尽量靠近；</li>
+<li>repulsion, 目标间也得保留适当的距离；</li>
+<li>coherence, 同一个 group 里面的目标速度应该差不多；</li>
+</ul>
+</li>
+</ol>
+<h4 id="3-3-2-ensp-Crowd-Motion-Pattern-Models"><a href="#3-3-2-ensp-Crowd-Motion-Pattern-Models" class="headerlink" title="3.3.2.&ensp;Crowd Motion Pattern Models"></a>3.3.2.&ensp;Crowd Motion Pattern Models</h4><p>　　当一个 group 比较密集的时候，单个目标的运动模型不太显著了，这时候群体的运动模型更加有效，可以用一些方法来构建群体运动模型。</p>
+<h3 id="3-4-ensp-Exclusion-Model"><a href="#3-4-ensp-Exclusion-Model" class="headerlink" title="3.4.&ensp;Exclusion Model"></a>3.4.&ensp;Exclusion Model</h3><h4 id="3-4-1-ensp-Detection-level"><a href="#3-4-1-ensp-Detection-level" class="headerlink" title="3.4.1.&ensp;Detection-level"></a>3.4.1.&ensp;Detection-level</h4><p>　　同一帧两个检测量不能指向同一个目标。匹配 tracklets 时，可以将这一项作为惩罚项。不过目前的检测技术都做了 NMS，基本可以消除这种情况。  </p>
+<h4 id="3-4-2-ensp-Trajectory-level"><a href="#3-4-2-ensp-Trajectory-level" class="headerlink" title="3.4.2.&ensp;Trajectory-level"></a>3.4.2.&ensp;Trajectory-level</h4><p>　　两个轨迹不能非常靠近。对于 online tracking 来说，就是 tracking 结果的两个量不能挨在一起，如果挨在一起，就说明有问题，比如遮挡，或跟丢。</p>
+<h3 id="3-5-ensp-Occlusion-Handling"><a href="#3-5-ensp-Occlusion-Handling" class="headerlink" title="3.5.&ensp;Occlusion Handling"></a>3.5.&ensp;Occlusion Handling</h3><ul>
+<li>Part-to-whole, 将目标分成栅格来处理；</li>
+<li>Hypothesize-and-test, </li>
+<li>Buffer-and-recover, 在遮挡产生前，记录一定量的观测，遮挡后恢复；</li>
+<li>Others</li>
+</ul>
+<h3 id="3-6-ensp-Inference"><a href="#3-6-ensp-Inference" class="headerlink" title="3.6.&ensp;Inference"></a>3.6.&ensp;Inference</h3><h4 id="3-6-1-ensp-Probabilistic-Inference"><a href="#3-6-1-ensp-Probabilistic-Inference" class="headerlink" title="3.6.1.&ensp;Probabilistic Inference"></a>3.6.1.&ensp;Probabilistic Inference</h4><p>　　概率法只需要用到当前时刻之前的信息，所以适合用于 online tracking 任务。首先，如果假设一阶马尔科夫，当前目标的状态之依赖于前一时刻目标的状态，即 <em>dynamic model</em>：<br>$$P(S_t|S_{1:t-1})=P(S_t|S_{t-1})$$<br>其次，观测是独立的，即当前目标的观测只由当前目标的状态决定，<em>observation model</em>：<br>$$P(O_{1:t}|S_{1:t})=\prod_{i=1}^t P(O_t|S_t)$$<br>dynamic model 对应的就是跟踪算法策略，observation model 是状态观测手段，包括检测方法。目标状态估计的迭代过程为：</p>
+<ul>
+<li><strong>predict step</strong><br>根据 dynamic model，由目标的上一状态预测当前状态的后验概率分布；</li>
+<li><strong>update step</strong><br>根据 observation model，更新当前目标状态的后验概率分布；</li>
+</ul>
+<p>　　状态估计的过程伴随着噪音等因素的影响，常用的概率推断模型有：</p>
+<ul>
+<li>Kalman filter</li>
+<li>Extended Kalman filter</li>
+<li>Particle filter</li>
+</ul>
+<h4 id="3-6-2-ensp-Deterministic-Optimization"><a href="#3-6-2-ensp-Deterministic-Optimization" class="headerlink" title="3.6.2.&ensp;Deterministic Optimization"></a>3.6.2.&ensp;Deterministic Optimization</h4><p>  　确定性优化法需要至少一个时间窗口的观测量，所以适合 offline tracking 任务。优化方法有：</p>
+<ul>
+<li>Bipartite graph matching</li>
+<li>Dynamic Programming</li>
+<li>Min-cost max-flow network flow</li>
+<li>Conditional random field</li>
+<li>MWIS(Maximum-weight independent set)</li>
+</ul>
+<h2 id="4-ensp-评价方法"><a href="#4-ensp-评价方法" class="headerlink" title="4.&ensp;评价方法"></a>4.&ensp;评价方法</h2><p>　　评价方法是非常重要的，一方面对算法系统进行调参优化，另一方面比较各个不同算法的优劣。评价方法 (evaluation) 包括评价指标 (metrics) 以及数据集 (datasets)，多类别的数据集主要有：</p>
+<ul>
 <li><a href="https://motchallenge.net/results/MOT17/" target="_blank" rel="noopener">MOT Challenge</a></li>
-<li><a href="https://arxiv.org/abs/1409.7618" target="_blank" rel="noopener">综述：Multiple Object Tracking: A Literature Review</a></li>
-<li><a href="https://www.cv-foundation.org/openaccess/content_cvpr_2013/html/Wu_Online_Object_Tracking_2013_CVPR_paper.html" target="_blank" rel="noopener">综述：Online object tracking: A benchmark</a></li>
-<li><a href="https://arxiv.org/abs/1504.01942" target="_blank" rel="noopener">综述：MOTChallenge 2015: Towards a benchmark for multi-target tracking</a></li>
+<li><a href="http://www.cvlibs.net/datasets/kitti/eval_tracking.php" target="_blank" rel="noopener">KITTI</a>　　</li>
 </ul>
-<hr>
-<h2 id="3-ensp-Computational-Photography"><a href="#3-ensp-Computational-Photography" class="headerlink" title="3.&ensp;Computational Photography"></a>3.&ensp;Computational Photography</h2><ul>
-<li><a href="http://graphics.cs.cmu.edu/courses/15-463/2017_fall/" target="_blank" rel="noopener">2017年秋季的计算摄影学课程15-463</a></li>
+<p>评价指标可分为：<br>A.&ensp;<strong>检测指标</strong><br>　\(\lozenge\)　准确性(Accuracy)</p>
+<ul>
+<li>Recall &amp; Precision</li>
+<li>False Alarme per Frame(FAF) rate, from <a href="https://www.google.com/search?q=Learning+affinities+and+dependencies+for+multi-target+tracking+using+a+CRF+model&amp;oq=Learning+affinities+and+dependencies+for+multi-target+tracking+using+a+CRF+model&amp;aqs=chrome..69i57.1077j0j9&amp;sourceid=chrome&amp;ie=UTF-8" target="_blank" rel="noopener">paper</a></li>
+<li>False Positive Per Image(FPPI), from <a href="https://www.google.com/search?q=Multiple+target+tracking+in+world+coordinate+with+single%2C+minimally+calibrated+camera&amp;oq=Multiple+target+tracking+in+world+coordinate+with+single%2C+minimally+calibrated+camera&amp;aqs=chrome..69i57j0.1134j0j9&amp;sourceid=chrome&amp;ie=UTF-8" target="_blank" rel="noopener">paper</a></li>
+<li>MODA(Multiple Object Detection Accuracy), 包含了 false positive &amp; miss dets. from <a href="https://www.google.com/search?q=Framework+for+performance+evaluation+of+face%2C+text%2C+and+vehicle+detection+and+tracking+in+video%3A+Data%2C+metrics%2C+and+protocol&amp;oq=Framework+for+performance+evaluation+of+face%2C+text%2C+and+vehicle+detection+and+tracking+in+video%3A+Data%2C+metrics%2C+and+protocol&amp;aqs=chrome..69i57j69i61.973j0j9&amp;sourceid=chrome&amp;ie=UTF-8" target="_blank" rel="noopener">paper</a></li>
 </ul>
-<hr>
-<h2 id="4-ensp-CNN-ACC"><a href="#4-ensp-CNN-ACC" class="headerlink" title="4.&ensp;CNN ACC"></a>4.&ensp;CNN ACC</h2><hr>
-<h2 id="5-ensp-SLAM"><a href="#5-ensp-SLAM" class="headerlink" title="5.&ensp;SLAM"></a>5.&ensp;SLAM</h2><h3 id="5-1-ensp-理论知识"><a href="#5-1-ensp-理论知识" class="headerlink" title="5.1.&ensp;理论知识"></a>5.1.&ensp;理论知识</h3><ul>
-<li><a href="http://cvrs.whu.edu.cn/downloads/ebooks/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89%E4%B8%AD%E7%9A%84%E6%95%B0%E5%AD%A6%E6%96%B9%E6%B3%95.pdf" target="_blank" rel="noopener">计算机视觉中的数学方法</a></li>
-<li><a href="http://cvrs.whu.edu.cn/downloads/ebooks/Multiple%20View%20Geometry%20in%20Computer%20Vision%20%28Second%20Edition%29.pdf" target="_blank" rel="noopener">Multiple View Geometry in Computer Vision</a></li>
-<li><a href="https://docs.ufpr.br/~danielsantos/ProbabilisticRobotics.pdf" target="_blank" rel="noopener">Probabilistic Robotics</a>(有中文版)</li>
-<li><a href="http://asrl.utias.utoronto.ca/~tdb/bib/barfoot_ser17.pdf" target="_blank" rel="noopener">State Estimation for Robotics</a>(有中文版)</li>
-<li><a href="https://github.com/gaoxiang12/slambook" target="_blank" rel="noopener">视觉SLAM十四讲</a></li>
+<p>　\(\lozenge\)　精确性(Precision)</p>
+<ul>
+<li>MODP(Multiple Object Detection Precision), 衡量检测框与真值框的位置对齐程度；from <a href="https://www.google.com/search?q=Framework+for+performance+evaluation+of+face%2C+text%2C+and+vehicle+detection+and+tracking+in+video%3A+Data%2C+metrics%2C+and+protocol&amp;oq=Framework+for+performance+evaluation+of+face%2C+text%2C+and+vehicle+detection+and+tracking+in+video%3A+Data%2C+metrics%2C+and+protocol&amp;aqs=chrome..69i57j69i61.973j0j9&amp;sourceid=chrome&amp;ie=UTF-8" target="_blank" rel="noopener">paper</a></li>
 </ul>
-<h3 id="5-2-ensp-综述"><a href="#5-2-ensp-综述" class="headerlink" title="5.2.&ensp;综述"></a>5.2.&ensp;综述</h3><ul>
-<li>[Visual Odometry Part I: Fundamentals]</li>
-<li>[Visual Odometry Part II: Matching, Robustness, Optimization, Applications]</li>
-<li><a href="https://link.springer.com/content/pdf/10.1186%2Fs40064-016-3573-7.pdf" target="_blank" rel="noopener">Review of Visual Odometry: Types, Approaches, Challenges, and Applications</a></li>
-<li><a href="https://ipsjcva.springeropen.com/track/pdf/10.1186/s41074-017-0027-2" target="_blank" rel="noopener">Visual SLAM algorithms: a Survey from 2010 to 2016</a></li>
-<li><a href="http://www.cvc.uab.es/~asappa/publications/C__IEEE_IV_2012_W3.pdf" target="_blank" rel="noopener">Visual SLAM for Driverless Cars: a Brief Survey</a></li>
-<li><a href="https://link.springer.com/article/10.1007/s10462-012-9365-8" target="_blank" rel="noopener">Visual Simultaneous Locations and Mapping: a Survey</a></li>
+<p>B.&ensp;<strong>跟踪指标</strong><br>　\(\lozenge\)　准确性(Accuracy)</p>
+<ul>
+<li>ID switches(IDs), from <a href="https://www.google.com/search?safe=strict&amp;ei=agXyXMaQEKyl_Qa4zJrQCg&amp;q=who+are+you+with+and+where+are+you+going&amp;oq=Who+are+you+with+and+where+are+you+going&amp;gs_l=psy-ab.1.0.0i203.53050.53050..55771...0.0..0.559.559.5-1......0....2j1..gws-wiz.nigYYAJc4jQ" target="_blank" rel="noopener">paper</a></li>
+<li>MOTA(Multiple Object Tracking Accuracy), 包含了FP，FN，mismatch；from <a href="https://www.google.com/search?safe=strict&amp;ei=0ATyXP6lPIO6ggfIk6GAAQ&amp;q=evaluating+multiple+object+tracking+performance+the+clear+mot+metrics&amp;oq=Evaluating+Multiple+Object+Tracking+Performance&amp;gs_l=psy-ab.1.1.35i39j0j0i30j0i67.46576.46576..50024...0.0..0.436.436.4-1......0....2j1..gws-wiz.KAREeooiDMo" target="_blank" rel="noopener">paper</a></li>
 </ul>
-<h3 id="5-3-ensp-工具"><a href="#5-3-ensp-工具" class="headerlink" title="5.3.&ensp;工具"></a>5.3.&ensp;工具</h3><ul>
-<li><a href="http://www.guyuehome.com/column/ros-explore" target="_blank" rel="noopener">ROS</a></li>
-<li><a href="https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html" target="_blank" rel="noopener">Opencv Camera Calibration</a></li>
-<li><a href="http://www.vision.caltech.edu/bouguetj/calib_doc/" target="_blank" rel="noopener">Matlab Camera Calibration Toolbox</a></li>
-<li><a href="http://wiki.ros.org/camera_calibration" target="_blank" rel="noopener">ROS Wiki Camera Calibration</a></li>
+<p>　\(\lozenge\)　精确性(Precision)</p>
+<ul>
+<li>MOTP(Multiple Object Tracking Precision), from <a href="https://www.google.com/search?safe=strict&amp;ei=0ATyXP6lPIO6ggfIk6GAAQ&amp;q=evaluating+multiple+object+tracking+performance+the+clear+mot+metrics&amp;oq=Evaluating+Multiple+Object+Tracking+Performance&amp;gs_l=psy-ab.1.1.35i39j0j0i30j0i67.46576.46576..50024...0.0..0.436.436.4-1......0....2j1..gws-wiz.KAREeooiDMo" target="_blank" rel="noopener">paper</a></li>
+<li>TDE(Tracking Distance Error), from <a href="https://www.google.com/search?safe=strict&amp;ei=fATyXNnwEvCH_QaG17fwDA&amp;q=%E2%80%9CTracking+with+local+spatio-temporal+motion+patterns+in+extremely+crowded+scenes&amp;oq=%E2%80%9CTracking+with+local+spatio-temporal+motion+patterns+in+extremely+crowded+scenes&amp;gs_l=psy-ab.12..0i30.82181.82181..83291...0.0..0.292.292.2-1......0....2j1..gws-wiz.hs0Je90zzHU" target="_blank" rel="noopener">paper</a></li>
+<li>OSPA(optimal subpattern assignment), from <a href="https://www.google.com/search?safe=strict&amp;ei=_gDyXPKINY21ggeKtb2oDg&amp;q=a+metric+for+performance+evaluation+of+multi-target+tracking+algorithms&amp;oq=A_Metric_for_Performance_Evaluation_of_Multi-Targe&amp;gs_l=psy-ab.1.0.0i30.106502.106502..109413...0.0..0.303.303.3-1......0....2j1..gws-wiz.vrzc0MG18OM" target="_blank" rel="noopener">paper</a></li>
 </ul>
-<h3 id="5-4-ensp-算法"><a href="#5-4-ensp-算法" class="headerlink" title="5.4.&ensp;算法"></a>5.4.&ensp;算法</h3><ul>
-<li><a href="https://openslam-org.github.io/" target="_blank" rel="noopener">OpenSLAM</a></li>
+<p>　\(\lozenge\)　完整性(Completeness)</p>
+<ul>
+<li>MT, the numbers of Mostly Tracked, from <a href="https://www.google.com/search?q=Learning+to+associate%3A+Hybridboosted+multi-target+tracker+for+crowded+scene&amp;oq=Learning+to+associate%3A+Hybridboosted+multi-target+tracker+for+crowded+scene&amp;aqs=chrome..69i57.1261j0j9&amp;sourceid=chrome&amp;ie=UTF-8" target="_blank" rel="noopener">paper</a></li>
+<li>PT, the numbers of Partly Tracked</li>
+<li>ML, the numbers of Mostly Lost</li>
+<li>FM, the numbers of Fragmentation</li>
 </ul>
-<h3 id="5-5-ensp-其它资料"><a href="#5-5-ensp-其它资料" class="headerlink" title="5.5.&ensp;其它资料"></a>5.5.&ensp;其它资料</h3><ul>
-<li><a href="https://www.zhihu.com/people/cheng-xu-yuan-10/posts" target="_blank" rel="noopener">计算机视觉life</a></li>
-<li><a href="https://paperswithcode.com/task/visual-odometry" target="_blank" rel="noopener">Paper with Code</a></li>
+<p>　\(\lozenge\)　鲁棒性(Robustness)</p>
+<ul>
+<li>RS(Recover from Short-term occlusion), from <a href="https://www.google.com/search?safe=strict&amp;ei=_gDyXPKINY21ggeKtb2oDg&amp;q=A+stochastic+graph+evolution+framework+for+robust+multi-target+tracking&amp;oq=A+stochastic+graph+evolution+framework+for+robust+multi-target+tracking&amp;gs_l=psy-ab.12..0i30.453442.453442..454691...0.0..0.315.315.3-1......0....2j1..gws-wiz.OPYJ8mRFgYg" target="_blank" rel="noopener">paper</a></li>
+<li>RL(Recover from Long-term occlusion)  </li>
+</ul>
+<p>评价指标汇总：<br><img src="/20190528/MOT-综述-Multiple-Object-Tracking-A-Literature-Review/metrics.png" width="50%" height="50%"></p>
+<h2 id="5-ensp-总结"><a href="#5-ensp-总结" class="headerlink" title="5.&ensp;总结"></a>5.&ensp;总结</h2><h3 id="5-1-ensp-还存在的问题"><a href="#5-1-ensp-还存在的问题" class="headerlink" title="5.1.&ensp;还存在的问题"></a>5.1.&ensp;还存在的问题</h3><p>　　MOT 算法模块较多，参数也较复杂，但是最依赖于检测模块的性能，所以算法间比较性能时，需要注意按模块进行变量控制。</p>
+<h3 id="5-2-ensp-未来研究方向"><a href="#5-2-ensp-未来研究方向" class="headerlink" title="5.2.&ensp;未来研究方向"></a>5.2.&ensp;未来研究方向</h3><ul>
+<li><strong>MOT with video adaptation</strong>，检测模块式预先训练的，需要在线更新学习；</li>
+<li><strong>MOT under multiple camera</strong>:<br>\(\circ\)　multiple views，不同视野相同场景信息的记录，<br>\(\circ\)　non-overlapping multi-camera，不同视野不同场景的 reidentification；</li>
+<li><strong>Multiple 3D object tracking</strong>，能更准确预测位置，大小，更有效处理遮挡；</li>
+<li><strong>MOT with scene understanding</strong>，拥挤场景，用场景理解来有效跟踪；</li>
+<li><strong>MOT with deep learning</strong></li>
+<li><strong>MOT with other cv tasks</strong>，和其他任务融合，比如目标分割等；</li>
 </ul>
 
       
@@ -565,7 +677,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>Post link:</strong>
-    <a href="https://leijiezhang001.github.io/2019-05-20/study-topic-list/" title="Study Topic List">https://leijiezhang001.github.io/2019-05-20/study-topic-list/</a>
+    <a href="https://leijiezhang001.github.io/20190528/MOT-综述-Multiple-Object-Tracking-A-Literature-Review/" title="MOT 综述-'Multiple Object Tracking: A Literature Review'">https://leijiezhang001.github.io/20190528/MOT-综述-Multiple-Object-Tracking-A-Literature-Review/</a>
   </li>
   <li class="post-copyright-license">
     <strong>Copyright Notice: </strong>
@@ -579,6 +691,16 @@
 	
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/paper-reading/" rel="tag"><i class="fa fa-tag"></i> paper reading</a>
+          
+            <a href="/tags/MOT/" rel="tag"><i class="fa fa-tag"></i> MOT</a>
+          
+            <a href="/tags/tracking/" rel="tag"><i class="fa fa-tag"></i> tracking</a>
+          
+        </div>
+      
 
       
       
@@ -588,8 +710,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019-05-20/hello-world/" rel="next" title="Hello World">
-                <i class="fa fa-chevron-left"></i> Hello World
+              <a href="/20190522/3D-Detection-paper-list/" rel="next" title="3D Detection Paper List">
+                <i class="fa fa-chevron-left"></i> 3D Detection Paper List
               </a>
             
           </div>
@@ -598,8 +720,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019-05-22/3D-Detection-paper-list/" rel="prev" title="3D Detection Paper List">
-                3D Detection Paper List <i class="fa fa-chevron-right"></i>
+              <a href="/20190602/MOT-评价指标-Evaluating-Multiple-Object-Tracking-Performance-the-CLEAR-MOT-Metrics/" rel="prev" title="MOT 评价指标-" evaluating multiple object tracking performance, the clear mot metrics"">
+                MOT 评价指标-"Evaluating Multiple Object Tracking Performance, the CLEAR MOT Metrics" <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -796,7 +918,7 @@ var jiathis_config={
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-ensp-Detection"><span class="nav-text">1. Detection</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-ensp-2D-Detection"><span class="nav-text">1.1. 2D Detection</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-ensp-3D-Detection"><span class="nav-text">1.2. 3D Detection</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-ensp-Tracking"><span class="nav-text">2. Tracking</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-ensp-Single-Object-Tracking"><span class="nav-text">2.1. Single Object Tracking</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-ensp-Multi-Object-Tracking"><span class="nav-text">2.2. Multi Object Tracking</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-ensp-Computational-Photography"><span class="nav-text">3. Computational Photography</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-ensp-CNN-ACC"><span class="nav-text">4. CNN ACC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-ensp-SLAM"><span class="nav-text">5. SLAM</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-ensp-理论知识"><span class="nav-text">5.1. 理论知识</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-ensp-综述"><span class="nav-text">5.2. 综述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-ensp-工具"><span class="nav-text">5.3. 工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-4-ensp-算法"><span class="nav-text">5.4. 算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-5-ensp-其它资料"><span class="nav-text">5.5. 其它资料</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-ensp-问题描述"><span class="nav-text">1. 问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-ensp-分类方法"><span class="nav-text">2. 分类方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-ensp-框架"><span class="nav-text">3. 框架</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-ensp-Appearance-Model"><span class="nav-text">3.1. Appearance Model</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-1-ensp-Visual-Representation"><span class="nav-text">3.1.1. Visual Representation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-2-ensp-Statistical-Measuring"><span class="nav-text">3.1.2. Statistical Measuring</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-ensp-Motion-Model"><span class="nav-text">3.2. Motion Model</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-1-ensp-Linear"><span class="nav-text">3.2.1. Linear</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-2-ensp-Non-linear"><span class="nav-text">3.2.2. Non-linear</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-ensp-Interaction-Model"><span class="nav-text">3.3. Interaction Model</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-3-1-ensp-Social-Force-Models"><span class="nav-text">3.3.1. Social Force Models</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-3-2-ensp-Crowd-Motion-Pattern-Models"><span class="nav-text">3.3.2. Crowd Motion Pattern Models</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-4-ensp-Exclusion-Model"><span class="nav-text">3.4. Exclusion Model</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-4-1-ensp-Detection-level"><span class="nav-text">3.4.1. Detection-level</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-4-2-ensp-Trajectory-level"><span class="nav-text">3.4.2. Trajectory-level</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-5-ensp-Occlusion-Handling"><span class="nav-text">3.5. Occlusion Handling</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-6-ensp-Inference"><span class="nav-text">3.6. Inference</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-6-1-ensp-Probabilistic-Inference"><span class="nav-text">3.6.1. Probabilistic Inference</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-6-2-ensp-Deterministic-Optimization"><span class="nav-text">3.6.2. Deterministic Optimization</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-ensp-评价方法"><span class="nav-text">4. 评价方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-ensp-总结"><span class="nav-text">5. 总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-ensp-还存在的问题"><span class="nav-text">5.1. 还存在的问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-ensp-未来研究方向"><span class="nav-text">5.2. 未来研究方向</span></a></li></ol></li></ol></div>
             
 
           </div>
@@ -1408,6 +1530,26 @@ var jiathis_config={
   
 
   
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
   
 
 
