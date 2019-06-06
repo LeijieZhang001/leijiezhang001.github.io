@@ -96,7 +96,7 @@
 <meta property="og:site_name" content="LeijieZhang">
 <meta property="og:description" content="MOT 是一个比较基本的技术模块，在视频监控中，常用于行人行为分析、姿态估计等任务的前序模块；在自动驾驶中，MOT 是动态目标状态估计的重要环节。在学术界，MOT 算法性能的评价准则已经较为完善，其指标主要关注，尽可能地覆盖所有性能维度，以及指标的简洁性（上一篇有较多介绍，the CLEAR MOT Metrics）。而工业界则尚无统一的标准，实际的指标需求情况也比学术界复杂。　　指标的计算过">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-06-05T14:00:24.605Z">
+<meta property="og:updated_time" content="2019-06-06T04:34:45.877Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MOT Metrics in Academia and Industry">
 <meta name="twitter:description" content="MOT 是一个比较基本的技术模块，在视频监控中，常用于行人行为分析、姿态估计等任务的前序模块；在自动驾驶中，MOT 是动态目标状态估计的重要环节。在学术界，MOT 算法性能的评价准则已经较为完善，其指标主要关注，尽可能地覆盖所有性能维度，以及指标的简洁性（上一篇有较多介绍，the CLEAR MOT Metrics）。而工业界则尚无统一的标准，实际的指标需求情况也比学术界复杂。　　指标的计算过">
@@ -476,7 +476,7 @@
       
 
       
-        <p>　　MOT 是一个比较基本的技术模块，在视频监控中，常用于行人行为分析、姿态估计等任务的前序模块；在自动驾驶中，MOT 是动态目标状态估计的重要环节。在学术界，MOT 算法性能的评价准则已经较为完善，其指标主要关注，尽可能地覆盖所有性能维度，以及指标的简洁性（上一篇有较多介绍，<a href="https://leijiezhang001.github.io/2019/06/02/MOT-%E8%AF%84%E4%BB%B7%E6%8C%87%E6%A0%87-Evaluating-Multiple-Object-Tracking-Performance-the-CLEAR-MOT-Metrics/#more">the CLEAR MOT Metrics</a>）。而工业界则尚无统一的标准，实际的指标需求情况也比学术界复杂。<br>　　指标的计算过程可由三部分组成，真值过滤(Filter)，匹配构建(Establishing Correspondences)与指标计算(Calculating Metrics)。其中真值过滤，更多的是工程细节，学术界没有文章对这一部分进行讨论研究。本文首先介绍学术界各评价指标详情，然后讨论工业界需要的评价指标又是怎样的。</p>
+        <p>　　MOT 是一个比较基本的技术模块，在视频监控中，常用于行人行为分析、姿态估计等任务的前序模块；在自动驾驶中，MOT 是动态目标状态估计的重要环节。在学术界，MOT 算法性能的评价准则已经较为完善，其指标主要关注，尽可能地覆盖所有性能维度，以及指标的简洁性（上一篇有较多介绍，<a href="https://leijiezhang001.github.io/2019-06-02/MOT-%E8%AF%84%E4%BB%B7%E6%8C%87%E6%A0%87-Evaluating-Multiple-Object-Tracking-Performance-the-CLEAR-MOT-Metrics/#more">the CLEAR MOT Metrics</a>）。而工业界则尚无统一的标准，实际的指标需求情况也比学术界复杂。<br>　　指标的计算过程可由三部分组成，真值过滤(Filter)，匹配构建(Establishing Correspondences)与指标计算(Calculating Metrics)。其中真值过滤，更多的是工程细节，学术界没有文章对这一部分进行讨论研究。本文首先介绍学术界各评价指标详情，然后讨论工业界需要的评价指标又是怎样的。</p>
 <h2 id="1-ensp-Metrics-in-Academia"><a href="#1-ensp-Metrics-in-Academia" class="headerlink" title="1.&ensp;Metrics in Academia"></a>1.&ensp;Metrics in Academia</h2><p>　　在学术界，因为数据集质量较高，噪声相对较小，匹配构建中距离的度量偏向于严格且简单的方式。对于区域(框)跟踪器，采用重叠区域来度量；对于点跟踪器，采用中心点的欧式距离来度量。指标汇总如下：<br>A.&ensp;<strong>检测指标</strong><br>　\(\lozenge\)　准确性(Accuracy)</p>
 <ul>
 <li><strong>Recall</strong> = \(\frac{TP}{GT}\)；</li>
