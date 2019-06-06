@@ -75,7 +75,7 @@
 
 
 
-  <meta name="keywords" content="paper reading,3D Detection,">
+  <meta name="keywords" content="paper reading,MOT,tracking,">
 
 
 
@@ -88,18 +88,18 @@
 
 
 
-<meta name="description" content="这篇文章从输入数据类别上进行 3D Detection paper 的归类。 RGBRGB-D(双目，单目+点云)Lidar">
-<meta name="keywords" content="paper reading,3D Detection">
+<meta name="description" content="这篇文章介绍了两个综合性指标 MOTA 以及 MOTP 的计算过程，这两个指标有优劣势，但是作为综合性指标至今在学术界仍广泛应用。本文主要介绍其设计思想及计算过程。　　一个理想的 MOT 算法，我们期望每一帧：  准确检测目标的数量； 准确估计每个目标的状态，如位置，朝向，速度等； 准确估计每个目标的轨迹，即目标的 ID 不变性；    这就要求评价准则：  能评估目标定位的精度； 能反映目标">
+<meta name="keywords" content="paper reading,MOT,tracking">
 <meta property="og:type" content="article">
-<meta property="og:title" content="3D Detection Paper List">
-<meta property="og:url" content="https://leijiezhang001.github.io/20190522/3D-Detection-paper-list/index.html">
+<meta property="og:title" content="MOT 评价指标-&quot;Evaluating Multiple Object Tracking Performance, the CLEAR MOT Metrics&quot;">
+<meta property="og:url" content="https://leijiezhang001.github.io/MOT-评价指标-Evaluating-Multiple-Object-Tracking-Performance-the-CLEAR-MOT-Metrics/index.html">
 <meta property="og:site_name" content="LeijieZhang">
-<meta property="og:description" content="这篇文章从输入数据类别上进行 3D Detection paper 的归类。 RGBRGB-D(双目，单目+点云)Lidar">
+<meta property="og:description" content="这篇文章介绍了两个综合性指标 MOTA 以及 MOTP 的计算过程，这两个指标有优劣势，但是作为综合性指标至今在学术界仍广泛应用。本文主要介绍其设计思想及计算过程。　　一个理想的 MOT 算法，我们期望每一帧：  准确检测目标的数量； 准确估计每个目标的状态，如位置，朝向，速度等； 准确估计每个目标的轨迹，即目标的 ID 不变性；    这就要求评价准则：  能评估目标定位的精度； 能反映目标">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-05-26T08:38:20.552Z">
+<meta property="og:updated_time" content="2019-06-05T14:32:36.448Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="3D Detection Paper List">
-<meta name="twitter:description" content="这篇文章从输入数据类别上进行 3D Detection paper 的归类。 RGBRGB-D(双目，单目+点云)Lidar">
+<meta name="twitter:title" content="MOT 评价指标-&quot;Evaluating Multiple Object Tracking Performance, the CLEAR MOT Metrics&quot;">
+<meta name="twitter:description" content="这篇文章介绍了两个综合性指标 MOTA 以及 MOTP 的计算过程，这两个指标有优劣势，但是作为综合性指标至今在学术界仍广泛应用。本文主要介绍其设计思想及计算过程。　　一个理想的 MOT 算法，我们期望每一帧：  准确检测目标的数量； 准确估计每个目标的状态，如位置，朝向，速度等； 准确估计每个目标的轨迹，即目标的 ID 不变性；    这就要求评价准则：  能评估目标定位的精度； 能反映目标">
 
 
 
@@ -129,13 +129,13 @@
 
 
 
-  <link rel="canonical" href="https://leijiezhang001.github.io/20190522/3D-Detection-paper-list/">
+  <link rel="canonical" href="https://leijiezhang001.github.io/MOT-评价指标-Evaluating-Multiple-Object-Tracking-Performance-the-CLEAR-MOT-Metrics/">
 
 
 
 
 
-  <title>3D Detection Paper List | LeijieZhang</title>
+  <title>MOT 评价指标-"Evaluating Multiple Object Tracking Performance, the CLEAR MOT Metrics" | LeijieZhang</title>
   
 
 
@@ -351,7 +351,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://leijiezhang001.github.io/20190522/3D-Detection-paper-list/">
+    <link itemprop="mainEntityOfPage" href="https://leijiezhang001.github.io/MOT-评价指标-Evaluating-Multiple-Object-Tracking-Performance-the-CLEAR-MOT-Metrics/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Leijie">
@@ -368,7 +368,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">3D Detection Paper List</h1>
+          <h1 class="post-title" itemprop="name headline">MOT 评价指标-"Evaluating Multiple Object Tracking Performance, the CLEAR MOT Metrics"</h1>
         
 
         <div class="post-meta">
@@ -380,8 +380,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-05-22T11:43:33+08:00">
-                2019-05-22
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-06-02T14:23:46+08:00">
+                2019-06-02
               </time>
             
 
@@ -439,7 +439,7 @@
                   <span class="post-meta-item-text">Words count in article&#58;</span>
                 
                 <span title="Words count in article">
-                  29 字
+                  1.1k 字
                 </span>
               
 
@@ -455,7 +455,7 @@
                   <span class="post-meta-item-text">Reading time &asymp;</span>
                 
                 <span title="Reading time">
-                  1 分钟
+                  3 分钟
                 </span>
               
             </div>
@@ -476,8 +476,56 @@
       
 
       
-        <p>这篇文章从输入数据类别上进行 3D Detection paper 的归类。</p>
-<h2 id="RGB"><a href="#RGB" class="headerlink" title="RGB"></a>RGB</h2><h2 id="RGB-D-双目，单目-点云"><a href="#RGB-D-双目，单目-点云" class="headerlink" title="RGB-D(双目，单目+点云)"></a>RGB-D(双目，单目+点云)</h2><h2 id="Lidar"><a href="#Lidar" class="headerlink" title="Lidar"></a>Lidar</h2>
+        <p>　　这篇文章介绍了两个综合性指标 MOTA 以及 MOTP 的计算过程，这两个指标有优劣势，但是作为综合性指标至今在学术界仍广泛应用。本文主要介绍其设计思想及计算过程。<br>　　一个理想的 MOT 算法，我们期望每一帧：</p>
+<ul>
+<li>准确检测目标的数量；</li>
+<li>准确估计每个目标的状态，如位置，朝向，速度等；</li>
+<li>准确估计每个目标的轨迹，即目标的 ID 不变性；  </li>
+</ul>
+<p>这就要求评价准则：</p>
+<ul>
+<li>能评估目标定位的精度；</li>
+<li>能反映目标轨迹的追踪能力，即同一个目标产生唯一的 ID；  </li>
+</ul>
+<p>此外，为了提高评价准则的实用性：</p>
+<ul>
+<li>参数尽可能少，阈值可调；</li>
+<li>易于理解，表现方式符合人们的直觉；</li>
+<li>有较强的通用性，能评估各种跟踪算法；</li>
+<li>指标个数少，但是能足够反映算法不同维度的性能；  </li>
+</ul>
+<p>假设第 \(t\) 帧，有目标集 \(\{o_1,…,o_n\}\)，跟踪算法的输出(hypotheses)：\(\{h_1,…h_m\}\)。根据上述设计准则，设计评价计算过程：</p>
+<ol>
+<li>&ensp;构建 \(h_j\) 与 \(o_i\) 的最优匹配；</li>
+<li>&ensp;对于每个匹配对，计算位置估计误差；</li>
+<li>&ensp;累加所有匹配对的误差，包括：<br>a. &ensp;计算漏检数(FN)；<br>b. &ensp;计算误检数(FP)；<br>c. &ensp;计算 ID swith 次数，包括两个邻近目标的 ID 交换，以及遮挡后，同一目标的 ID 跳变；  </li>
+</ol>
+<p>由此可得到两大指标：</p>
+<ul>
+<li>tracking precision，目标位置的估计精度；</li>
+<li>tracking accuracy，包括 misses(FN), FP, mismatches(IDs), failures to recover；  </li>
+</ul>
+<p>下面分两块做细节分析，匹配构建 (Establishing Correspondences) 与评价指标 (Metrics)。</p>
+<h2 id="1-ensp-匹配构建"><a href="#1-ensp-匹配构建" class="headerlink" title="1.&ensp;匹配构建"></a>1.&ensp;匹配构建</h2><p>　　算法估计与目标真值的匹配，大致还是基于匹配最近 object-hypothesis 的思想，没匹配上的估计就是 FP，没匹配上的真值就是 FN。但是这中间需要进一步考虑一些问题。</p>
+<h3 id="1-1-ensp-有效匹配"><a href="#1-1-ensp-有效匹配" class="headerlink" title="1.1.&ensp;有效匹配"></a>1.1.&ensp;有效匹配</h3><p>　　如果算法估计 \(h_j\) 与目标 \(o_i\) 的最近距离 \(dist_{i,j}\) 超过了一定的阈值 \(T\)，那么这个匹配也是不合理的，因为这个距离误差加入到定位误差中是不合理的，所以只能说这个跟踪的结果不是这个目标。关于距离的度量：</p>
+<ul>
+<li>区域（框）跟踪器，距离可用两者的重叠区域来度量，\(T\) 可以设为 0；</li>
+<li>点跟踪器，距离可用两者中心点的欧氏距离来度量，\(T\) 可以根据目标的尺寸来设定；</li>
+</ul>
+<h3 id="1-2-ensp-跟踪一致性"><a href="#1-2-ensp-跟踪一致性" class="headerlink" title="1.2.&ensp;跟踪一致性"></a>1.2.&ensp;跟踪一致性</h3><p>　　统计目标与算法输出的匹配跳变的次数，也就是目标 ID 的跳变数。文章还提到，当目标有两个有效地匹<br>配时，选择之前的匹配，即使那个匹配的距离大于另一个匹配，这点当存在两个很近的目标时，可能会有问题，需要全局来看。</p>
+<h3 id="1-3-ensp-匹配过程"><a href="#1-3-ensp-匹配过程" class="headerlink" title="1.3.&ensp;匹配过程"></a>1.3.&ensp;匹配过程</h3><ol>
+<li>&ensp;对 \(t\) 帧，考虑 \(M_{t-1}\) 中所有匹配是否还依然有效，包括目标真值及算法输出是否还存在，如果都存在，那么距离是否超出阈值 \(T\)；</li>
+<li>&ensp;对于剩下的没找到匹配的真值目标，在唯一匹配以及阈值约束下，可采用匹配算法或者贪心算法来求解，使得距离误差的总和最小（文章的意思是排除了从上一帧继承的已有匹配，当目标密集时，这部分也应该加入进来优化）。统计当前帧目标真值匹配的跳变数 \(mme_t\)，作为 mismatch errors；</li>
+<li>&ensp;经过之前两步后，找到了所有的匹配，统计匹配个数为 \(c_t\)，计算匹配上的目标真值与算法输出的定位误差 \(d_t^i\)；</li>
+<li>&ensp;统计没有匹配上的算法输出 (hypotheses) 为 \(fp_t\)，没有匹配上的目标真值为 \(m_t\)，目标真值个数为 \(g_t\)；</li>
+<li>&ensp;每一帧重复步骤１，第一帧没有 mismatch；</li>
+</ol>
+<h2 id="2-ensp-评价指标"><a href="#2-ensp-评价指标" class="headerlink" title="2.&ensp;评价指标"></a>2.&ensp;评价指标</h2><p>　　基于以上的匹配策略，得出两个合理的指标：</p>
+<ul>
+<li><strong>MOTP</strong>(multiple object tracking precision)，跟踪定位精度指标：$$MOTP=\frac{\sum_{i,t}d_t^i}{\sum_tc_t}$$</li>
+<li><strong>MOTA</strong>(multiple object tracking accuracy)，综合了漏检率，误检率，以及 ID 跳变率：$$MOTA=1-\frac{\sum_t(m_t+fp_t+mme_t)}{\sum_tg_t}$$</li>
+</ul>
+
       
     </div>
     
@@ -531,7 +579,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>Post link:</strong>
-    <a href="https://leijiezhang001.github.io/20190522/3D-Detection-paper-list/" title="3D Detection Paper List">https://leijiezhang001.github.io/20190522/3D-Detection-paper-list/</a>
+    <a href="https://leijiezhang001.github.io/MOT-评价指标-Evaluating-Multiple-Object-Tracking-Performance-the-CLEAR-MOT-Metrics/" title="MOT 评价指标-" evaluating multiple object tracking performance, the clear mot metrics"">https://leijiezhang001.github.io/MOT-评价指标-Evaluating-Multiple-Object-Tracking-Performance-the-CLEAR-MOT-Metrics/</a>
   </li>
   <li class="post-copyright-license">
     <strong>Copyright Notice: </strong>
@@ -549,7 +597,9 @@
           
             <a href="/tags/paper-reading/" rel="tag"><i class="fa fa-tag"></i> paper reading</a>
           
-            <a href="/tags/3D-Detection/" rel="tag"><i class="fa fa-tag"></i> 3D Detection</a>
+            <a href="/tags/MOT/" rel="tag"><i class="fa fa-tag"></i> MOT</a>
+          
+            <a href="/tags/tracking/" rel="tag"><i class="fa fa-tag"></i> tracking</a>
           
         </div>
       
@@ -562,8 +612,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/20190520/study-topic-list/" rel="next" title="Study Topic List">
-                <i class="fa fa-chevron-left"></i> Study Topic List
+              <a href="/MOT-综述-Multiple-Object-Tracking-A-Literature-Review/" rel="next" title="MOT 综述-'Multiple Object Tracking: A Literature Review'">
+                <i class="fa fa-chevron-left"></i> MOT 综述-'Multiple Object Tracking: A Literature Review'
               </a>
             
           </div>
@@ -572,8 +622,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/20190528/MOT-综述-Multiple-Object-Tracking-A-Literature-Review/" rel="prev" title="MOT 综述-'Multiple Object Tracking: A Literature Review'">
-                MOT 综述-'Multiple Object Tracking: A Literature Review' <i class="fa fa-chevron-right"></i>
+              <a href="/MOT-Metrics-in-Academia-and-Industry/" rel="prev" title="MOT Metrics in Academia and Industry">
+                MOT Metrics in Academia and Industry <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -770,7 +820,7 @@ var jiathis_config={
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#RGB"><span class="nav-text">RGB</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RGB-D-双目，单目-点云"><span class="nav-text">RGB-D(双目，单目+点云)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lidar"><span class="nav-text">Lidar</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-ensp-匹配构建"><span class="nav-text">1. 匹配构建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-ensp-有效匹配"><span class="nav-text">1.1. 有效匹配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-ensp-跟踪一致性"><span class="nav-text">1.2. 跟踪一致性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-ensp-匹配过程"><span class="nav-text">1.3. 匹配过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-ensp-评价指标"><span class="nav-text">2. 评价指标</span></a></li></ol></div>
             
 
           </div>
@@ -1382,6 +1432,26 @@ var jiathis_config={
   
 
   
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
   
 
 
