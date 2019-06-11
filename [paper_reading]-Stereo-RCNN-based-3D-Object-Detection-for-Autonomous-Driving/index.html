@@ -105,7 +105,7 @@
 <meta property="og:image" content="https://leijiezhang001.github.io/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/r2.png">
 <meta property="og:image" content="https://leijiezhang001.github.io/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/r3.png">
 <meta property="og:image" content="https://leijiezhang001.github.io/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/r4.png">
-<meta property="og:updated_time" content="2019-06-10T12:34:39.216Z">
+<meta property="og:updated_time" content="2019-06-11T01:43:51.655Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[paper_reading]-&quot;Stereo R-CNN based 3D Object Detection for Autonomous Driving&quot;">
 <meta name="twitter:description" content="Learning 方法有什么致命缺点吗？我认为目前 Learning 方法还存在的较为棘手的问题是，有时候结果会出现非常低级的错误，或是说不可思议不合常理的 cornercases。所以我认为一个工程系统或是一个鲁棒的算法系统，在 Learning 之后做一个基于常理（如 geometry 约束或专家系统）的验证，能有效抑制这个问题。本文就是一个比较好的 learning+geometry 想">
@@ -486,7 +486,7 @@
       
 
       
-        <p>　　Learning 方法有什么致命缺点吗？我认为目前 Learning 方法还存在的较为棘手的问题是，有时候结果会出现非常低级的错误，或是说不可思议不合常理的 cornercases。所以我认为一个工程系统或是一个鲁棒的算法系统，在 Learning 之后做一个基于常理（如 geometry 约束或专家系统）的验证，能有效抑制这个问题。本文就是一个比较好的 learning+geometry 想结合的方法。<br>　　本文基于图像语义及几何信息，通过 3D 目标的稀疏与密集约束，提出了一种准确的 3D 目标检测方法。根据输入数据的类型，作者将 3D 检测分为三大类：</p>
+        <p>　　Learning 方法有什么致命缺点吗？我认为目前 Learning 方法还存在的较为棘手的问题是，有时候结果会出现非常低级的错误，或是说不可思议不合常理的 cornercases。所以我认为一个工程系统或是一个鲁棒的算法系统，在 Learning 之后做一个基于常理（如 geometry 约束或专家系统）的验证，能有效抑制这个问题。本文就是一个比较好的 learning+geometry 想结合的方法。<br>　　本文<a href="#1" id="1ref"><sup>[1]</sup></a>基于图像语义及几何信息，通过 3D 目标的稀疏与密集约束，提出了一种准确的 3D 目标检测方法。根据输入数据的类型，作者将 3D 检测分为三大类：</p>
 <ul>
 <li>LiDAR-based，近期被研究的较多，基本是自动驾驶所必须的；</li>
 <li>Monocular-based，低成本方案；</li>
@@ -530,6 +530,7 @@
 </ul>
 <p>关键点预测的时候只预测了 u 方向的坐标，边缘关键点无 v 方向的信息，看起来会使某些背景像素被划入为目标像素，更好的方法是加入 instance segmentation 信息。定义误差函数为：<br>$$E=\sum_{i=0}^N e_i=\sum_{i=0}^N \left\| I_l(u_i,v_i)-I_r(u_i-\frac{b}{z+\Delta z_i},v_i)\right\|$$<br>可由三角测量关系 \(z=\frac{bf}{d}\) 推出。上式中，\(\Delta z_i=z_i-z\) 表示某个像素点 \(i\) 所对应的 3D 点与目标中心点之间的距离。最小化总误差即可求得最优的中心点距离 \(z\)。优化过程可以用 coarse-to-fine 的策略，先以 0.5m 的精度找 50 步，再以 0.05m 的精度找 20 次。<br>　　这个 dense alignment 模块是独立的，可以应用到任意的左右目 3D 检测的后处理中。因为目标 RoI 是物理约束，所以这个方法避免了深度估计中不连续、病态的问题，且对光照是鲁棒的，因为每个像素都会对估计起作用。这里，本文只做了中心点的 align，尺寸，甚至朝向角是否能加入优化?</p>
 <h2 id="4-ensp-Other-Details"><a href="#4-ensp-Other-Details" class="headerlink" title="4.&ensp;Other Details"></a>4.&ensp;Other Details</h2><p><img src="/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/r1.png" width="110%" height="110%"><br><img src="/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/r2.png" width="70%" height="70%"><br><img src="/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/r3.png" width="100%" height="100%"><br><img src="/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/r4.png" width="90%" height="90%"></p>
+<p><a id="1" href="#1ref">[1]</a> Li, Peiliang, Xiaozhi Chen, and Shaojie Shen. “Stereo R-CNN based 3D Object Detection for Autonomous Driving.” arXiv preprint arXiv:1902.09738 (2019).</p>
 
       
     </div>
@@ -541,7 +542,7 @@
       <div>
 	    
 <div style="text-align:center;color: #ccc;font-size:14px;">
------------------------------------------------------- END -------------------------------------------------------</div>
+-------------- END --------------</div>
       </div>
     
 		
@@ -551,9 +552,9 @@
     
       <div>
         <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
-  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <div>坚持原创技术分享！</div>
   <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
-    <span>Donate</span>
+    <span>赞赏</span>
   </button>
   <div id="QR" style="display: none;">
 
