@@ -100,7 +100,7 @@
 <meta property="og:image" content="https://leijiezhang001.github.io/[paper_reading]-Stereo-Vision-based-Semantic-3D-Object-and-Ego-motion-Tracking-for-Autonomous-Driving/view.png">
 <meta property="og:image" content="https://leijiezhang001.github.io/[paper_reading]-Stereo-Vision-based-Semantic-3D-Object-and-Ego-motion-Tracking-for-Autonomous-Driving/kinematic.png">
 <meta property="og:image" content="https://leijiezhang001.github.io/[paper_reading]-Stereo-Vision-based-Semantic-3D-Object-and-Ego-motion-Tracking-for-Autonomous-Driving/15.png">
-<meta property="og:updated_time" content="2019-06-12T10:16:22.478Z">
+<meta property="og:updated_time" content="2019-06-12T11:05:42.085Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[paper_reading]-&quot;Stereo Vision-based Semantic 3D Object and Ego-motion Tracking for Autonomous Driving&quot;">
 <meta name="twitter:description" content="本文[1]结合 Semantic SLAM 与 Learning-based 3D Det 技术，提出了一种用于自动驾驶的动态目标定位与本车状态估计的方法。本文系统性较强，集成了较多成熟的模块，对工程应用也有较强的指导意义。　　如图 1. 所示，整个系统框架由三部分组成：  2D object detection and viewpoint classification，目标位姿通过 2D-3">
@@ -502,8 +502,8 @@
 <li><strong>目标及背景区域下前后帧的时序匹配</strong><br>首先进行 2D 框的关联，2D 框经过相机旋转补偿后，最小化关联框的中心点距离及框形状相似度值。然后在关联上的目标框区域以及背景区域里，分别作 ORB 特征的匹配，异常值在 RANSAC 下通过基础矩阵测试去除。</li>
 </ul>
 <h2 id="3-ensp-Ego-motion-and-Object-Tracking"><a href="#3-ensp-Ego-motion-and-Object-Tracking" class="headerlink" title="3.&ensp;Ego-motion and Object Tracking"></a>3.&ensp;Ego-motion and Object Tracking</h2><p>　　首先进行本车运动状态估计，可在传统 SLAM 框架下做，不同的是将动态障碍物中的特征点去除。有了本车的位姿后，再估计动态障碍物的运动状态。</p>
-<h3 id="3-1-ensp-Ego-motion-Tracking"><a href="#3-1-ensp-Ego-motion-Tracking" class="headerlink" title="3.1.&ensp;Ego-motion Tracking"></a>3.1.&ensp;Ego-motion Tracking</h3><p>　　给定左目前后帧背景区域特征点的观测，本车状态估计可以通过最大似然估计（Maximum Likelihood Estimation）得到。MLE 可以转化为非线性最小二乘问题，也就是 Bundle Adjustment 过程。</p>
-<h3 id="3-2-ensp-Semantic-Object-Tracking"><a href="#3-2-ensp-Semantic-Object-Tracking" class="headerlink" title="3.2.&ensp;Semantic Object Tracking"></a>3.2.&ensp;Semantic Object Tracking</h3><p>　　得到本车相机的位姿后，运动目标的状态估计可以通过最大后验概率估计（Maximum-a-posterior, MAP）得到。类似的，可转为非线性优化问题进行求解。有四个 loss 项。</p>
+<h3 id="3-1-ensp-Ego-motion-Tracking"><a href="#3-1-ensp-Ego-motion-Tracking" class="headerlink" title="3.1.&ensp;Ego-motion Tracking"></a>3.1.&ensp;Ego-motion Tracking</h3><p>　　给定左目前后帧背景区域特征点的观测，本车状态估计可以通过最大似然估计（Maximum Likelihood Estimation）得到。MLE 可以转化为非线性最小二乘问题，也就是 Bundle Adjustment 过程。<br>　　<em>待完善。</em></p>
+<h3 id="3-2-ensp-Semantic-Object-Tracking"><a href="#3-2-ensp-Semantic-Object-Tracking" class="headerlink" title="3.2.&ensp;Semantic Object Tracking"></a>3.2.&ensp;Semantic Object Tracking</h3><p>　　得到本车相机的位姿后，运动目标的状态估计可以通过最大后验概率估计（Maximum-a-posterior, MAP）得到。类似的，可转为非线性优化问题进行求解。有四个 loss 项。<br>　　<em>待完善。</em></p>
 <h3 id="3-2-1-ensp-Vehicle-Motion-Model"><a href="#3-2-1-ensp-Vehicle-Motion-Model" class="headerlink" title="3.2.1.&ensp;Vehicle Motion Model"></a>3.2.1.&ensp;Vehicle Motion Model</h3><p>　　<a href="#2" id="2ref">[2]</a> 中介绍了前转向车的两种模型：运动学模型(Kinematic Bicycle Model)，以及更复杂的动力学模型(Dynamic Bicycle Model)。运动学模型假设车辆不存在滑动，这在大多数情况下都是满足的，所以我们只介绍运动学模型。<br><img src="/[paper_reading]-Stereo-Vision-based-Semantic-3D-Object-and-Ego-motion-Tracking-for-Autonomous-Driving/kinematic.png" width="30%" height="30%" title="图 3. 车辆运动学模型"><br>　　如图 3. 所示，前后轮无滑动的约束下，可得方程组：<br>$$\left\{\begin{array}{rl}<br>\dot{x}_fsin(\theta+\delta)-\dot{y}_fcos(\theta+\delta)=&amp;0\\<br>\dot{x}sin(\theta)-\dot{y}cos(\theta)=&amp;0\\<br>x+Lcos(\theta)=&amp;x_f  \quad\Rightarrow \quad \dot{x}-\dot{\theta}Lsin(\theta)=\dot{x}_f\\<br>y+Lsin(\theta)=&amp;y_f \quad\Rightarrow \quad \dot{y}+\dot{\theta}Lcos(\theta)=\dot{y}_f<br>\end{array}\right.$$<br>由此可得到:<br>$$\dot{x}sin(\theta+\delta)-\dot{y}cos(\theta+\delta)-\dot{\theta}Lcos(\delta)=0$$<br>用 \(\left(v \cdot cos(\theta),v\cdot sin(\theta)\right)\) 代替 \((\dot{x},\dot{y})\) 可得：<br>$$\dot{\theta}=\frac{tan(\delta)}{L}\cdot v$$<br>最终可整理成矩阵形式：<br>$$<br>\begin{bmatrix}<br>\dot{x}\\<br>\dot{y}\\<br>\dot{\theta}\\<br>\dot{\delta}\\<br>\dot{v}\\<br>\end{bmatrix}=<br>\begin{bmatrix}<br>0 &amp;0 &amp;0 &amp;0 &amp;cos(\theta)\\<br>0 &amp;0 &amp;0 &amp;0 &amp;sin(\theta)\\<br>0 &amp;0 &amp;0 &amp;0 &amp;\frac{tan(\delta)}{L}\\<br>0 &amp;0 &amp;0 &amp;0 &amp;0\\<br>0 &amp;0 &amp;0 &amp;0 &amp;0\\<br>\end{bmatrix}<br>\begin{bmatrix}<br>x\\<br>y\\<br>\theta\\<br>\delta\\<br>v\\<br>\end{bmatrix}+<br>\begin{bmatrix}<br>0 &amp;0\\<br>0 &amp;0\\<br>0 &amp;0\\<br>1 &amp;0\\<br>0 &amp;1\\<br>\end{bmatrix}<br>\begin{bmatrix}<br>\gamma\\<br>\alpha\\<br>\end{bmatrix}<br>$$<br>其中 \(L\) 为车辆参数。观测量有：</p>
 <ul>
 <li>\((x,y,\theta)\) 为车辆的位置及朝向角；</li>
@@ -823,7 +823,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">11.4k</span>
+    <span title="Site words total count">11.5k</span>
   
 </div>
 <!--
