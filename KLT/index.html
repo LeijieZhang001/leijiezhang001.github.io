@@ -96,7 +96,7 @@
 <meta property="og:site_name" content="LeijieZhang">
 <meta property="og:description" content="光流（Optical Flow）是物体在三维空间中的运动（运动场）在二维图像平面上的投影，由物体与相机的相对速度产生，反映了微小时间内物体对应的图像像素的运动方向和速度。　　KLT 是基于光流原理的一种特征点跟踪算法，本文首先介绍光流原理，然后介绍 KLT 及相关 KLT 变种算法。 1.&amp;ensp;Optical Flow　　光流法假设：  亮度恒定，图像中物体的像素亮度在连续帧之间不会发生">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-06-24T11:01:10.701Z">
+<meta property="og:updated_time" content="2019-06-24T11:03:56.866Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="KLT 光流算法详解">
 <meta name="twitter:description" content="光流（Optical Flow）是物体在三维空间中的运动（运动场）在二维图像平面上的投影，由物体与相机的相对速度产生，反映了微小时间内物体对应的图像像素的运动方向和速度。　　KLT 是基于光流原理的一种特征点跟踪算法，本文首先介绍光流原理，然后介绍 KLT 及相关 KLT 变种算法。 1.&amp;ensp;Optical Flow　　光流法假设：  亮度恒定，图像中物体的像素亮度在连续帧之间不会发生">
@@ -506,7 +506,7 @@
 <li>视计算能力，保留其中的子集</li>
 </ol>
 <p>要注意的是选择特征计算 \(Z\) 时，\(3\times3\) 窗口足够，但是跟踪时，一般大于 \(3\times3\)。</p>
-<h2 id="5-ensp-Dissimilarity"><a href="#5-ensp-Dissimilarity" class="headerlink" title="5.&ensp;Dissimilarity"></a>5.&ensp;Dissimilarity</h2><p>　　相似性度量决定该特征点是否已经漂移而不能使用了，即外点检测(Outlier Detection)，所以非常重要。相比于平移模型，放射模型对特征点的相似性度量更有效果。在长距离跟踪下，相似性度量可能解决不了是否漂移的问题，但是好的相似性度量能从一开始就剔除漂移的特征点。此外，也可用其它更高层面的外点检测技术替代。</p>
+<h2 id="5-ensp-Dissimilarity"><a href="#5-ensp-Dissimilarity" class="headerlink" title="5.&ensp;Dissimilarity"></a>5.&ensp;Dissimilarity</h2><p>　　相似性度量决定该特征点是否已经漂移而不能使用了，即外点检测(Outlier Detection)，所以非常重要。相比于平移模型，仿射模型对特征点的相似性度量更有效果。在长距离跟踪下，相似性度量可能解决不了是否漂移的问题，但是好的相似性度量能从一开始就剔除漂移的特征点。此外，也可用其它更高层面的外点检测技术替代。</p>
 <p><a id="1" href="#1ref">[1]</a> Shi, Jianbo, and Carlo Tomasi. Good features to track. Cornell University, 1993.<br><a id="2" href="#2ref">[2]</a> Birchfield, Stan. “Derivation of kanade-lucas-tomasi tracking equation.” unpublished notes (1997).<br><a id="3" href="#3ref">[3]</a> Bouguet, J.-Y.. “Pyramidal implementation of the lucas kanade feature tracker.” (2000).<br><a id="4" href="#4ref">[4]</a> Suhr, Jae Kyu. “Kanade-lucas-tomasi (klt) feature tracker.” Computer Vision (EEE6503) (2009): 9-18.<br><a id="5" href="#5ref">[5]</a> Bouguet, Jean-Yves. “Pyramidal implementation of the affine lucas kanade feature tracker description of the algorithm.” Intel Corporation 5.1-10 (2001): 4.</p>
 
       
