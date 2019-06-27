@@ -75,7 +75,7 @@
 
 
 
-  <meta name="keywords" content="SLAM,VO,autonomous driving,paper reading,">
+  <meta name="keywords" content="SLAM,paper reading,VO,autonomous driving,">
 
 
 
@@ -89,7 +89,7 @@
 
 
 <meta name="description" content="1.&amp;ensp;Overview of VO　　SFM(Structure from Motion) 是解决从一堆图片中将场景以及相机姿态进行 3-D 重建的问题，最后的场景以及相机姿态可以通过离线优化方法（bundle adjustment）来 refine。VO &amp;amp; VSLAM 都属于 SFM 的特殊情况，SfM 处理的图像时间上可以是无序的，而 VO &amp;amp; VSLAM 则要求图">
-<meta name="keywords" content="SLAM,VO,autonomous driving,paper reading">
+<meta name="keywords" content="SLAM,paper reading,VO,autonomous driving">
 <meta property="og:type" content="article">
 <meta property="og:title" content="[paper_reading]-&quot;Visual Odometry Part I&amp;II&quot;">
 <meta property="og:url" content="https://leijiezhang001.github.io/[paper_reading]-Visual_Odometry_Part_I_II/index.html">
@@ -99,7 +99,7 @@
 <meta property="og:image" content="https://leijiezhang001.github.io/[paper_reading]-Visual_Odometry_Part_I_II/VO流程.png">
 <meta property="og:image" content="https://leijiezhang001.github.io/[paper_reading]-Visual_Odometry_Part_I_II/detectors.png">
 <meta property="og:image" content="https://leijiezhang001.github.io/[paper_reading]-Visual_Odometry_Part_I_II/ransac.png">
-<meta property="og:updated_time" content="2019-06-19T10:51:52.879Z">
+<meta property="og:updated_time" content="2019-06-25T03:55:28.564Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="[paper_reading]-&quot;Visual Odometry Part I&amp;II&quot;">
 <meta name="twitter:description" content="1.&amp;ensp;Overview of VO　　SFM(Structure from Motion) 是解决从一堆图片中将场景以及相机姿态进行 3-D 重建的问题，最后的场景以及相机姿态可以通过离线优化方法（bundle adjustment）来 refine。VO &amp;amp; VSLAM 都属于 SFM 的特殊情况，SfM 处理的图像时间上可以是无序的，而 VO &amp;amp; VSLAM 则要求图">
@@ -520,7 +520,7 @@
 <li>feature tracking<br>用局部搜索的方法，较适用于相邻两帧视角变化不大的情况，会有漂移（drift）的现象；</li>
 <li>feature detection and matching<br>独立在每个图像上进行检测，然后用某种度量准则进行匹配。在视野变化较大的情况下，只能用这种方法；</li>
 </ul>
-<h3 id="4-1-ensp-Feature-Tracking"><a href="#4-1-ensp-Feature-Tracking" class="headerlink" title="4.1.&ensp;Feature Tracking"></a>4.1.&ensp;Feature Tracking</h3><p>　　主要采用 <a href>KLT</a> 方法进行特征点跟踪。</p>
+<h3 id="4-1-ensp-Feature-Tracking"><a href="#4-1-ensp-Feature-Tracking" class="headerlink" title="4.1.&ensp;Feature Tracking"></a>4.1.&ensp;Feature Tracking</h3><p>　　主要采用 KLT（详见 <a href="/KLT/" title="KLT 算法详解">KLT 算法详解</a>）方法进行特征点跟踪。</p>
 <h3 id="4-2-ensp-Feature-Detection-and-Matching"><a href="#4-2-ensp-Feature-Detection-and-Matching" class="headerlink" title="4.2.&ensp;Feature Detection and Matching"></a>4.2.&ensp;Feature Detection and Matching</h3><p>　　特征点包含特征检测子与特征描述子。一个好的特征点应该有如下性质：</p>
 <ul>
 <li>可重复性(Repeatability)，不同图像下相同特征点可再次检测出；</li>
@@ -674,11 +674,11 @@
           
             <a href="/tags/SLAM/" rel="tag"><i class="fa fa-tag"></i> SLAM</a>
           
+            <a href="/tags/paper-reading/" rel="tag"><i class="fa fa-tag"></i> paper reading</a>
+          
             <a href="/tags/VO/" rel="tag"><i class="fa fa-tag"></i> VO</a>
           
             <a href="/tags/autonomous-driving/" rel="tag"><i class="fa fa-tag"></i> autonomous driving</a>
-          
-            <a href="/tags/paper-reading/" rel="tag"><i class="fa fa-tag"></i> paper reading</a>
           
         </div>
       
@@ -691,8 +691,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/" rel="next" title="[paper_reading]-" stereo r-cnn based 3d object detection for autonomous driving"">
-                <i class="fa fa-chevron-left"></i> [paper_reading]-"Stereo R-CNN based 3D Object Detection for Autonomous Driving"
+              <a href="/[paper_reading]-Stereo-Vision-based-Semantic-3D-Object-and-Ego-motion-Tracking-for-Autonomous-Driving/" rel="next" title="[paper_reading]-" stereo vision-based semantic 3d object and ego-motion tracking for autonomous driving"">
+                <i class="fa fa-chevron-left"></i> [paper_reading]-"Stereo Vision-based Semantic 3D Object and Ego-motion Tracking for Autonomous Driving"
               </a>
             
           </div>
@@ -789,7 +789,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -908,7 +908,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">18.5k</span>
+    <span title="Site words total count">20.8k</span>
   
 </div>
 <!--
