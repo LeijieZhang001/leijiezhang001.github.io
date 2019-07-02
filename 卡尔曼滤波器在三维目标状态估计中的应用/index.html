@@ -75,7 +75,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT">
+  <meta name="keywords" content="3D Detection,autonomous driving,MOT,tracking,">
 
 
 
@@ -88,13 +88,20 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="LeijieZhang">
-<meta property="og:url" content="https://leijiezhang001.github.io/tags/tracking/index.html">
+<meta name="description" content="目前主流的三维目标的状态估计方法（也可称为 MOT 问题）主要包括三部分：1. 检测，出单帧三维目标信息；2. 跟踪，前后帧数据关联出 ID 信息；3. 滤波，平滑估计状态信息。这里的“跟踪”只是狭义地指出 ID 的过程，“滤波”也就是综述 Multiple-Object-Tracking-A-Literature-Review 中提到的 Inference 过程。Inference 过程还可">
+<meta name="keywords" content="3D Detection,autonomous driving,MOT,tracking">
+<meta property="og:type" content="article">
+<meta property="og:title" content="卡尔曼滤波器在三维目标状态估计中的应用">
+<meta property="og:url" content="https://leijiezhang001.github.io/卡尔曼滤波器在三维目标状态估计中的应用/index.html">
 <meta property="og:site_name" content="LeijieZhang">
+<meta property="og:description" content="目前主流的三维目标的状态估计方法（也可称为 MOT 问题）主要包括三部分：1. 检测，出单帧三维目标信息；2. 跟踪，前后帧数据关联出 ID 信息；3. 滤波，平滑估计状态信息。这里的“跟踪”只是狭义地指出 ID 的过程，“滤波”也就是综述 Multiple-Object-Tracking-A-Literature-Review 中提到的 Inference 过程。Inference 过程还可">
 <meta property="og:locale" content="default">
+<meta property="og:image" content="https://leijiezhang001.github.io/卡尔曼滤波器在三维目标状态估计中的应用/状态量.png">
+<meta property="og:updated_time" content="2019-07-02T07:45:24.606Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="LeijieZhang">
+<meta name="twitter:title" content="卡尔曼滤波器在三维目标状态估计中的应用">
+<meta name="twitter:description" content="目前主流的三维目标的状态估计方法（也可称为 MOT 问题）主要包括三部分：1. 检测，出单帧三维目标信息；2. 跟踪，前后帧数据关联出 ID 信息；3. 滤波，平滑估计状态信息。这里的“跟踪”只是狭义地指出 ID 的过程，“滤波”也就是综述 Multiple-Object-Tracking-A-Literature-Review 中提到的 Inference 过程。Inference 过程还可">
+<meta name="twitter:image" content="https://leijiezhang001.github.io/卡尔曼滤波器在三维目标状态估计中的应用/状态量.png">
 
 
 
@@ -124,13 +131,13 @@
 
 
 
-  <link rel="canonical" href="https://leijiezhang001.github.io/tags/tracking/">
+  <link rel="canonical" href="https://leijiezhang001.github.io/卡尔曼滤波器在三维目标状态估计中的应用/">
 
 
 
 
 
-  <title>Tag: tracking | LeijieZhang</title>
+  <title>卡尔曼滤波器在三维目标状态估计中的应用 | LeijieZhang</title>
   
 
 
@@ -194,7 +201,7 @@
     
   
 
-  <div class="container sidebar-position-left ">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 <a href="https://github.com/LeijieZhang001" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewbox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -332,156 +339,275 @@
           <div id="content" class="content">
             
 
+  <div id="posts" class="posts-expand">
+    
+
+  
+
   
   
   
-  <div class="post-block tag">
-
-    <div id="posts" class="posts-collapse">
-      <div class="collection-title">
-        <h1>tracking<small>Tag</small>
-        </h1>
-      </div>
-
-      
-        
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://leijiezhang001.github.io/卡尔曼滤波器在三维目标状态估计中的应用/">
 
-      <h2 class="post-title">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Leijie">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LeijieZhang">
+    </span>
+
+    
+      <header class="post-header">
+
         
-            <a class="post-title-link" href="/卡尔曼滤波器在三维目标状态估计中的应用/" itemprop="url">
-              
-                <span itemprop="name">卡尔曼滤波器在三维目标状态估计中的应用</span>
-              
-            </a>
         
-      </h2>
+          <h1 class="post-title" itemprop="name headline">卡尔曼滤波器在三维目标状态估计中的应用</h1>
+        
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2019-07-01T20:48:40+08:00" content="2019-07-01">
-          07-01
-        </time>
-      </div>
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-01T20:48:40+08:00">
+                2019-07-01
+              </time>
+            
 
-    </header>
-  </article>
+            
 
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/MOT/" itemprop="url" rel="index">
+                    <span itemprop="name">MOT</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i> 本文总阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>次
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Words count in article&#58;</span>
+                
+                <span title="Words count in article">
+                  1.6k 字
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Reading time &asymp;</span>
+                
+                <span title="Reading time">
+                  7 分钟
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/KLT/" itemprop="url">
-              
-                <span itemprop="name">KLT 光流算法详解</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2019-06-19T18:58:47+08:00" content="2019-06-19">
-          06-19
-        </time>
-      </div>
-
-    </header>
-  </article>
-
+      
 
       
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/MOT-Metrics-in-Academia-and-Industry/" itemprop="url">
-              
-                <span itemprop="name">MOT Metrics in Academia and Industry</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2019-06-03T13:47:00+08:00" content="2019-06-03">
-          06-03
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-      
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/MOT-评价指标-Evaluating-Multiple-Object-Tracking-Performance-the-CLEAR-MOT-Metrics/" itemprop="url">
-              
-                <span itemprop="name">MOT 评价指标-"Evaluating Multiple Object Tracking Performance, the CLEAR MOT Metrics"</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2019-06-02T14:23:46+08:00" content="2019-06-02">
-          06-02
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-      
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/MOT-综述-Multiple-Object-Tracking-A-Literature-Review/" itemprop="url">
-              
-                <span itemprop="name">MOT 综述-'Multiple Object Tracking: A Literature Review'</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2019-05-28T16:22:58+08:00" content="2019-05-28">
-          05-28
-        </time>
-      </div>
-
-    </header>
-  </article>
-
+        <p>　　目前主流的三维目标的状态估计方法（也可称为 MOT 问题）主要包括三部分：<strong>1. 检测</strong>，出单帧三维目标信息；<strong>2. 跟踪</strong>，前后帧数据关联出 ID 信息；<strong>3. 滤波</strong>，平滑估计状态信息。这里的“跟踪”只是狭义地指出 ID 的过程，“滤波”也就是综述 <a href="/MOT-综述-Multiple-Object-Tracking-A-Literature-Review/" title="Multiple-Object-Tracking-A-Literature-Review">Multiple-Object-Tracking-A-Literature-Review</a> 中提到的 Inference 过程。Inference 过程还可以是基于优化的方法，本文我们主要讨论在自动驾驶中估计动态障碍物状态的扩展卡尔曼滤波方法。</p>
+<h2 id="1-ensp-扩展卡尔曼滤波"><a href="#1-ensp-扩展卡尔曼滤波" class="headerlink" title="1.&ensp;扩展卡尔曼滤波"></a>1.&ensp;扩展卡尔曼滤波</h2><p>　　文章<a href="/卡尔曼滤波详解/" title="卡尔曼滤波详解">卡尔曼滤波详解</a>中已经详细推导了卡尔曼滤波相关原理，这里摘抄如下。非线性系统：<br>$$\left\{\begin{array}{l}<br>运动方程:\quad x_k=f(x_{k-1},u_k)+w_k\\<br>测量方程:\quad z_k=h(x_k)+v_k<br>\end{array}\tag{1}\right.$$<br>滤波的两个步骤：</p>
+<ol>
+<li><strong>预测（Predict）</strong><br>计算先验：<br>$$\begin{align}<br>\bar{x} _k&amp;=f(\hat{x} _{k-1},u _k) \tag{2}\\<br>\bar{P} _k&amp;=F\hat{P} _kF^T+Q _k \tag{3}<br>\end{align}$$</li>
+<li><strong>更新（Update）</strong><br>先计算卡尔曼增益：<br>$$K_k=\bar{P}_kH_k^T(H_k\bar{P}_kH_k^T+R_k)^{-1} \tag{4}$$<br>再计算后验概率分布：<br>$$\begin{align}<br>\hat{x}_k &amp;=\bar{x}_k+K(z_k-h(\bar{x})) \tag{5}\\<br>\hat{P}_k &amp;=(I-KH_k)\bar{P}_k \tag{6}<br>\end{align}$$</li>
+</ol>
+<h2 id="2-ensp-非线性系统构建"><a href="#2-ensp-非线性系统构建" class="headerlink" title="2.&ensp;非线性系统构建"></a>2.&ensp;非线性系统构建</h2><p>　　要构建三维目标状态估计系统，我们得分析状态量 \(x_k\)，测量量 \(z_k\)，输入量 \(u_k\)，状态转移函数（运动学方程）\(f(\cdot)\)，观测函数 \(h(\cdot)\)，以及雅克比矩阵 \(F\)，\(H\) 各是什么。<br><img src="/卡尔曼滤波器在三维目标状态估计中的应用/状态量.png" width="25%" height="25%" title="图 1. 目标状态"><br>　　如图1所示，<strong>我们严格限定要构建的非线性系统场景：动态目标的状态估计</strong>。对于自动驾驶中的动态目标状态估计，我们关心的状态量有水平面上目标物理位置，朝向，速度，转向速度，记为：<br>$$x_k=\begin{bmatrix}<br>x\\<br>y\\<br>\psi\\<br>v\\<br>\dot{\psi}\\<br>\end{bmatrix}\tag{7}$$<br>目前主流的 3D 检测方法，能出位置，尺寸，朝向。所以测量量：<br>$$z_k=\begin{bmatrix}<br>x\\<br>y\\<br>\psi\\<br>\end{bmatrix}\tag{8}$$<br>以上针对的是目标三维状态估计，如果是本车的状态估计，那么测量量可能可以加上本车的速度等（故限定场景）。文章 <a href="/[paper_reading]-Stereo-Vision-based-Semantic-3D-Object-and-Ego-motion-Tracking-for-Autonomous-Driving/" title="[paper_reading]-" stereo vision-based semantic 3d object and ego-motion tracking for autonomous driving"">[paper_reading]-"Stereo Vision-based Semantic 3D Object and Ego-motion Tracking for Autonomous Driving"</a> 的 3.2.1 章节中提到过一种车辆运动学模型，<strong>该模型定义了输入量：方向盘比率以及加速度（实际使用中均设为0，类似下述质点模型中的 CTRV 模型）；并增加了状态量：方向盘转角</strong>。虽然那篇文章处理的场景与本篇讨论的一致，但是那篇文章采用的是优化方法，方向盘转角可作为优化参数进行求解；而本篇讨论的滤波迭代方法，则很难确定方向盘转角。所以该模型虽然能更好的描述目标，但是可能并不是更有效的（实际中可做实验对比），这里引出几种质点模型。<br>　　<a href="#1" id="1ref">[1]</a>中介绍了几种非线性车辆质点模型：CHCV(Constant Heading and Constant Velocity)，CTRV(Constant Turn Rate and Velocity)，CTRA(Constant Turn Rate and Acceleration)。这些模型均没有考虑输入量，即：<br>$$u_k=\mathbb{0}\tag{9}$$<br>这里我们依次介绍各模型（为了完整性，重写文章 <a href="/[paper_reading]-Stereo-Vision-based-Semantic-3D-Object-and-Ego-motion-Tracking-for-Autonomous-Driving/" title="[paper_reading]-" stereo vision-based semantic 3d object and ego-motion tracking for autonomous driving"">[paper_reading]-"Stereo Vision-based Semantic 3D Object and Ego-motion Tracking for Autonomous Driving"</a> 中的前转向车运动学模型），并导出状态转移函数（运动学方程）\(f(\cdot)\)，观测函数 \(h(\cdot)\)，以及雅克比矩阵 \(F\)，\(H\)。</p>
+<h3 id="2-1-ensp-CHCV-Constant-Heading-and-Constant-Velocity"><a href="#2-1-ensp-CHCV-Constant-Heading-and-Constant-Velocity" class="headerlink" title="2.1.&ensp;CHCV(Constant Heading and Constant Velocity)"></a>2.1.&ensp;CHCV(Constant Heading and Constant Velocity)</h3><p>　　该模型下，目标车辆的朝向及速度不变。则容易写出，在时间 \(\Delta T\) 内，运动方程\(f(\cdot)\)为：<br>$$\begin{align}<br>&amp; \begin{bmatrix}<br>x\\<br>y\\<br>\psi\\<br>v\\<br>\dot{\psi}\end{bmatrix} _k=<br>\begin{bmatrix}<br>x+v\,cos(\psi)\Delta T\\<br>y+v\,sin(\psi)\Delta T\\<br>\psi\\<br>v\\<br>0\end{bmatrix} _{k-1} \\<br>\iff &amp;\begin{bmatrix}<br>x\\<br>y\\<br>\psi\\<br>v\\<br>\end{bmatrix} _k=<br>\begin{bmatrix}<br>x+v\,cos(\psi)\Delta T\\<br>y+v\,sin(\psi)\Delta T\\<br>\psi\\<br>v\\<br>\end{bmatrix} _{k-1} \tag{10}<br>\end{align}$$<br>观测方程\(h(\cdot)\)也可得到：<br>$$\begin{bmatrix}<br>x\\<br>y\\<br>\psi\\<br>\end{bmatrix} _k=<br>\begin{bmatrix}<br>1 &amp;0 &amp;0 &amp;0\\<br>0 &amp;1 &amp;0 &amp;0\\<br>0 &amp;0 &amp;1 &amp;0\\<br>\end{bmatrix}<br>\begin{bmatrix}<br>x\\<br>y\\<br>\psi\\<br>v\\<br>\end{bmatrix} _{k} \tag{11} $$<br>由此得到雅克比矩阵：<br>$$\begin{align}F&amp;=<br>\begin{bmatrix}<br>1 &amp;0 &amp;-v\,sin(\psi)\Delta T &amp;cos(\psi)\Delta T\\<br>0 &amp;1 &amp;v\,cos(\psi)\Delta T &amp;sin(\psi)\Delta T\\<br>0 &amp;0 &amp;1 &amp;0\\<br>0 &amp;0 &amp;0 &amp;1<br>\end{bmatrix} \tag{12} \\<br>H&amp;=\begin{bmatrix}<br>1 &amp;0 &amp;0 &amp;0\\<br>0 &amp;1 &amp;0 &amp;0\\<br>0 &amp;0 &amp;1 &amp;0\\<br>\end{bmatrix} \tag{13}<br>\end{align}$$</p>
+<h3 id="2-2-ensp-CTRV-Constant-Turn-Rate-and-Velocity"><a href="#2-2-ensp-CTRV-Constant-Turn-Rate-and-Velocity" class="headerlink" title="2.2.&ensp;CTRV(Constant Turn Rate and Velocity)"></a>2.2.&ensp;CTRV(Constant Turn Rate and Velocity)</h3><p>　　该模型下，目标车辆的(朝向)转向速度及线速度不变。则分别在 \(x,y\) 方向上，位移积分为：<br>$$\left\{\begin{array}{l}<br>x=\int_0^{\Delta T} v\,cos(\dot{\psi}t+\psi)dt=\frac{v}{\dot{\psi}}sin(\dot{\psi}t+\psi)\vert_0^{\Delta T}&amp;= \frac{v}{\dot{\psi}}(sin(\dot{\psi}\Delta T+\psi)-sin(\psi)) \\<br>y=\int_0^{\Delta T} v\,sin(\dot{\psi}t+\psi)dt=-\frac{v}{\dot{\psi}}cos(\dot{\psi}t+\psi)\vert_0^{\Delta T}&amp;=\frac{v}{\dot{\psi}}(cos(\psi)-cos(\dot{\psi}\Delta T+\psi)) \\<br>\end{array}\tag{14}\right.$$<br>由此得到运动方程\(f(\cdot)\)为：<br>$$\begin{bmatrix}<br>x\\<br>y\\<br>\psi\\<br>v\\<br>\dot{\psi}\end{bmatrix} _k=<br>\begin{bmatrix}<br>x+\frac{v}{\dot{\psi}}(sin(\dot{\psi}\Delta T+\psi)-sin(\psi))\\<br>y+\frac{v}{\dot{\psi}}(cos(\psi)-cos(\dot{\psi}\Delta T+\psi)) \\<br>\psi+\dot{\psi}\Delta T\\<br>v\\<br>\dot{\psi}\end{bmatrix} _{k-1}  \tag{15}<br>$$<br>观测方程则还是线性方程：<br>$$\begin{bmatrix}<br>x\\<br>y\\<br>\psi\\<br>\end{bmatrix} _k=<br>\begin{bmatrix}<br>1 &amp;0 &amp;0 &amp;0 &amp;0\\<br>0 &amp;1 &amp;0 &amp;0 &amp;0\\<br>0 &amp;0 &amp;1 &amp;0 &amp;0\\<br>\end{bmatrix}<br>\begin{bmatrix}<br>x\\<br>y\\<br>\psi\\<br>v\\<br>\dot{\psi}<br>\end{bmatrix} _{k} \tag{16} $$<br>由此得到雅克比矩阵：<br>$$\begin{align}F&amp;=<br>\begin{bmatrix}<br>1 &amp;0 &amp;\frac{v}{\dot{\psi}}(cos(\dot{\psi}+\psi)-cos(\psi)) &amp;\frac{1}{\dot{\psi}}(sin(\dot{\psi}\Delta T+\psi)-sin(\psi)) &amp;\frac{v\Delta T}{\dot{\psi}}cos(\dot{\psi}\Delta T+\psi)-\frac{v}{\dot{\psi}^2}(sin(\dot{\psi}\Delta T+\psi)-sin(\psi)) \\<br>0 &amp;1 &amp;\frac{v}{\dot{\psi}}(sin(\dot{\psi}+\psi)-sin(\psi)) &amp;\frac{1}{\dot{\psi}}(cos(\psi)-cos(\dot{\psi}\Delta T+\psi)) &amp;\frac{v\Delta T}{\dot{\psi}}sin(\dot{\psi}\Delta T+\psi)-\frac{v}{\dot{\psi}^2}(cos(\psi)-cos(\dot{\psi}\Delta T+\psi)) \\<br>0 &amp;0 &amp;1 &amp;0 &amp;\Delta T\\<br>0 &amp;0 &amp;0 &amp;1 &amp;0\\<br>0 &amp;0 &amp;0 &amp;0 &amp;1\\<br>\end{bmatrix} \tag{17} \\<br>H&amp;=\begin{bmatrix}<br>1 &amp;0 &amp;0 &amp;0 &amp;0\\<br>0 &amp;1 &amp;0 &amp;0 &amp;0\\<br>0 &amp;0 &amp;1 &amp;0 &amp;0\\<br>\end{bmatrix} \tag{18}<br>\end{align}$$</p>
+<h3 id="2-3-ensp-CTRA-Constant-Turn-Rate-and-Acceleration"><a href="#2-3-ensp-CTRA-Constant-Turn-Rate-and-Acceleration" class="headerlink" title="2.3.&ensp;CTRA(Constant Turn Rate and Acceleration)"></a>2.3.&ensp;CTRA(Constant Turn Rate and Acceleration)</h3><h3 id="2-4-ensp-前转向车模型"><a href="#2-4-ensp-前转向车模型" class="headerlink" title="2.4.&ensp;前转向车模型"></a>2.4.&ensp;前转向车模型</h3><h2 id="3-ensp-状态及参数初始化"><a href="#3-ensp-状态及参数初始化" class="headerlink" title="3.&ensp;状态及参数初始化"></a>3.&ensp;状态及参数初始化</h2><p><a id="1" href="#1ref">[1]</a> <a href="https://github.com/balzer82/Kalman" target="_blank" rel="noopener">https://github.com/balzer82/Kalman</a></p>
 
       
     </div>
+    
+    
+    
+
+    
+      <div>
+	    
+<div style="text-align:center;color: #ccc;font-size:14px;">
+----------------- END -----------------</div>
+      </div>
+    
+		
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>赞赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="Leijie WeChat Pay">
+        <p>WeChat Pay</p>
+      </div>
+    
+
+    
+
+    
 
   </div>
-  
-  
-  
+</div>
+
+      </div>
+    
+	
+	
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:</strong>
+    Leijie
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link:</strong>
+    <a href="https://leijiezhang001.github.io/卡尔曼滤波器在三维目标状态估计中的应用/" title="卡尔曼滤波器在三维目标状态估计中的应用">https://leijiezhang001.github.io/卡尔曼滤波器在三维目标状态估计中的应用/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice: </strong>
+    All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> unless stating additionally.
+  </li>
+</ul>
+
+      </div>
+    
+
+	
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/3D-Detection/" rel="tag"><i class="fa fa-tag"></i> 3D Detection</a>
+          
+            <a href="/tags/autonomous-driving/" rel="tag"><i class="fa fa-tag"></i> autonomous driving</a>
+          
+            <a href="/tags/MOT/" rel="tag"><i class="fa fa-tag"></i> MOT</a>
+          
+            <a href="/tags/tracking/" rel="tag"><i class="fa fa-tag"></i> tracking</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/卡尔曼滤波详解/" rel="next" title="卡尔曼滤波详解">
+                <i class="fa fa-chevron-left"></i> 卡尔曼滤波详解
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+
 
   
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -489,6 +615,15 @@
 
 
           
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC80NDQyOS8yMDk2MQ=="></div>
+    </div>
+
+  
+
+
 
         </div>
         
@@ -509,8 +644,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -601,6 +745,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-ensp-扩展卡尔曼滤波"><span class="nav-text">1. 扩展卡尔曼滤波</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-ensp-非线性系统构建"><span class="nav-text">2. 非线性系统构建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-ensp-CHCV-Constant-Heading-and-Constant-Velocity"><span class="nav-text">2.1. CHCV(Constant Heading and Constant Velocity)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-ensp-CTRV-Constant-Turn-Rate-and-Velocity"><span class="nav-text">2.2. CTRV(Constant Turn Rate and Velocity)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-ensp-CTRA-Constant-Turn-Rate-and-Acceleration"><span class="nav-text">2.3. CTRA(Constant Turn Rate and Acceleration)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-ensp-前转向车模型"><span class="nav-text">2.4. 前转向车模型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-ensp-状态及参数初始化"><span class="nav-text">3. 状态及参数初始化</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -802,6 +962,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
@@ -830,6 +994,17 @@
 
 
 
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
   
 
 
