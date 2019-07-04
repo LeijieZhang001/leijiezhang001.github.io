@@ -97,7 +97,7 @@
 <meta property="og:description" content="目前主流的三维目标的状态估计方法（也可称为 MOT 问题）主要包括三部分：1. 检测，出单帧三维目标信息；2. 跟踪，前后帧数据关联出 ID 信息；3. 滤波，平滑估计状态信息。这里的“跟踪”只是狭义地指出 ID 的过程，“滤波”也就是综述 Multiple-Object-Tracking-A-Literature-Review 中提到的 Inference 过程。Inference 过程还可">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="https://leijiezhang001.github.io/卡尔曼滤波器在三维目标状态估计中的应用/状态量.png">
-<meta property="og:updated_time" content="2019-07-03T08:57:46.375Z">
+<meta property="og:updated_time" content="2019-07-03T10:37:19.224Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="卡尔曼滤波器在三维目标状态估计中的应用">
 <meta name="twitter:description" content="目前主流的三维目标的状态估计方法（也可称为 MOT 问题）主要包括三部分：1. 检测，出单帧三维目标信息；2. 跟踪，前后帧数据关联出 ID 信息；3. 滤波，平滑估计状态信息。这里的“跟踪”只是狭义地指出 ID 的过程，“滤波”也就是综述 Multiple-Object-Tracking-A-Literature-Review 中提到的 Inference 过程。Inference 过程还可">
@@ -496,7 +496,7 @@
 <li>观测不稳定的状态量较难初始化，如目标有截断的情况下；</li>
 <li>协方差矩阵较难初始化，如状态量的协方差矩阵；</li>
 </ul>
-<p>　　前两个问题需要在工程实践中优化；最后一个问题可以让检测网络同时出预测值的不确定性(Uncertainty)，这也是深度学习中一个较为系统性的工作，后面文章再做介绍。</p>
+<p>　　前两个问题需要在工程实践中优化；最后一个问题（<strong>非常重要</strong>）可以让检测网络同时出预测值的不确定性(Uncertainty)，这也是深度学习中一个较为系统性的工作，后面文章再做介绍。</p>
 <p><a id="1" href="#1ref">[1]</a> <a href="https://github.com/balzer82/Kalman" target="_blank" rel="noopener">https://github.com/balzer82/Kalman</a></p>
 
       
@@ -597,6 +597,10 @@
 
           <div class="post-nav-prev post-nav-item">
             
+              <a href="/Uncertainty-in-Deep-Learning/" rel="prev" title="Uncertainty in Deep Learning">
+                Uncertainty in Deep Learning <i class="fa fa-chevron-right"></i>
+              </a>
+            
           </div>
         </div>
       
@@ -681,7 +685,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-count">13</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -692,7 +696,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-count">4</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
