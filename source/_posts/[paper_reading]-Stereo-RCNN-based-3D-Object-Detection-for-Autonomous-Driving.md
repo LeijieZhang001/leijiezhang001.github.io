@@ -42,7 +42,7 @@ mathjax: true
 <img src="viewpoint.png" width="50%" height="50%" title="图 3. 各角度关系">
 　　网络头包含两大部分：
 
-1. &ensp;**Stereo Regression**
+1. &ensp;**Stereo Regression**  
 左右目的 proposal 关联对，分别在左右目的 feature 上进行 RoI Align 的操作，然后 concatenate 输入到全链接层。左右目的 RoI 对与真值框的 IoU 均大于 0.5 时定位正样本，左右目的 RoI 对与真值框的 IoU 有一个小于 0.5 且大于 0.1，则定位负样本。用四个分支分别预测：
 
     - object class；
@@ -52,7 +52,7 @@ mathjax: true
 
 <img src="keypoints.png" width="70%" height="70%" title="图 4. 语义关键点">
 
-2. &ensp;**Keypoint Prediction**
+2. &ensp;**Keypoint Prediction**  
 如图 4 所示，考虑 3D 框底部矩形的四个关键点，投影到图像平面后，最多只有一个关键点会在图像 2D 矩形框内。对左目图像进行关键点预测，类似 Mask R-CNN，在 6×28×28 的基础上，因为关键点只有图像坐标 u 方向才提供了额外的信息，所以对每列进行累加，最终输出 6×28 的向量。前 4 个通道代表每个关键点作为 perspective keypoint 投影到该 u 坐标下的概率；后 2 个通道代表该 u 坐标是左右边缘关键点(boundary keypoints)的概率。为了找出 perspective keypoint，softmax 应用于 4×28 的输出上；为了找出左右边缘关键点，softmax 分别应用于后两个 1×28 的输出上。训练的时候，4×28 中只有一个被赋予 perspective keypoint，忽略没有 perspective keypoint 的情况（遮挡等），然后最小化 cross-entropy loss；对于边缘关键点，则分别最小化 1×28 维度上的 cross-entropy loss，前景中也会被赋予边缘关键点。
 
 ## 2.&ensp;3D Box Estimation
@@ -91,8 +91,8 @@ cos\theta & 0 &sin\theta\\
 其中 \\(K\\) 为相机内参，\\(T_{cam}^{obj}\\) 为目标中心坐标系在相机坐标系下的表示，\\((\\cdot)_{cam/obj}\\) 分别为点在相机坐标系，目标中心坐标系下的表示。同样的，这个视野下，右下点为：
 $$\require{cancel}
 \begin{bmatrix}
-u_l\\
-v_t\\
+u_r\\
+v_b\\
 1\\
 \end{bmatrix}=K\cdot
 \begin{bmatrix}

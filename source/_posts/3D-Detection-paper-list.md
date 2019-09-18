@@ -6,6 +6,9 @@ categories: paper reading
 ---
 
 这篇文章从输入数据类别上进行 3D Detection paper 的归类。
+
 ## RGB
+
 ## RGB-D(双目，单目+点云)
+
 ## Lidar
