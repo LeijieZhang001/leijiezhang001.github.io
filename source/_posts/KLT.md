@@ -122,8 +122,8 @@ I^L(x,y)&=\frac{1}{4}I^{L-1}(2x,2y)\\
 　　相似性度量决定该特征点是否已经漂移而不能使用了，即外点检测(Outlier Detection)，所以非常重要。相比于平移模型，仿射模型对特征点的相似性度量更有效果。在长距离跟踪下，相似性度量可能解决不了是否漂移的问题，但是好的相似性度量能从一开始就剔除漂移的特征点。此外，也可用其它更高层面的外点检测技术替代。
 
 
-<a id="1" href="#1ref">[1]</a> Shi, Jianbo, and Carlo Tomasi. Good features to track. Cornell University, 1993.
-<a id="2" href="#2ref">[2]</a> Birchfield, Stan. "Derivation of kanade-lucas-tomasi tracking equation." unpublished notes (1997).
-<a id="3" href="#3ref">[3]</a> Bouguet, J.-Y.. “Pyramidal implementation of the lucas kanade feature tracker.” (2000).
-<a id="4" href="#4ref">[4]</a> Suhr, Jae Kyu. "Kanade-lucas-tomasi (klt) feature tracker." Computer Vision (EEE6503) (2009): 9-18.
+<a id="1" href="#1ref">[1]</a> Shi, Jianbo, and Carlo Tomasi. Good features to track. Cornell University, 1993.  
+<a id="2" href="#2ref">[2]</a> Birchfield, Stan. "Derivation of kanade-lucas-tomasi tracking equation." unpublished notes (1997).  
+<a id="3" href="#3ref">[3]</a> Bouguet, J.-Y.. “Pyramidal implementation of the lucas kanade feature tracker.” (2000).  
+<a id="4" href="#4ref">[4]</a> Suhr, Jae Kyu. "Kanade-lucas-tomasi (klt) feature tracker." Computer Vision (EEE6503) (2009): 9-18.  
 <a id="5" href="#5ref">[5]</a> Bouguet, Jean-Yves. "Pyramidal implementation of the affine lucas kanade feature tracker description of the algorithm." Intel Corporation 5.1-10 (2001): 4.
