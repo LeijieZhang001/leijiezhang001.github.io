@@ -32,6 +32,17 @@ mathjax: true
 
 ## 3.&ensp;实现细节
 
+1. 特征编码
+
+    - 只取有点的柱子，所以 \\(P < H\\times W\\)
+    - 计算量较大，需要并行加速，我复现的时候是将柱子信息离线存下来的
+    - pointpillar 方式可能只比高度体素采样方式效果高一点
+
+2. 训练
+
+    - 针对不同的类别设定唯一尺寸的 anchor，角度上旋转 90 度，所以每个点上每个类别是有两个 anchor
+    - 正负样本严重不均衡，所以需要 OHEM 或者 focalloss 技术
+
 
 <a id="1" href="#1ref">[1]</a> Qi, Charles R., et al. "Frustum pointnets for 3d object detection from rgb-d data." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2018.  
 <a id="2" href="#2ref">[2]</a> Zhou, Yin, and Oncel Tuzel. "Voxelnet: End-to-end learning for point cloud based 3d object detection." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2018.  
