@@ -5,4 +5,4 @@ tags: ["travel"]
 categories: Travel
 ---
 
-{% dplayer "url=https://leijie.oss-cn-shenzhen.aliyuncs.com/travel/Serbia-Montenegro-Bosnia.mov" "pic=https://leijie.oss-cn-shenzhen.aliyuncs.com/travel/Serbia-Montenegro-Bosnia.mov" "loop=yes" "theme=#FADFA3" "autoplay=false" "token=tokendemo" %}
+{% dplayer "url=https://leijie.oss-cn-shenzhen.aliyuncs.com/travel/Serbia-Montenegro-Bosnia.mp4" "pic=https://leijie.oss-cn-shenzhen.aliyuncs.com/travel/Serbia-Montenegro-Bosnia.mp4" "loop=yes" "theme=#FADFA3" "autoplay=false" "token=tokendemo" %}
