@@ -32,7 +32,7 @@ $$ \mathrm{h}_i=\sum_j \mathbf{MLP}(x_i-x_j)\cdot \mathrm{f}_j $$
 - **Continuous Fusion Layer**  
 Continuous Fusion 则没有显示得计算卷积权重的过程，这样使得特征提取能力更强，而且计算效率更高，不用存储权重值。其数学描述为：
 $$ \mathrm{h}_i=\sum_j \mathbf{MLP}(\mathrm{concat}[\mathrm{f}_j,x_i-x_j]) $$
-多层感知机 \\(\\mathbf{MLP}\\) 直接将 \\(\\mathbb{R}^{J\\times (N+3)}\\) 映射到 \\(\\mathbb{R}^{J\\times M}\\) 空间，最后再做一个 element-wise 的相加即得空间为 \\(\\mathbb{R}^{M}\\) 的特征输出。
+多层感知机 \\(\\mathbf{MLP}\\) 直接将 \\(\\mathbb{R}^{J\\times (N+3)}\\) 映射到 \\(\\mathbb{R}^{J\\times M}\\) 空间，最后再做一个 element-wise 的相加即得空间为 \\(\\mathbb{R}^{M}\\) 的特征输出(**这个和 PointNet 几乎一模一样，本质就是将每个点的特征空间升维，然后用对称函数(pooling, sum)消除无序点的影响, 只是这里输入的点的特征空间 \\(N\\) 可能已经很大了**)。
 <img src="continuous_fusion.png" width="70%" height="70%" title="图 4. Continuous Fusion">
 具体步骤如图 4. 所示：
 
