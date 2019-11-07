@@ -2,7 +2,7 @@
 title: '[paper_reading]-"Multi-Task Learning Using Uncertainty to Weigh Losses"'
 date: 2019-10-15 15:19:09
 tags: ["paper reading", "Deep Learning", "Uncertainty"]
-categories: paper reading
+categories: Uncertainty
 mathjax: true
 ---
 　　深度学习网络中的不确定性(Uncertainty)是一个比较重要的问题，本文<a href="#1" id="1ref"><sup>[1]</sup></a>讨论了其中一种不确定性在多任务训练中的应用。目前关于深度学习不确定性的研究基本出自本文作者及其团队，后续我会较系统得整理其研究成果，这篇文章先只讨论一个较为实用的应用。  

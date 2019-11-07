@@ -2,7 +2,7 @@
 title: '[paper_reading]-"End-to-End Multi-View Fusion for 3D Object Detection in LiDAR Point Clouds"'
 date: 2019-10-21 11:30:27
 tags: ["paper reading", "3D Detection", "Deep Learning", "autonomous driving", "Point Cloud"]
-categories: paper reading
+categories: 3D Detection
 mathjax: true
 ---
 　　在多视角融合 3D 检测上，研究比较多的是俯视图下的激光点云以及前视图下的图像做多传感器融合，而融合点云俯视图(Bird's Eye View)与前视图(Perspective View)的特征则比较少，新鲜出炉的本文<a href="#1" id="1ref"><sup>[1]</sup></a>提供了一种较好的点云前视图与俯视图特征前融合(early fusion)方法。

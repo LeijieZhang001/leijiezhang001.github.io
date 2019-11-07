@@ -2,7 +2,7 @@
 title: '[paper_reading]-"FlowNet3D"'
 date: 2019-10-22 19:51:11
 tags: ["paper reading", "Scene Flow", "Deep Learning", "autonomous driving", "Point Cloud"]
-categories: paper reading
+categories: Scene Flow
 mathjax: true
 ---
 　　本来以为这篇文章是 FlowNet<a href="#1" id="1ref"><sup>[1]</sup></a>，FlowNet2.0<a href="#2" id="2ref"><sup>[2]</sup></a> 的续作，其实不是，大概只是借鉴了其网络框架。从网络细节上来说，应该算是 PointNet<a href="#3" id="3ref"><sup>[3]</sup></a>，PointNet++<a href="#4" id="4ref"><sup>[4]</sup></a> 系列的续作，本文<a href="#5" id="5ref"><sup>[5]</sup></a>二作也是 PointNet 系列的作者。  

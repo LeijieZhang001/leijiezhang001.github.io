@@ -2,7 +2,7 @@
 title: '[paper_reading]-"Multi-Task Multi-Sensor Fusion for 3D Object Detection""'
 date: 2019-10-14 10:42:54
 tags: ["paper reading", "3D Detection", "Deep Learning", "autonomous driving"]
-categories: paper reading
+categories: 3D Detection
 mathjax: true
 ---
 

@@ -2,7 +2,7 @@
 title: 'MOT 综述-''Multiple Object Tracking: A Literature Review'''
 date: 2019-05-28 16:22:58
 tags: ["paper reading", "MOT", "tracking"]
-categories: paper reading
+categories: MOT
 mathjax: true
 ---
 　　之前做 MOT 还是沿着 SOT 的思路，这篇文章对 MOT 有一个很深入且很有框架性的综述，以下对这篇文章做一个提炼，并加入一些自己的想法。  

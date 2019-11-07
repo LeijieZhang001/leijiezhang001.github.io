@@ -2,7 +2,7 @@
 title: '[paper_reading]-"Stereo Vision-based Semantic 3D Object and Ego-motion Tracking for Autonomous Driving"'
 date: 2019-06-08 14:21:14
 tags: ["paper reading", "3D Detection", "Deep Learning", "autonomous driving"]
-categories: paper reading
+categories: 3D Detection
 mathjax: true
 ---
 　　本文<a href="#1" id="1ref"><sup>[1]</sup></a>结合 Semantic SLAM 与 Learning-based 3D Det 技术，提出了一种用于自动驾驶的动态目标定位与本车状态估计的方法。本文系统性较强，集成了较多成熟的模块，对工程应用也有较强的指导意义。

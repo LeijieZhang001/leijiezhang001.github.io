@@ -2,7 +2,7 @@
 title: 3D Detection Paper List
 date: 2019-05-22 11:43:33
 tags: ["paper reading", "3D Detection"]
-categories: paper reading
+categories: Trash
 ---
 
 这篇文章从输入数据类别上进行 3D Detection paper 的归类。

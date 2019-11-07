@@ -1,7 +1,7 @@
 ---
 title: Study Topic List
 date: 2019-05-20 13:30:54
-categories: 
+categories: Trash
 tags: ['']
 ---
 

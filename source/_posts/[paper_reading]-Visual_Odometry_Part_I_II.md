@@ -2,7 +2,7 @@
 title: '[paper_reading]-"Visual Odometry Part I&II"'
 date: 2019-06-17 15:16:53
 tags: ["paper reading", "SLAM", "VO", "autonomous driving"]
-categories: paper reading
+categories: SLAM
 mathjax: true
 ---
 

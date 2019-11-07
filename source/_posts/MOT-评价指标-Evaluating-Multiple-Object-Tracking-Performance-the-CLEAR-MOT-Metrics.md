@@ -2,7 +2,7 @@
 title: 'MOT 评价指标-"Evaluating Multiple Object Tracking Performance, the CLEAR MOT Metrics"'
 date: 2019-06-02 14:23:46
 tags: ["paper reading", "MOT", "tracking"]
-categories: paper reading
+categories: MOT
 mathjax: true
 ---
 　　这篇文章介绍了两个综合性指标 MOTA 以及 MOTP 的计算过程，这两个指标有优劣势，但是作为综合性指标至今在学术界仍广泛应用。本文主要介绍其设计思想及计算过程。  

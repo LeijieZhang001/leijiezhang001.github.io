@@ -2,7 +2,7 @@
 title: '[paper_reading]-"Fast and Furious"'
 date: 2019-09-24 10:23:23
 tags: ["paper reading", "3D Detection", "Deep Learning", "autonomous driving", "Point Cloud"]
-categories: paper reading
+categories: 3D Detection
 mathjax: true
 ---
 

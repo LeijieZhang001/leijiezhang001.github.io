@@ -2,7 +2,7 @@
 title: '[paper_reading]-"Stereo R-CNN based 3D Object Detection for Autonomous Driving"'
 date: 2019-06-08 14:21:14
 tags: ["paper reading", "3D Detection", "Deep Learning", "autonomous driving"]
-categories: paper reading
+categories: 3D Detection
 mathjax: true
 ---
 

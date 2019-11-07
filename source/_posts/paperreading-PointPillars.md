@@ -2,7 +2,7 @@
 title: '[paper_reading]-PointPillars'
 date: 2019-09-03 22:08:12
 tags: ["paper reading", "3D Detection", "Deep Learning", "autonomous driving", "Point Cloud"]
-categories: paper reading
+categories: 3D Detection
 mathjax: true
 ---
 

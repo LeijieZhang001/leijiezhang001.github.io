@@ -2,7 +2,7 @@
 title: Lane Detection from BEV
 date: 2019-10-17 17:53:12
 tags: ["Deep Learning", "Lane Detection"]
-categories: lane detection
+categories: Lane Detection
 mathjax: true
 ---
 　　车道线检测(Lane Detection)是 ADAS 系统中重要的功能模块，而对于 L4 自动驾驶系统，在不完全依赖高精度地图的情况下，车道线检测结果也是车辆运动规划的重要输入信息。由于俯视图(BEV, Bird's Eye View)下做车道线检测相比于前视图，有天然的优势，所以本文根据几篇论文(就看了两三篇)及项目经验，探讨总结俯视图下做车道线检测的流程方案，<a href="#0" id="0ref">[0]</a>为车道线检测资源集。

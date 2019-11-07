@@ -2,7 +2,7 @@
 title: PointNet 系列论文详读
 date: 2019-08-19 09:50:45
 tags: ["Deep Learning", "3D Detection", "Point Cloud"]
-categories: paper reading
+categories: 3D Detection
 mathjax: true
 ---
 
