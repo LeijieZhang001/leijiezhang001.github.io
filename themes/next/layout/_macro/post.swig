@@ -73,6 +73,14 @@
                 {{ date(post.date, config.date_format) }}
               </time>
             {% endif %}
+            {%if post.updated and post.updated > post.date%}
+              <span class="post-updated">
+                &nbsp; | &nbsp; {{ __('Updated on') }}
+                <time itemprop="dateUpdated" datetime="{{ moment(post.updated).format() }}" content="{{ date(post.updated, config.date_format) }}">
+                  {{ date(post.updated, config.date_format) }}
+                </time>
+              </span>
+            {% endif %}
 
             {% if theme.post_meta.created_at and theme.post_meta.updated_at %}
               <span class="post-meta-divider">|</span>
