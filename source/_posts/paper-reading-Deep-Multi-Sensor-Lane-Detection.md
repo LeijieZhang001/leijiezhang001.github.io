@@ -1,6 +1,7 @@
 ---
-title: '[paper_reading] "Deep Multi-Sensor Lane Detection"'
+title: '[paper_reading]-"Deep Multi-Sensor Lane Detection"'
 date: 2019-11-09 11:54:34
+updated: 2019-11-09 21:54:34
 tags: ["Deep Learning", "Lane Detection"]
 categories: Lane Detection
 mathjax: true
