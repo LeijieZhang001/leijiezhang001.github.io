@@ -12,7 +12,7 @@ mathjax: true
 
 ## 1.&ensp;网络结构
 <img src="arch.png" width="90%" height="90%" title="图 2. 网络结构">
-　　如图 2. 所示，网络有两部分组成：
+　　如图 2. 所示，网络有两部分组成： 
 
 - Image-view 通路  
 输入为前视图图像，输出相机 pitch 角度 \\(\\theta\\) 以及相机高度 \\(H\\)，这里假设相机坐标系相对地面坐标系没有 roll，yaw 偏转，由此可得到相机外参矩阵，用于 IPM 变换；
