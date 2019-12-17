@@ -24,7 +24,7 @@ mathjax: true
 - 查询：\\(\\mathcal{O}(n^{1-\\frac{1}{k}}+m)\\)，其中 \\(m\\) 为要查询的最近点个数
 
 ### 1.1.&ensp;问题描述
-　　设点云集合：\\(P=\\{p_1,...,p_n\\}\\in R^{F}\\)，每个点有 \\(F\\) 维的特征，以及每个点的三维坐标为：\\(p_i=(x_i,y_i,z_i)\\)（注意，坐标也可作为特征包含于 \\(F\\) 维中）。因为点云的无序性，定义点云集合的最近邻图(k-nearest neighbor graph) \\(\\mathcal{G=(V,E)}\\)，其中 \\(\\mathcal{V}\\) 表示点云中的点，\\(\\mathcal{E}\\) 表示点 \\(p_i\\) 与最近的 \\(k\\) 个点 \\(\\{p_j ^ {i1},...,p_j ^ {ik}\\}\\) 所构成的有向边集合 \\(\\{(i,j_{i1}),...,(i,j_{ik})\\}\\)。由此定义**点级别特征提取操作**：
+　　设点云集合：\\(P=\\{p_1,...,p_n\\}\\in R^{F}\\)，每个点有 \\(F\\) 维的特征，以及每个点的三维坐标为：\\(p_i=(x_i,y_i,z_i)\\)（注意，坐标也可作为特征包含于 \\(F\\) 维中）。因为点云的无序性，定义点云集合的最近邻图(k-nearest neighbor graph) \\(\\mathcal{G=(V,E)}\\)，其中 \\(\\mathcal{V}\\) 表示点云中的点，\\(\\mathcal{E}\\) 表示点 \\(p_i\\) 与最近的 \\(k\\) 个点 \\(P_i^k=\\{p_j ^ {i1},...,p_j ^ {ik}\\}\\) 所构成的有向边集合 \\(\\{(i,j_{i1}),...,(i,j_{ik})\\}\\)。由此定义**点级别特征提取操作**：
 $$ p_i' = \displaystyle\Box_{j:(i,j)\in\mathcal{E}} h_\Theta(p_i,p_j) \tag{1}$$
 其中 \\(h _ {\\Theta}\\) 表示非线性映射函数，将特征空间：\\(\\mathbb{R} ^ F \\times \\mathbb{R} ^ F \\to \\mathbb{R} ^ {F'}\\)；\\(\\Box\\) 为用于特征聚合的对称函数。该操作类似图像二维卷积操作，将输入的点云集合：\\(P=\\{p_1,...,p_n\\}\\in R^{F}\\) 映射到相同点数的：\\(P'=\\{p_1',...,p_n'\\}\\in R^{F'}\\)。
 
@@ -62,13 +62,24 @@ $$ p_i' = \displaystyle\mathrm{MAX}_{j:(i,j)\in\mathcal{E}}\mathrm{MLP}\,\left(p
 $$ p_i' = \displaystyle\sum_{j:(i,j)\in\mathcal{E}}\left(\mathrm{softmax\,MLP'}\,\left(p _ j^{\mathrm{exclude}\,xyz}\oplus\left\Vert p _ j^{xyz}-p _ i^{xyz}\right\Vert\oplus (p _ j ^ {xyz}-p _ i^{xyz})\oplus p _ j^{xyz}\oplus p _ i^{xyz}\right)\right)\cdot \left(\mathrm{MLP}\,\left(p _ j^{\mathrm{exclude}\,xyz}\oplus\left\Vert p _ j^{xyz}-p _ i^{xyz}\right\Vert\oplus (p _ j ^ {xyz}-p _ i^{xyz})\oplus p _ j^{xyz}\oplus p _ i^{xyz}\right)\right) \tag{7}$$
 这里的 \\(\\Box\\) 函数称为 Attention Pooling，即将特征维度进行加权求和。
 
+#### 1.2.7.&ensp;TANet<a href="#12" id="12ref"><sup>[12]</sup></a>
+<img src="TANet.png" width="40%" height="40%" title="图 2. TANet">
+　　如图 2. 所示，TANet 中提出了 TA Module，该模块包含三种注意力机制：point-wise，channel-wise，voxel-wise。其中前两种注意力可用于任意点的特征提取。对应的前两种注意力构成了 \\(h _ {\\Theta}(p_i,p_j)\\) 函数：
+$$h_{\Theta} = \left(\mathrm{MLP_1}(\mathrm{MaxPool_{feats}}\,P_i^k) \times \mathrm{MLP_2}(\mathrm{MaxPool_{points}}\, P_i^k)\right) \cdot P_i^k \tag{8}$$
+其中 point-wise attention 为 \\(\\mathrm{MLP_1}(\\mathrm{MaxPool_{feats}}\\,P_i^k) = S \\in \\mathbb{R}^{K\\times 1}\\)；channel-wise attention 为 \\(\\mathrm{MLP_2}(\\mathrm{MaxPool_{points}}\\,P_i^k) = T \\in \\mathbb{R}^{F\\times 1}\\)；由此构成 \\(M=S\\times T\\in\\mathbb{R}^{K\\times F}\\)，作为权重作用于 \\(P_i^k\\)，最后用 \\(\\sum |\\mathrm{MAX}\\) 操作对点维度进行特征聚合。注意，这里的 point-wise attention 是与点的顺序有关的，看起来这里经过训练，可以消除点顺序的影响。
+
+#### 1.2.8.&ensp;PointConv<a href="#13" id="13ref"><sup>[13]</sup></a>
+<img src="PointConv.png" width="60%" height="60%" title="图 3. PointConv">
+<img src="PointConv2.png" width="60%" height="60%" title="图 4. Efficient PointConv">
+　　如图 3. 以及 4. 所示，PointConv 设计的 \\(h_{\\Theta}\\) 有两部分组成。一是根据 \\(P_i^k\\) 点集计算权重矩阵 \\(W\\)；二是用核密度函数(Kernel Density Estimation)计算点的密度，然后根据密度计算权重。这里加入基于点密度的权重，是因为，点密度高的区域，需要显式地降低其特征权重，避免最终特征学不到稀疏点的特征。图 4. 是高效版本。
+
 ## 2.&ensp;基于映射空间操作
 　　基于原始三维空间的点特征提取操作，**其算法复杂度直接依赖点数**；而如果将其映射到高维空间，则点数只会影响映射与反映射的过程，核心特征提取操作将不受点的个数影响。  
 　　三维空间下点云无法有序组织，将点云映射到更高维空间，在高维空间下进行结构化组织后，即可应用传统的卷积操作进行特征提取。
 
 ### 2.1.&ensp;Bilateral Convolutional Layer(BCL<a href="#8" id="8ref"><sup>[8]</sup></a>)(SPLATNet<a href="#9" id="9ref"><sup>[9]</sup></a>/HPLFlowNet<a href="#10" id="10ref"><sup>[10]</sup></a>)
-<img src="BCL.png" width="60%" height="60%" title="图 2. BCL">
-　　如图 2. 所示，BCL 操作有三部分组成：
+<img src="BCL.png" width="60%" height="60%" title="图 3. BCL">
+　　如图 3. 所示，BCL 操作有三部分组成：
 
 - **Splat**  
 将三维空间的点 \\(p_i^{xyz}\\) 投影到高维空间，实际操作中直接乘以一个预定义的 \\(4\\times 3\\) 矩阵。4 维空间的晶格顶点聚合晶格内映射点的信息，聚合过程中以映射点与格点的距离作为权重；
@@ -91,7 +102,9 @@ $$ p_i' = \displaystyle\sum_{j:(i,j)\in\mathcal{E}}\left(\mathrm{softmax\,MLP'}\
 <a id="8" href="#8ref">[8]</a> Kiefel, Martin, Varun Jampani, and Peter V. Gehler. "Permutohedral lattice cnns." arXiv preprint arXiv:1412.6618 (2014).  
 <a id="9" href="#9ref">[9]</a> Su, Hang, et al. "Splatnet: Sparse lattice networks for point cloud processing." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2018.  
 <a id="10" href="#10ref">[10]</a> Gu, Xiuye, et al. "Hplflownet: Hierarchical permutohedral lattice flownet for scene flow estimation on large-scale point clouds." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.  
-
+<a id="11" href="#11ref">[11]</a> Xie, Liang, et al. "PI-RCNN: An Efficient Multi-sensor 3D Object Detector with Point-based Attentive Cont-conv Fusion Module." arXiv preprint arXiv:1911.06084 (2019).  
+<a id="12" href="#12ref">[12]</a> Liu, Zhe, et al. "TANet: Robust 3D Object Detection from Point Clouds with Triple Attention." arXiv preprint arXiv:1912.05163 (2019).  
+<a id="13" href="#13ref">[13]</a> Wu, Wenxuan, Zhongang Qi, and Li Fuxin. "Pointconv: Deep convolutional networks on 3d point clouds." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.
 
 
 
