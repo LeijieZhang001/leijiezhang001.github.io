@@ -56,7 +56,7 @@ $$ p_i' = \displaystyle\mathrm{MAX}_{j:(i,j)\in\mathcal{E}}\mathrm{MLP}\,\left(p
 额外加上点　\\(p_i\\) 的世界坐标，保留点的全局信息。
 <img src="DGCNN.png" width="80%" height="80%" title="图 1. DGCNN">
 　　如图 1. 所示，DGCNN 网络结构与 PointNet 网络差不多，区别就在核心的点特征提取操作。  
-　　代码实现可参考<a href="#14" id="14ref">[14]</a>, <a href="#15" id="15ref">[15]</a>，其中 <a href="#14" id="14ref">[14]</a> 是简化版，分析代码可知其步骤：
+　　代码实现可参考<a href="#14" id="14ref">[14]</a>, <a href="#15" id="15ref">[15]</a>，其中 <a href="#15" id="15ref">[15]</a>是完整的 DGCNN，每次卷积操作都是要在该点的新特征下取寻找 \\(k\\) 个最近邻，而 <a href="#14" id="14ref">[14]</a> 是简化版，最近邻点是固定的，分析代码可知其步骤：
 
 1. 针对每个点 \\(p_i\\)，首先找到该点最近的 \\(k\\) 个点及对应的特征，得到 tensor 维度：\\(B\\times N\\times k\\times F\\);
 2. 然后将本点 \\(p_i\\) 的特征 concate 到对应的 \\(k\\) 个点特征，得到 tensor 维度： \\(B\\times N\\times k\\times 2F\\)；
