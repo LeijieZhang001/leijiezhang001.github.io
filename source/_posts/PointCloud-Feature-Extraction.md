@@ -55,7 +55,17 @@ $$ p_i' = \displaystyle\left\{\mathrm{MAX}|\sum\right\}_{j:(i,j)\in\mathcal{E}}\
 $$ p_i' = \displaystyle\mathrm{MAX}_{j:(i,j)\in\mathcal{E}}\mathrm{MLP}\,\left(p _ j^{\mathrm{exclude}\,xyz}\oplus( p _ j ^ {xyz}-p _ i^{xyz})\oplus p _ i^{xyz}\right) \tag{6}$$
 额外加上点　\\(p_i\\) 的世界坐标，保留点的全局信息。
 <img src="DGCNN.png" width="80%" height="80%" title="图 1. DGCNN">
-　　如图 1. 所示，DGCNN 网络结构与 PointNet 网络差不多，区别就在核心的点特征提取操作。
+　　如图 1. 所示，DGCNN 网络结构与 PointNet 网络差不多，区别就在核心的点特征提取操作。  
+　　代码实现可参考<a href="#14" id="14ref">[14]</a>, <a href="#15" id="15ref">[15]</a>，其中 <a href="#14" id="14ref">[14]</a> 是简化版，分析代码可知其步骤：
+
+1. 针对每个点 \\(p_i\\)，首先找到该点最近的 \\(k\\) 个点及对应的特征，得到 tensor 维度：\\(B\\times N\\times k\\times F\\);
+2. 然后将本点 \\(p_i\\) 的特征 concate 到对应的 \\(k\\) 个点特征，得到 tensor 维度： \\(B\\times N\\times k\\times 2F\\)；
+3. 不同层 conv，bn，relu 的作用，得到多个 tensor，其维度：\\(B\\times N\\times k\\times \\{F'|F'_1,...,F'_s\\}\\)；
+4. 对 \\(k\\) 个点作最大化聚合，得到各 tensor 维度：\\(B\\times N\\times \\{F'|F_1',...,F_s'\\}\\)
+5. 每个点的特征进行 concate，然后作 conv，bn，relu 操作，最终得到点的特征 tensor，维度为 \\(B\\times N\\times F^{final}\\)；
+
+该实现与式 (6) 有点出入，该实现没有显示计算本点坐标与对应的 \\(k\\) 个点坐标的差值。但是总体思想一致。
+
 
 #### 1.2.6.&ensp;RandLA-Net<a href="#7" id="7ref"><sup>[7]</sup></a>
 　　设计 \\(h _ {\\Theta}(p_i,p_j)=\\mathrm{MLP}\\,\\left(p _ j^{\\mathrm{exclude}\\,xyz}\\oplus\\left\\Vert p _ j^{xyz}-p _ i^{xyz}\\right\\Vert\\oplus (p _ j ^ {xyz}-p _ i^{xyz})\\oplus p _ j^{xyz}\\oplus p _ i^{xyz}\\right)\\)，\\(\\Box=\\sum \\mathrm{softmax\\,MLP}(h_{\\Theta}(p_i,p_j))\\)，得到 RandLA-Net 中的操作(详见 {% post_link paper-reading-RandLA-Net RandLA-Net%})：
@@ -104,7 +114,9 @@ $$h_{\Theta} = \left(\mathrm{MLP_1}(\mathrm{MaxPool_{feats}}\,P_i^k) \times \mat
 <a id="10" href="#10ref">[10]</a> Gu, Xiuye, et al. "Hplflownet: Hierarchical permutohedral lattice flownet for scene flow estimation on large-scale point clouds." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.  
 <a id="11" href="#11ref">[11]</a> Xie, Liang, et al. "PI-RCNN: An Efficient Multi-sensor 3D Object Detector with Point-based Attentive Cont-conv Fusion Module." arXiv preprint arXiv:1911.06084 (2019).  
 <a id="12" href="#12ref">[12]</a> Liu, Zhe, et al. "TANet: Robust 3D Object Detection from Point Clouds with Triple Attention." arXiv preprint arXiv:1912.05163 (2019).  
-<a id="13" href="#13ref">[13]</a> Wu, Wenxuan, Zhongang Qi, and Li Fuxin. "Pointconv: Deep convolutional networks on 3d point clouds." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.
+<a id="13" href="#13ref">[13]</a> Wu, Wenxuan, Zhongang Qi, and Li Fuxin. "Pointconv: Deep convolutional networks on 3d point clouds." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.  
+<a id="14" href="#14ref">[14]</a> https://github.com/WangYueFt/dcp/blob/master/model.py  
+<a id="15" href="#15ref">[15]</a> https://github.com/WangYueFt/dgcnn/blob/master/pytorch/model.py  
 
 
 
