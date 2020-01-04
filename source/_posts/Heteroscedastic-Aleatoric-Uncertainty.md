@@ -59,7 +59,7 @@ p\left(\mathbf{y}\vert\mathbf{f^W(x)}\right) = \sum_k \alpha_k \mathcal{N}\left(
 
 ## 3.&ensp;Metrics
 
-## 4.&ensp;reference
+## 4.&ensp;Reference
 
 <a id="1" href="#1ref">[1]</a> Kendall, Alex, and Yarin Gal. "What uncertainties do we need in bayesian deep learning for computer vision?." Advances in neural information processing systems. 2017.  
 <a id="2" href="#2ref">[2]</a> Feng, Di, Lars Rosenbaum, and Klaus Dietmayer. "Towards safe autonomous driving: Capture uncertainty in the deep neural network for lidar 3d vehicle detection." 2018 21st International Conference on Intelligent Transportation Systems (ITSC). IEEE, 2018.  
