@@ -6,7 +6,7 @@ categories: Uncertainty
 mathjax: true
 ---
 　　{% post_link paperreading-MT-Learning-Using-Uncertainty-to-Weight-Losses Multi-task Learning Using Uncertainty to Weigh Losses%} 已经详细描述了贝叶斯模型中几种可建模的不确定性(uncertainty)，并应用了**任务依赖/同方差不确定性(Task-dependent or Homoscedastic Aleatoric Uncertainty)**来自动学习多任务中的 Loss 权重。本文讨论同为偶然不确定性(Aleatoric Uncertainty)的**数据依赖/异方差不确定性(Data-dependent or Heteroscedastic Aleatoric Uncertainty)**。需要注意的是，偶然不确定性(Aleatoric Uncertainty)描述的是数据不能解释的信息，只能通过提高数据的精度来消除；而认知不确定性(Epistemic Uncertainty)描述的是模型因为缺少训练数据而存在的未知，可通过增加训练数据解决。  
-　　为什么要建模 Heteroscedastic Aleatoric Uncertainty？Learning 算法一个比较致命的问题是，网络能输出预测量，但是网络不知道其预测的不确定性，如目标状态估计中，状态量的协方差矩阵。尤其在自动驾驶领域，**我们不仅关注模型知道什么，更要关注模型不知道什么**。  
+　　为什么要建模 Heteroscedastic Aleatoric Uncertainty？Learning 算法一个比较致命的问题是，网络能输出预测量，但是网络不知道其预测的不确定性，如目标状态估计中，需要获得观测的协方差矩阵**(检测作为观测模块，理论上需要出检测的 Uncertainty，包括 Aleatoric 与 Epistemic Uncertainty，但是 Epistemic Uncertainty 只能通过多次采样近似得到，不能实时应用，所以一般只考虑 Aleatoric Uncertainty 作为观测的不确定性)**。尤其在自动驾驶领域，**我们不仅关注模型知道什么，更要关注模型不知道什么**。  
 　　本文通过贝叶斯神经网络来建模 Aleatoric Uncertainty，并分析其应用效果。
 
 ## 1.&ensp;Aleatoric Uncertainty 建模
