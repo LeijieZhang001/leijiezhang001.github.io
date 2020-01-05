@@ -58,6 +58,7 @@ p\left(\mathbf{y}\vert\mathbf{f^W(x)}\right) = \sum_k \alpha_k \mathcal{N}\left(
 　　训练时，找出与真值分布最近的一组预测量，混合高斯模型权重用 softmax 回归并用 cross-entropy loss，找到最相似的分布后，将该分布的方差用式(3)作用于回归的 Loss 项；测试时，找到混合高斯模型最大的权重项，对应的高斯分布，即作为最终的输出分布。这里只考虑了输出 3D 框的一个整体的方差，也可以输出定位方差+尺寸方差+角度方差，只要将该方差作用于对应的 Loss 项即可。当 \\(K=1\\) 时，就是多变量单高斯模型，一般也够用。
 
 ## 3.&ensp;Metrics
+TODO
 
 ## 4.&ensp;Reference
 
