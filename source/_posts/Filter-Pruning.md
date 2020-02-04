@@ -90,7 +90,7 @@ PruningNet 输入为网络编码向量，即每层卷积的 Filter 数量，输�
 ### 3.3.&ensp;Generative Adversarial Learning<a href="#8" id="8ref"><sup>[8]</sup></a>
 <img src="GAL.png" width="90%" height="90%" title="图 9. Generative Adversarial Learning">
 　　本方法主要思想来自知识蒸馏(Knowledge Distillation)和生成对抗网络(Generative Adversarial Network)，如图 9. 所示，Baseline 为完整的原始网络，PrunedNet 是为了学习一个 soft mask 来动态选择 block，branch，channel，最终裁剪后的网络由 soft mask 决定。  
-　　从知识蒸馏的角度：Baseline 就是一个大容量的网络，Pruned Net 就是个小容量的网络，用大容量网络来监督小容量网络学习。从生成对抗学习的角度：Baseline 教师，PrunedNet 是学生，用一个 Discriminator 网络来区分学生与教师的区别，使学生的输出能逼近教师的输出。
+　　从知识蒸馏的角度：Baseline 就是一个大容量的教师网络，Pruned Net 就是个小容量的学生网络，用大容量网络来监督小容量网络学习。从生成对抗学习的角度：Baseline 是原始网络，PrunedNet 是生成的对抗网络，用一个 Discriminator 网络来区分原始网络与生成的对抗网络的区别，使生成的对抗网络输出逼近于原始网络。
 
 ## 4.&ensp;Reference
 <a id="1" href="#1ref">[1]</a> Liu, Zhuang, et al. "Rethinking the Value of Network Pruning." International Conference on Learning Representations. 2018.  
