@@ -10,19 +10,19 @@ mathjax: true
 
 ## 1.&ensp;问题描述
 ### 1.1.&ensp;Scan 定义
-　　针对旋转式机械雷达，Scan 为单个激光头旋转一周获得的点云，类似 VLP-16 则旋转一周是“几乎”同时获得了 16 个 Scan。针对棱镜旋转而激光头不旋转的雷达(Solid State LiDARs)，如大疆 Livox 系列，Scan 则可定义为一定时间下累积获得的点云。
+　　针对旋转式机械雷达，Scan 为单个激光头旋转一周获得的点云，类似 VLP-16 旋转一周则是“几乎”同时获得了 16 个 Scan。针对棱镜旋转而激光头不旋转的雷达(Solid State LiDARs)，如大疆 Livox 系列，Scan 则可定义为一定时间下累积获得的点云。
 
 ### 1.2.&ensp;Sweep 定义
-　　Sweep 定义为静止的机器人平台上激光雷达能覆盖所有空间的点云。  
-　　针对旋转式机械雷达，Sweep 即为旋转一周获得的由一个或多个 Scan 组成的点云。针对棱镜选择而激光头不旋转的雷达，由于其属于非重复性扫描(Non-repetitive Scanning)结构，所以 Sweep 理论上为时间趋于无穷大时获得的点云，但是狭义上，可以认为一段较长时间下(相对于 Scan 时间)，获得的点云。  
+　　Sweep 定义为静止的机器人平台上激光雷达能覆盖到所有空间的点云。  
+　　针对旋转式机械雷达，Sweep 即为旋转一周获得的由一个或多个 Scan 组成的点云。针对棱镜旋转而激光头不旋转的雷达，由于其属于非重复性扫描(Non-repetitive Scanning)结构，所以 Sweep 理论上为时间趋于无穷大时获得的点云，但是狭义上，可以认为一段较长时间下(相对于 Scan 时间)，获得的点云。  
 <img src="motor_lidar.png" width="60%" height="60%" title="图 1. 3D Lidar Updated from 2D Lidar with a Motor">
-　　那么，如果给激光雷达加上一个马达呢？如图 1. 所示，<a href="#1" id="1ref">[1]</a> 中设计了一种 3D Lidar 装置，由一个只有一个激光头的 2D Lidar 和一个马达组成，激光扫描频率为 40Hz，马达转速为 180°/s。这种装置下，Scan 意义不变，Sweep 则为 1s 内该装置获得的点云(因为 1s 的时间内，该装置获得点点云可覆盖所有能覆盖的空间)。  
+　　那么，如果给激光雷达加上一个马达呢？如图 1. 所示，<a href="#1" id="1ref">[1]</a> 中设计了一种 3D Lidar 装置，由一个只有一个激光头的 2D Lidar 和一个马达组成，激光扫描频率为 40Hz，马达转速为 180°/s。这种装置下，Scan 意义不变，Sweep 则为 1s 内该装置获得的点云(因为 1s 的时间内，该装置获得的点云可覆盖所有能覆盖的空间)。  
 
 ### 1.2.&ensp;非重复性扫描激光雷达
 <img src="livox.png" width="60%" height="60%" title="图 2. Livox Scanning Pattern">
 　　其实，大疆的 Livox 非重复性扫描雷达相当于把这马达移到了内部的棱镜中，而且加上非对称，所以随着时间的累积，可获得相当稠密的点云。  
 　　Livox 这种非重复式扫描的激光雷达价格低廉，相对于传统的多线激光雷达有很多优点，但是有个致命的缺点：**只能准确捕捉静态物体，无法准确捕捉动态物体；对应的，只能作 Mapping，很难作动态障碍物的估计。**因为在一帧点云的扫描周期 \\(T\\) 内，如果目标速度为 \\(v\\)，那么 Livox 式雷达在扫描周期内都会扫到目标，目标的尺寸会被放大 \\(Tv\\)，而传统旋转的线束雷达真正扫到目标的时间为 \\(t\\ll T\\)。当 \\(T=0.1s\\)，\\(v=20m/s\\) 时，尺寸放大为 2m，而一般小汽车车长也就几米。**所以尺寸是估不准的，但是其它属性，如位置，速度，在目标加速度不是很大的情况下，可能还是有技巧可以估准的，具体就得看实验效果。另一种思路：直接对其进行物理建模，先假设已知目标速度，那么所有点即可恢复出目标的真实尺寸，然后可进一步估计速度，由此迭代至最优值**。  
-　　由于本车的状态可以通过其它方式(如 IMU)获得，所以本车运动所引起的点云畸变(即 Motion Blur，基本所有雷达都会有这个问题，以下会详解)可以很容易得到补偿，所以对于静态目标，其点云是能准确捕捉到物理属性的。
+　　由于本车的状态可以通过其它方式(如 IMU)获得，所以本车运动所引起的点云畸变(即 Motion Blur，基本所有雷达都会有这个问题，详见 2.3，4.1 章节)可以很容易得到补偿，所以对于静态目标，点云是能准确捕捉到其物理属性的。
 
 ### 1.3.&ensp;符号定义
 　　本文首先基于图 1. 的装置进行 LOAM 算法的描述，一般的多线激光雷达或是 Livox 雷达则可以认为是图 1. 的特殊形式，算法过程很容易由此导出。  
@@ -34,7 +34,7 @@ $$\{\mathit{T} _ {(k,i)}^L\} _ {i=1}^I \tag{2}$$
 　　**里程计问题**：
 $$\mathit{T} _ K^L(t) \prod _ {k=1}^K\mathit{T} _ {k-1}^L(t _ {k}) \tag{3}$$
 
-## 2.&ensp;LOAM for 2D Lidar with Motor
+## 2.&ensp;LOAM for 2D Lidar with Motor<a href="#1" id="1ref"><sup>[1]</sup></a><a href="#2" id="2ref"><sup>[2]</sup></a>
 <img src="loam.png" width="70%" height="70%" title="图 3. LOAM Software System">
 　　硬件装置如图 1. 所示，这里不再赘述，软件算法流程如图 3. 所示，\\(\\mathcal{\\hat{P}} _ k=\\{\\mathcal{P} _ {(k,s)}\\}\\) 为累积的 Scan 点云，其都会注册到 \\(L\\) 坐标系，得到 \\(\\mathcal{P} _ k\\)。Lidar Odometry 由 \\(\\mathcal{\\hat{P}} _ k\\) 注册到 \\(\\mathcal{P} _ {k-1}\\) 生成高频低精度的位姿，并且生成运动补偿后的 Sweep 点云(这里也可以用其它的里程计实现，如 IMU 等)；Lidar Mapping 则由 \\(\\mathcal{P}_k\\) 注册到世界坐标系 \\(W\\) 下的地图 \\(\\mathcal{P}_m\\) 中，生成低频高精度的位姿和地图；Transform Integration 则插值出高精度高频的位姿。
 
@@ -82,7 +82,7 @@ $$\begin{align}
 \mathit{\tilde{X}} _ {(k,i)}^L &= \mathit{T} _ {(k,i)}^L\mathit{X} _ {(k,i)} \\
 \tag{7}
 \end{align}$$
-带入式(4)(5)，可简化为以下优化函数：
+带入式(4)(5)，可简化为以下非线性最小二乘优化函数：
 $$f(\mathit{T} _ {k}^L(t)) = \mathbf{d} \tag{8}$$
 其中每一行表示一个特征点及对应的误差，用非线性优化使 \\(\\mathbf{d}\\to \\mathbf{0}\\)：
 $$\mathit{T} _ {k}^L(t)\gets \mathit{T} _ {k}^L(t) - (\mathbf{J}^T\mathbf{J}+\lambda\mathrm{diag(\mathbf{J}^T\mathbf{J})})^{-1}\mathbf{J}^T\mathbf{d} \tag{9}$$
@@ -102,16 +102,53 @@ $$\mathit{T} _ {k}^L(t)\gets \mathit{T} _ {k}^L(t) - (\mathbf{J}^T\mathbf{J}+\la
 　　建图时需要对 Map 进行采样，通过 Voxel-Grid Filter 保持栅格内点的密度，由此减少内存及运算量，Edge Points 的栅格应该要比 Planar Points 的小。  
 　　得到低频高精度雷达位姿后，结合 Lidar Odometry(式(3))，即可输出高频高精度(精度相对世界坐标系而言)的雷达位姿。
 
-## 3.&ensp;LOAM for Livox
+## 3.&ensp;LOAM for Livox<a href="#3" id="3ref"><sup>[3]</sup></a>
+　　1.2 小节中已经阐述了 Livox 雷达的特性，这里整理如下：
 
-## 4.&ensp;LOAM for VLP-16
+a. **Small FoV**  
+包括 MEMS 这种 Solid State LiDARs，一般都有较小的视场角，不像旋转式机械雷达可达 360°；
+b. **Irregular Scanning Pattern**  
+如图 2. 所示，雷达扫描出的 Pattern 是无规则的，这就导致有效特征提取的难度提升；
+c. **Non-repetitive Scanning**  
+非重复性扫描，有利有弊；
+d. **Motion Blur**  
+包括自身运动及目标运动所产生的点云畸变。自身运动所导致的点云畸变可以通过估计自身运动后，对点云进行运动补偿来矫正；而由于帧内周期均会扫描到目标，所以目标运动所产生的点云畸变影响较大，且基本无法消除。
 
-<a href="#2" id="2ref"><sup>[2]</sup></a>
+### 3.1.&ensp;Workflow
+
+<img src="livox_loam.png" width="90%" height="90%" title="图 6. Livox Loam">
+　　Livox LOAM 可以认为是 LOAM 的简化版，直接从每帧的点云中提取出 Edge Points 和 Planar Points，经过线性插值的运动补偿后，在 Map 中找到对应的 Edge Line 与 Planar Patch，由此建立优化函数。相比于 LOAM，本文干掉了高频低精度的 Lidar Odometry(因为 Livox 没有前后 Scan 概念，很难做 Scan-to-Sweep 的点云注册)，直接出 20Hz 高频高精度的 Odometry 与 Map(计算平台强+软件多线程)。  
+　　此外本文针对雷达特性还作了更细致的工程改进，包括：
+
+1. 更严格的特征点选取  
+去除视场边缘处的特征点；去除较大或较小反射强度的点；
+2. 改进的特征提取  
+为了增多提取的特征点，将周围反射率变化较大的点也列入 Edge Points；
+3. Outlier Rejection  
+在优化迭代时，先迭代两步，然后去除掉有较大误差的点，最后作进一步迭代；
+4. Dynamic Objects Filtering  
+扣除掉动态障碍物的点云，这需要动态障碍物检测模块的支持；
+
+## 4.&ensp;LOAM for VLP-16<a href="#4" id="4ref"><sup>[4]</sup></a>
+
+### 4.1.&ensp;Motion Blur
+　　运动导致的点云畸变主要有两种：自身运动与目标运动。对于旋转式线束雷达来说，目标运动所导致的畸变基本可考虑不计(只有目标正好处于初始扫描与结束扫描的交界处时会有影响；Mapping 时则已扣掉动态障碍物，所以不影响)，这里主要讨论自身运动所导致的点云畸变影响。  
+　　每帧激光雷达数据(即一次 Sweep)都会标记到同一时间戳，假设标记到初始扫描的时刻。假设激光雷达旋转一周的扫描周期为 \\(T\\)，考虑一次 Sweep：\\(t\\in [0,T]\\)。假设在扫描周期内自身为匀速运动，速度为 \\(v\\)，那么场景中点云的最大偏移畸变为 \\(vT\\)。考虑两次 Sweep: \\(t _ 1,t _ 2\\)，对应的速度为 \\(v _ 1, v _ 2\\)，那么两个时刻对同一物体的点云偏差量为 \\(v _ 1T,v _ 2T\\)。在世界坐标系下，该物体观测的点云最坏的不一致量可达到 \\(|v _ 1T+v _ 2T|\\)(自身运动有旋转的时候)，当然大多数情况可能是 \\(|v _ 1T-v _ 2T|\\)。
+
+a. **单帧情况**  
+当 \\(T=0.1s,v=20m/s\\) 时，畸变量为 2m，对于目标检测算法，虽然目标整体漂移了约 2m，不影响检测(尺寸未变)，但是直接导致观测的目标位置漂了约 2m！如果目标正好处于初始扫描和结束扫描的位置，那么目标的尺寸也会失真。
+b. **多帧情况**  
+这种情况指 Mapping 的过程。如果 \\(t _ 1, t _ 2\\) 时间跨度大，那么世界坐标系下同一物体的不一致性会相当高。如果是相邻 \\(n\\) 帧，假设自身加速度为 \\(a = 5m/s^2\\)，那么不一致量为 \\(|v _ 1T-v _ 2T|=nTaT=0.05n\\)，相邻帧可达 5cm ！
+
+由此可见，不管是单帧任务还是多帧任务，点云的运动补偿不可不做。
+
+### 4.2.&ensp;Other
+　　<a href="#4" id="4ref">[4]</a> 根据代码详细描述了 LOAM 应用到旋转式多线激光雷达的诸多细节，代码中采用了 IMU 里程计作为高频低精度的位姿估计。其它内容在以上章节中都有描述，这里就不再展开了。
 
 ## 5.&ensp;Reference
 <a id="1" href="#1ref">[1]</a> Zhang, Ji, and Sanjiv Singh. "LOAM: Lidar Odometry and Mapping in Real-time." Robotics: Science and Systems. Vol. 2. No. 9. 2014.  
 <a id="2" href="#2ref">[2]</a> Zhang, Ji, and Sanjiv Singh. "Low-drift and real-time lidar odometry and mapping." Autonomous Robots 41.2 (2017): 401-416.  
 <a id="3" href="#3ref">[3]</a> Lin, Jiarong, and Fu Zhang. "Loam_livox: A fast, robust, high-precision LiDAR odometry and mapping package for LiDARs of small FoV." arXiv preprint arXiv:1909.06700 (2019).  
-https://zhuanlan.zhihu.com/p/57351961  
+<a id="4" href="#4ref">[4]</a> https://zhuanlan.zhihu.com/p/57351961  
 
 
