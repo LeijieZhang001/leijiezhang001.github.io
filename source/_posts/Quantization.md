@@ -125,16 +125,17 @@ $$\left\{\begin{array}{l}
 \end{array}\tag{16}\right.$$
 
 ## 3.&ensp;Quantized Framework
-　　不管是 Post-Training Quantization 还是 Quantization-Aware Training，算法端都还是用伪量化操作实现的，据我所知目前 INT8 引擎有：
+　　不管是 Post-Training Quantization 还是 Quantization-Aware Training，算法端都还是用伪量化操作实现的，部署时就必须用 INT8 引擎。据我所知目前 INT8 引擎有：
 
-1. DSP 平台  
-目测没有开源的；
+1. DSP/加速芯片平台  
+目测没有开源的，大家自个玩自个的；
 2. CPU 平台  
 Google 的 TensorFlow Lite<a href="#6" id="6ref"><sup>[6]</sup></a>，Facebook 的 QNNPACK<a href="#8" id="8ref"><sup>[8]</sup></a>，Tencent 的 NCNN<a href="#9" id="9ref"><sup>[9]</sup></a>。
 3. GPU 平台  
-NVIDIA 的 TensorRT<a href="#10" id="10ref"><sup>[10]</sup></a>。
+NVIDIA 的 TensorRT<a href="#10" id="10ref"><sup>[10]</sup></a>，TVM<a href="#11" id="11ref"><sup>[11]</sup></a>。
 
-而伪量化框架则在深度学习框架(caffe，pytorch，tensorflow)中开源的较多，如基于 pytorch 的 distiller<a href="#3" id="3ref"><sup>[3]</sup></a>。下面对 INT8 引擎作简要阐述。
+而伪量化框架则在深度学习框架(caffe，pytorch，tensorflow)中开源的较多，如基于 pytorch 的 distiller<a href="#3" id="3ref"><sup>[3]</sup></a>。  
+　　对于 ARM 平台，INT8 引擎会通过 NEON 指令集加速；对于 x86 平台，INT8 引擎会通过 SSE 加速；对于 NVIDIA GPU 平台，则通过 dp4a<a href="#12" id="12ref"><sup>[12]</sup></a> 矩阵运算库加速。dp4a 实现了基础的 INT8 矩阵相乘操作，目前 cuDNN，cuBLAS，TensorRT 均采用该指令集。下面对 INT8 引擎作简要阐述。
 
 ### 3.1.&ensp;Ristretto<a href="#1" id="1ref"><sup>[1]</sup></a>
 　　Ristretto 是一种基于 (Dynamix) Fixed Point Approximation, Post-Training Quantization 的量化框架，其精度有限，量化的 Inference 引擎可用 bits shifts & add 操作实现，比较适合应用于 DSP 等嵌入式平台。
@@ -144,7 +145,7 @@ NVIDIA 的 TensorRT<a href="#10" id="10ref"><sup>[10]</sup></a>。
 　　移动端的 CPU 的量化计算引擎开源的也比较多，如 Facebook 的 QNNPACK<a href="#8" id="8ref"><sup>[8]</sup></a>，腾讯的 ncnn-int8<a href="#9" id="9ref"><sup>[9]</sup></a>。
 
 ### 3.3.&ensp;TensorRT<a href="#10" id="10ref"><sup>[10]</sup></a>
-　　TensorRT 是 NVIDIA 基于 GPU 平台的模型(量化)加速框架，其基于 Symmetric Linear Approximation 量化策略，并且只支持 Post-Training Quantization。  
+　　TensorRT 是 NVIDIA 基于 GPU 平台的模型(量化)加速框架，其基于 Symmetric Linear Approximation 量化策略，并且只支持 Post-Training Quantization，其内部可能直接调用 dp4a，也可能调用 cuDNN 或 cuBLAS。TVM<a href="#11" id="11ref"><sup>[11]</sup></a> 调用 dp4a 实现了基于 python 的 INT8 引擎，对于部署来讲没有 TensorRT 高效。  
 　　对于特征图的量化参数 \\(S\\) 的搜索，其使用张量级别的损失函数，最小化量化前后特征图值分布差异性的方式，KL-divergency，即两个分布的相对熵。假设连个分布 \\(P,Q\\)，那么两者的相对熵为：
 $$E(P,Q) = \sum _ i P(i)\cdot\mathrm{log}\left(\frac{P(i)}{Q(i)}\right) \tag{17}$$
 熵越大，表示两个分布差异性越大，即量化后信息损失越大。这里也可以采用其它能描述两个分布差异性的方式，如 EMD。整个量化参数搜索过程为：
@@ -166,4 +167,6 @@ $$E(P,Q) = \sum _ i P(i)\cdot\mathrm{log}\left(\frac{P(i)}{Q(i)}\right) \tag{17}
 <a id="8" href="#8ref">[8]</a> https://github.com/pytorch/QNNPACK  
 <a id="9" href="#9ref">[9]</a> https://github.com/Tencent/ncnn/pull/487  
 <a id="10" href="#10ref">[10]</a> Migacz, Szymon. "8-bit inference with tensorrt." GPU technology conference. Vol. 2. No. 4. 2017.  
+<a id="11" href="#11ref">[11]</a> https://tvm.apache.org/2019/04/29/opt-cuda-quantized  
+<a id="12" href="#12ref">[12]</a> https://devblogs.nvidia.com/mixed-precision-programming-cuda-8/  
 
