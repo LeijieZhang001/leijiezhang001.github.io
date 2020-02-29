@@ -126,6 +126,8 @@ $$\left\{\begin{array}{l}
 
 ### 2.3.&ensp;Trained Quantization Thresholds
 　　Post-Training Quantization 以及 Quantization-Aware Training 都是直接对张量的分析来搜索或近似求解量化参数的，Trained Quantization Thresholds 则在训练的时候同时训练得到量化参数。  
+
+#### 2.3.1.&ensp;PACT
 　　PACT<a href="#13" id="13ref"><sup>[13]</sup></a> 定义了激活函数输出的最大值，该最大值就是 Symmetric 量化中的激活层量化参数 Scale。具体的，改进 Relu：
 $$ y = \mathrm{PACT}(x) = 0.5(|x|-|x-\alpha|+\alpha)=
 \left\{\begin{array}{l}
@@ -140,6 +142,7 @@ $$\frac{\partial y _ q(x;\,\alpha)}{\partial \alpha}=
 1, \;\;x\in[\alpha,+\infty)
 \end{array}\tag{18}\right.$$
 
+#### 2.3.2.&ensp;TQT
 　　TQT(Trained Quantization Thresholds)<a href="#14" id="14ref"><sup>[14]</sup></a>则提出了一种同时学习权重和激活函数的量化参数的方法。为了简化，其采用 Linear Symmetric Approximation，且 Scale 参数限定为 \\(s=2 ^ {-f}\\)，由式(8,9)可知，消除了定点乘法运算。前向传播与式(13)并无差异，对每个权重即激活层作 scale，round，saturate，de-quant 操作。反向传播则需要对量化值 \\(q(x;s)\\) 求导，量化值表示为：
 $$q(x;s)=
 \left\{\begin{array}{l}
