@@ -10,11 +10,11 @@ mathjax: true
 
 ## 1.&ensp;算法框架
 <img src="framework.png" width="90%" height="90%" title="图 1. LaserNet Framework">
-　　如图 1. 所示，输入为激光点云的 Sensor Range View 表示方式，输出为点级别的目标框3D属性，框顶点位置方差，以及类别概率。最后在 Bird View 下作目标框的聚类与 NMS。  
+　　如图 1. 所示，输入为激光点云的 Sensor Range View 表示方式，输出为点级别的目标框3D属性，框顶点位置方差，以及类别概率。最后在 Bird View 下作目标框的聚类与 NMS 等后处理。  
 
 ### 1.1.&ensp;点云输入方式
 　　不同于目前主流的 Bird View 点云栅格化方式，本文将点云直接根据线束在 Sensor Range View 下进行表示，高为激光线数量，宽为 HFOV 除以角度分辨率。设计 5 个 channel：距离，高度，角度，反射值，以及是否有点的标志位。  
-　　本文认为这种点云表示方式的优点被忽视了，该视角下，点云的表式是紧促的，而且能高效得取得局部区域点，此外，能保留点云获取时的信息。另一方面，该表达方式的缺点有，访问局部区域时，并不是空间一致的；以及需要处理物体的不同形状和遮挡问题。本文实验结果是，在 Kitti 上效果不如 Bird View 方法，但是在一个较大数据集上，能克服这些缺点。
+　　本文认为这种点云表示方式的优点被忽视了，该视角下，点云的表达是紧促的，而且能高效得取得局部区域点，此外，能保留点云获取方式的信息。另一方面，该表达方式的缺点有，访问局部区域时，并不是空间一致的；以及需要处理物体的不同形状和遮挡问题。本文实验结果是，在 Kitti 上效果不如 Bird View 方法，但是在一个较大数据集上，能克服这些缺点。
 
 ### 1.2.&ensp;网络输出
 　　网络输出为点级别的预测，由三部分组成：
@@ -41,7 +41,7 @@ $$\left\{\begin{array}{l}
 　　网络其实就做了一个点级别的分割，接下来需要作聚类以得到目标框。本文采用 Mean-Shift 方法作聚类。由于是点级别的概率分布，得到目标点集后，需要用 BCN(详见 {% post_link MOT-Fusion MOT-Fusion%}) 转换为目标级别的概率分布：
 $$\left\{\begin{array}{l}
 \hat{\mathbf{b}} _ i = \frac{\sum _ {j\in S _ i} w _ j\mathbf{b} _ j}{\sum _ {j\in S _ i}w _ j}\\
-\hat{\sigma} _ i^2 = \left(\sum _ {j\in S _ i}\frac{1}{\sigma ^2 _ j}\right)
+\hat{\sigma} _ i^2 = \left(\sum _ {j\in S _ i}\frac{1}{\sigma ^2 _ j}\right)^{-1}
 \end{array}\tag{3}\right.$$
 其中 \\(w=\\frac{1}{\\sigma ^ 2}\\)。
 
@@ -54,11 +54,21 @@ $$\mathcal{L} _ {box}=\sum _ n\frac{1}{\hat{\sigma} _ {k ^ * }} \left\vert\hat{\
 $$\mathcal{L} _ {reg} = \frac{1}{N}\sum _ i \frac{\mathcal{L} _ {box, i} + \lambda \mathcal{L} _ {mix,i}}{n _ i} \tag{6}$$
 
 ## 3.&ensp;Adaptive NMS
+　　类别概率不能反应目标框的质量，所以本文采用预测的目标框方差作为 NMS 的参考量。将目标框方差转换为目标框的质量分数：\\(\\alpha _ k/2\\hat{\\sigma} _ k\\)。  
+<img src="nms.png" width="50%" height="50%" title="图 2. Adaptive NMS">
+　　此外不同目标在 Bird-View 下 IoU 最大值有一定的限制，如图 2. 所示，最坏的情况，Bird-View 下两个框的 IoU 最大限制为设计为：
+$$t=\left\{\begin{array}{l}
+\frac{\sigma _ 1+\sigma _ 2}{2w-\sigma _ 1 - \sigma _ 2} & \sigma _ 1+\sigma _ 2 < w\\
+1 & otherwise
+\end{array}\tag{7}\right.$$
+当两个目标框的 IoU 大于阈值时，可能的情况是：1. 目标框错误，则删除低分数的目标框；2. 方差估计错误，那么增大方差使最大阈值满足 IoU 条件。
 
 ## 4.&ensp;预测分布的分析
+<img src="calibration.png" width="80%" height="80%" title="图 3. Uncertainty(Variance) Calibration">
+　　评价 Variance(Uncertainty) 预测的好坏，可以画 Calibration 图。如图 3. 所示，横坐标为预测的 Mean 与真值形成的高斯概率分布下的 CDF，而纵坐标为预测的 Variance 统计出的高斯分布下的 CDF。理想情况下，两者是 \\(y=x\\) 的关系，如图所示，在 ATG4D 大数据集上，预测的 Variance 效果更好。
 
 ## 5.&ensp;一些思考
-　　不管是 2D 检测还是 3D 检测，这种先(语义)分割后聚类出目标的思想，有很强的优势：召回率高，超参数少，自带分割信息等。本文又应用 Aleatoric Uncertainty 来建模检测的不确定性(不确定性干嘛用，怎么用，不多说了)，有很好的借鉴意义。
+　　不管是 2D 检测还是 3D 检测，这种先(语义)分割后聚类出目标的思想，有很强的优势：召回率高，超参数少，自带分割信息等。本文又应用 Aleatoric Uncertainty 来建模检测的不确定性--位置方差(不确定性干嘛用，怎么用，不多说了)，有很好的借鉴意义。
 
 ## 6.&ensp;Reference
-<a id="1" href="#1ref">[1]</a>
+<a id="1" href="#1ref">[1]</a> Meyer, Gregory P., et al. "Lasernet: An efficient probabilistic 3d object detector for autonomous driving." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.  
