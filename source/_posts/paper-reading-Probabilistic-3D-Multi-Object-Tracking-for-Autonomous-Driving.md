@@ -97,7 +97,8 @@ $$\begin{align}
 
 ## 2.&ensp;Covariance Matrices Estimation
 　　如何确定卡尔曼滤波过程中的 \\(\\Sigma _ 0, \\mathbf{Q, R}\\)？传统方法是直接用一个确定的经验矩阵赋值；理想的是用{% post_link Heteroscedastic-Aleatoric-Uncertainty Heteroscedastic Aleatoric Uncertainty%} 建模处理，但是会相对较复杂；本文用更简单的基于统计方法来确定协方差矩阵。  
-　　**观测量的方差(不确定性)与目标的属性有关**，如距离，遮挡，类别等。本文没有区分这些属性，只统计了一种观测量的方差，**更好的处理方式是按照不同属性，统计不同的方差**。而 {% post_link Heteroscedastic-Aleatoric-Uncertainty Heteroscedastic Aleatoric Uncertainty%} 是 Instance 级别的方差预测。**这种统计出来的方差虽然细粒度差一点，但是非常合理，因为只要模型训练好后，模型预测的分布是与训练集分布相似的**，所以用训练集的方差来直接代替模型预测的方差也较为合理。  
+　　**观测量的方差(不确定性)与目标的属性有关**，如距离，遮挡，类别等。本文没有区分这些属性，只统计了一种观测量的方差，**更好的处理方式是按照不同属性，统计不同的方差**。而 {% post_link Heteroscedastic-Aleatoric-Uncertainty Heteroscedastic Aleatoric Uncertainty%} 是 Instance 级别的方差预测。**这种统计出来的方差虽然细粒度差一点，但是非常合理，因为只要模型训练好后，模型预测的分布是与训练集分布相似的(理想情况)**，所以用训练集的方差来直接代替模型预测的方差也较为合理。  
+　　<span style="color:red">**更准确的来说，不确定性与物体的属性以及标注误差有关，这里只统计了标注误差(标注误差在大多数情况下都是同分布的)，而实际上遮挡大的目标，是更难学习的(目标学习有难易之分，即预测分布与训练集分布会有偏差)，即预测结果会有额外量的不确定性，所以这种离线统计方法也有很大的局限性**。</span>  
 　　设训练集的真值标签：\\(\\left\\{\\left\\{x _ t^m, y _ t^m, z _ t^m, a _ t^m\\right\\} _ {m=1}^M\\right\\} _ {t = 1}^T\\)。  
 
 ## 2.1.&ensp;Motion/Process Noise Model
