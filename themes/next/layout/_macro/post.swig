@@ -63,7 +63,7 @@
         <div class="post-meta">
           {% if post.top %}
             <i class = "fa fa-thumb-tack"></i>
-            <font color=E74C3C>置顶</font>
+            <font color=33CC00>置顶</font>
             <span class="post-meta-divider">|</span>
           {% endif %}
           <span class="post-time">
