@@ -90,6 +90,11 @@ leancloud_counter_security:
   username: leijie
   password: 312814085 
 
+# Security
+##
+encrypt:
+  enable: true
+
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
