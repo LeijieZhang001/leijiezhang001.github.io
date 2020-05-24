@@ -5,7 +5,7 @@ tags: ["Optimization"]
 categories: SLAM
 mathjax: true
 ---
-　　非线性最小二乘(Non-linear Least Squares)问题应用非常广泛，尤其是在 SLAM 领域。{% post_link LOAM LOAM%}，{% post_link paper-reading-the-Normal-Distributions-Transform The Normal Distributions Transform%}，{% post_link [paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving Stereo-RCNN%}，{% post_link [paper_reading]-Stereo-Vision-based-Semantic-3D-Object-and-Ego-motion-Tracking-for-Autonomous-Driving Stereo Vision-based Semantic and Ego-motion Tracking for Autonomous Driving%} 等均需要求解非线性最小二乘问题。其中 {% post_link LOAM LOAM%} 作为标准的 SLAM 框架，其后端是一个典型的非线性最优化问题，本文会作为实践进行代码级讲解。  
+　　非线性最小二乘(Non-linear Least Squares)问题应用非常广泛，尤其是在 SLAM 领域。{% post_link LOAM LOAM%}，{% post_link paper-reading-the-Normal-Distributions-Transform The Normal Distributions Transform%}，{% post_link [paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving Stereo-RCNN%}，{% post_link [paper_reading]-Stereo-Vision-based-Semantic-3D-Object-and-Ego-motion-Tracking-for-Autonomous-Driving Stereo Vision-based Semantic and Ego-motion Tracking for Autonomous Driving%} 等均需要求解非线性最小二乘问题。其中 {% post_link LOAM LOAM%} 作为非常流行的激光 SLAM 框架，其后端是一个典型的非线性最优化问题，本文会作为实践进行代码级讲解。  
 
 ## 1.&ensp;问题描述
 　　在前端观测-后端优化框架下，设观测数据对集合为：\\(\\{y _ i,z _ i\\} _ {i=1}^m\\)，待求解的变量参数 \\(x\\in\\mathbb{R}^n\\) 定义了观测数据对的映射关系，即 \\(z _ i=h(y _ i;x)\\)，由此得到有 \\(m\\) 个参数方程 \\(F(x)=[f _ 1(x),...,f _ m(x)]^T\\)，其中 \\(f _ i(x) = z _ i-h(y _ i;x)\\)。我们要找到最优的参数 \\(x\\) 来描述观测数据对之间的关系，即求解的最优化问题为：
@@ -13,11 +13,11 @@ $$\begin{align}
 \mathop{\arg\min}\limits _ x \frac{1}{2}\Vert F(x)\Vert ^2 \iff \mathop{\arg\min}\limits _ x\frac{1}{2}\sum _ i \rho _ i\left(\Vert f _ i(x)\Vert ^ 2\right)\\
 L\leq x \leq U
 \end{align}\tag{1}$$
-其中 \\(f _ i(\\cdot)\\) 为 Cost Function，\\(\\rho _ i(\\cdot)\\) 为 Loss Function，即核函数，用来减少离群点对非线性最小二乘优化的影响；\\(L,U\\) 分别为参数 \\(x\\) 的上下界。当核函数 \\(\\rho _ i(x)=x\\) 时，就是常见的非线性最小二乘问题。
+其中 \\(f _ i(\\cdot)\\) 为 Cost Function，\\(\\rho _ i(\\cdot)\\) 为 Loss Function，即核函数，用来减少离群点对非线性最小二乘优化的影响；\\(L,U\\) 分别为参数 \\(x\\) 的上下界。当核函数 \\(\\rho _ i(x)=x\\) 时，就是常见的非线性最小二乘问题。  
+　　《视觉 SLAM 十四讲》<a href="#1" id="1ref"><sup>[1]</sup></a>在 SLAM 的状态估计问题中，从概率学角度导出了最大似然估计求解状态的方法，并进一步引出了最小二乘问题。回过头来看，本文很多内容在《视觉 SLAM 十四讲》中已经有非常清晰的描述，可作进一步参考。
 
-## 2.&ensp;问题求解
-　　根据 \\(F(x)\\) 求得雅克比矩阵(Jacobian)：\\(J(x) \\in\\mathbb{R}^{m\\times n}\\)，即 \\(J _ {ij}(x)=\\frac{\\partial f _ i(x)}{\\partial x _ j}\\)。目标函数的梯度向量为 \\(g(x) = \\nabla\\frac{1}{2}\\Vert F(x)\\Vert ^ 2=J(x)^TF(x)\\)。  
-　　在 \\(x\\) 处将目标函数线性化：\\(F(x+\\Delta x)\\approx F(x)+J(x)\\Delta x\\)。由此非线性最小二乘问题可转换为线性最小二乘求解残差量 \\(\\Delta x\\) 来近似求解：
+## 2.&ensp;问题求解 
+　　根据 \\(F(x)\\) 求得雅克比矩阵(Jacobian)：\\(J(x) \\in\\mathbb{R}^{m\\times n}\\)，即 \\(J _ {ij}(x)=\\frac{\\partial f _ i(x)}{\\partial x _ j}\\)。目标函数的梯度向量为 \\(g(x) = \\nabla\\frac{1}{2}\\Vert F(x)\\Vert ^ 2=J(x)^TF(x)\\)。在 \\(x\\) 处将目标函数线性化：\\(F(x+\\Delta x)\\approx F(x)+J(x)\\Delta x\\)。由此非线性最小二乘问题可转换为线性最小二乘求解残差量 \\(\\Delta x\\) 来近似求解：
 $$\mathop{\arg\min}\limits _ {\Delta x}\frac{1}{2}\Vert J(x)\Delta x+F(x)\Vert ^ 2\tag{2}$$
 根据如何控制 \\(\\Delta x\\) 的大小，非线性优化算法可分为两大类：
 
@@ -30,9 +30,9 @@ $$\mathop{\arg\min}\limits _ {\Delta x}\frac{1}{2}\Vert J(x)\Delta x+F(x)\Vert ^
   - Inner Iterations
   - Non-monotonic Steps
 
-Line Search 首先确定迭代方向，然后确定迭代步长；Trust Region 则划分一个局部区域，在该区域内求解最优值，然后根据近似程度，扩大或缩减该局部区域范围。这里介绍几种有代表性的几种方法：属于 Line Search 的梯度下降法，高斯牛顿法，以及属于 Trust Region 的 LM 法。
+Line Search 首先确定迭代方向，然后最小化 \\(\\Vert f(x+\\alpha \\Delta x)\\Vert ^2\\) 确定迭代步长；Trust Region 则划分一个局部区域，在该区域内求解最优值，然后根据近似程度，扩大或缩减该局部区域范围。Trust Region 相比 Linear Search，数值迭代会更加稳定。这里介绍几种有代表性的方法：属于 Line Search 的梯度下降法，高斯牛顿法，以及属于 Trust Region 的 LM 法。
 
-### 2.1.&ensp;一阶和二阶梯度法
+### 2.1.&ensp;梯度下降法
 　　将目标函数式(1)在 \\(x\\) 附近泰勒展开：
 $$ \Vert F(x+\Delta x)\Vert ^2 \approx \Vert F(x)\Vert ^2 + J(x)\Delta x+\frac{1}{2}\Delta x^TH\Delta x \tag{3}$$
 其中 \\(H\\) 是二阶导数(Hessian 矩阵)。  
@@ -51,11 +51,13 @@ $$\begin{align}
 &J(x)^TJ(x)\Delta x=-J(x)^TF(x)\\
 \iff & H\Delta x=g
 \end{align}\tag{7}$$
-相比牛顿法，高斯牛顿法不用计算 \\(H\\) 矩阵，所以节省了计算量。但是高斯牛顿法要求 \\(H\\) 矩阵是可逆且正定的，而实际计算的 \\(J^TJ\\) 是半正定的，所以 \\(J^TJ\\) 会出现奇异或病态的情况，此时增量的稳定性就会变差，导致迭代发散。这是高斯牛顿法的缺陷。高斯牛顿法的步骤为：
+相比牛顿法，高斯牛顿法不用计算 \\(H\\) 矩阵，直接用 \\(J^TJ\\) 来近似，所以节省了计算量。但是高斯牛顿法要求 \\(H\\) 矩阵是可逆且正定的，而实际计算的 \\(J^TJ\\) 是半正定的，所以 \\(J^TJ\\) 会出现奇异或病态的情况，此时增量的稳定性就会变差，导致迭代发散。另一方面，增量较大时，目标近似函数式(2)就会产生较大的误差，也会导致迭代发散。这是高斯牛顿法的缺陷。高斯牛顿法的步骤为：
 
-1. 根据式 (7) 求解迭代步长 \\(Delta x\\)；
+1. 根据式 (7) 求解迭代步长 \\(\\Delta x\\)；
 2. 变量迭代：\\(x ^ * \\leftarrow x+\\Delta x\\)；
 3. 如果 \\(\\Vert F(x ^ * )-F(x)\\Vert < \\epsilon\\)，则收敛，退出迭代，否则重复步骤 1.；
+
+高斯牛顿法简单的将 \\(\\alpha\\) 置为 1，而其它 Line Search 方法会最小化 \\(\\Vert f(x+\\alpha \\Delta x)\\Vert ^2\\) 来确定 \\(\\alpha\\) 值。
 
 ### 2.3.&ensp;LM 法
 　　Line Search 依赖线性化近似有较高的拟合度，但是有时候线性近似效果较差，导致迭代不稳定；Region Trust 就是解决了这种问题。高斯牛顿法中采用的近似二阶泰勒展开只在该点附近有较好的近似结果，对 \\(\\Delta x\\) 添加一个信赖域区域，就变为 Trust Region 方法。其最优化问题转换为：
@@ -74,7 +76,14 @@ $$\begin{align}
 &\left(J(x)^TJ(x)+\frac{2}{\mu}D^T(x)D(x)\right)\Delta x=-J(x)^TF(x)\\
 \iff & (H+\lambda D^TD)\Delta x=g
 \end{align}\tag{11}$$
-当 \\(\\lambda\\) 较小时，接近于高斯牛顿法；当 \\(\\lambda\\) 较大时，接近于最速下降法。
+当 \\(\\lambda\\) 较小时，接近于高斯牛顿法；当 \\(\\lambda\\) 较大时，接近于最速下降法。LM 法的步骤为：
+
+1. 根据式(11)求解迭代步长 \\(\\Delta x\\);
+2. 根据式(10)求解 \\(\\rho\\);
+3. 若 \\(\\rho > \\eta _ 1\\)，则 \\(\\mu = 2\\mu\\);
+4. 若 \\(\\rho < \\eta _ 2\\)，则 \\(\\mu = 0.5\\mu\\);
+5. 若 \\(\\rho > \\epsilon\\)，则 \\(x ^ * \\leftarrow x+\\Delta x\\)；
+6. 如果满足收敛条件，则结束，否则继续步骤1.；
 
 ## 3.&ensp;Ceres 实践
 　　Ceres 是谷歌开发的一个用于非线性优化的库，使用 Ceres 库有以下几个步骤：
@@ -193,7 +202,7 @@ int main(int argc, char **argv) {
   ```
 
 ### 3.2.&ensp;例子-LOAM
-　　{% post_link LOAM LOAM%} 前端提取线和面特征，后端最小化线和面的匹配误差。其源码实现了整个最优化过程，[] 将后端代码用 Ceres 实现，这里对其作理解与分析。
+　　{% post_link LOAM LOAM%} 前端提取线和面特征，后端最小化线和面的匹配误差。其源码实现了整个最优化过程，ALOAM<a href="#2" id="2ref"><sup>[2]</sup></a> 将后端代码用 Ceres 实现，这里对其作理解与分析。
 
   ```c
 struct LidarEdgeFactor
@@ -480,7 +489,9 @@ int main(int argc, char** argv) {
   return 0;
 }
 ```
-　　这里使用了 Bundle Adjustment in the Large<a href="#1" id="1ref"><sup>[1]</sup></a> 数据集，观测量为图像坐标系下路标(特征)的像素坐标系，待优化的参数为各路标的 3D 坐标以及相机内外参，这里相机内外参有 9 个，其中位置及姿态 6 个，畸变系数 2 个，焦距 1 个。
+　　这里使用了 Bundle Adjustment in the Large<a href="#3" id="3ref"><sup>[3]</sup></a> 数据集，观测量为图像坐标系下路标(特征)的像素坐标系，待优化的参数为各路标的 3D 坐标以及相机内外参，这里相机内外参有 9 个，其中位置及姿态 6 个，畸变系数 2 个，焦距 1 个。
 
-## 4.&ensp;参考文献
-<a id="1" href="#1ref">[1]</a> http://grail.cs.washington.edu/projects/bal/
+## 4.&ensp;Reference
+<a id="1" href="#1ref">[1]</a> 高翔. 视觉 SLAM 十四讲: 从理论到实践. 电子工业出版社, 2017.  
+<a id="2" href="#2ref">[2]</a> https://github.com/HKUST-Aerial-Robotics/A-LOAM  
+<a id="3" href="#3ref">[3]</a> http://grail.cs.washington.edu/projects/bal/  
