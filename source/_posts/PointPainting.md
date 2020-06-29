@@ -1,6 +1,6 @@
 ---
 title: '[paper_reading]-"PointPainting: Sequential Fusion for 3D Object Detection"'
-date: 2020-05-22 11:27:38
+date: 2020-06-17 11:27:38
 tags: ["paper reading", "3D Detection", "Deep Learning", "Autonomous Driving"]
 categories: 3D Detection
 mathjax: true
