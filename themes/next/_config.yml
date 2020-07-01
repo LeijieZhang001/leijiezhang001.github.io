@@ -403,8 +403,9 @@ valine:
 
 # Support for LiveRe comments system.
 # You can get your uid from https://livere.com/insight/myCode (General web site)
-livere_uid: MTAyMC80NDQyOS8yMDk2MQ==
-
+livere_uid: MTAyMC81MDYxNC8yNzA5Nw==
+    #old: MTAyMC80NDQyOS8yMDk2MQ==
+#
 # Gitment
 # Introduction: https://imsun.net/posts/gitment-introduction/
 # You can get your Github ID from https://api.github.com/users/<Github username>

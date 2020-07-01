@@ -2,6 +2,9 @@
 
   {% if page.comments and theme.livere_uid %}
     <script type="text/javascript">
+    window.livereOptions = {
+        refer: 'https://leijiezhang001.github.io' + location.pathname
+    };
       (function(d, s) {
         var j, e = d.getElementsByTagName(s)[0];
         if (typeof LivereTower === 'function') { return; }
