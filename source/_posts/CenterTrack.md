@@ -1,7 +1,7 @@
 ---
 title: CenterTrack
 date: 2020-07-02 09:16:36
-updated: 2020-07-3 09:19:12
+updated: 2020-07-08 09:19:12
 tags: ["Deep Learning", "Autonomous Driving", "Tracking", "MOT"]
 categories:
 - MOT
