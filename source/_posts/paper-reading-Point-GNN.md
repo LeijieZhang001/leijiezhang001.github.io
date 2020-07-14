@@ -1,7 +1,7 @@
 ---
 title: '[paper_reading]-"Point-GNN: Graph Neural Network for 3D Object Detection in a Point Cloud"'
 date: 2020-07-10 09:22:07
-updated: 2020-07-10 09:19:12
+updated: 2020-07-14 09:19:12
 tags: ["Deep Learning", "Autonomous Driving", "Point Cloud", "3D Detection"]
 categories:
 - 3D Detection
