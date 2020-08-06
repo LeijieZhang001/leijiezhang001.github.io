@@ -1,6 +1,7 @@
 ---
 title: '[paper_reading]-"End-to-End Multi-View Fusion for 3D Object Detection in LiDAR Point Clouds"'
 date: 2019-10-21 11:30:27
+updated: 2020-08-06 11:30:27
 tags: ["paper reading", "3D Detection", "Deep Learning", "autonomous driving", "Point Cloud"]
 categories: 3D Detection
 mathjax: true
@@ -48,7 +49,7 @@ mathjax: true
 - 俯视图下抽取的 Voxel 级别特征，有一定的感受野；
 - 前视图下抽取的 Voxel 级别特征，有一定的感受野；
 
-　　俯视图下点云特征提取过程我们比较熟悉了，这里再详细介绍下点云在前视图下提取特征的过程(还没看懂，论文中好像没有详细信息，看懂了再补充)。
+　　俯视图下点云特征提取过程我们比较熟悉了，这里再详细介绍下点云在前视图下提取特征的过程。可直接看 {%post_link paper-reading-Pillar-based-Object-Detection Pillar-based Object Detection %} 中 2. Cylindrical View 的描述。
 
 ## 3.&ensp;实验结果
 <img src="eval.png" width="90%" height="90%" title="图 4. 实验结果">
