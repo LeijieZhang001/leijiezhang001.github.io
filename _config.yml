@@ -99,5 +99,7 @@ encrypt:
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repo: https://github.com/LeijieZhang001/leijiezhang001.github.io.git
+  repo:
+      github: https://github.com/LeijieZhang001/leijiezhang001.github.io.git
+      coding: https://e.coding.net/leijiezhang001/leijiezhang001/leijiezhang001.git
   branch: master
