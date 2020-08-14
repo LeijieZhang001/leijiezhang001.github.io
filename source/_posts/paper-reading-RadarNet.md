@@ -1,7 +1,7 @@
 ---
 title: '[paper_reading]-"RadarNet"'
 date: 2020-08-07 09:25:41
-updated: 2020-08-06 09:19:12
+updated: 2020-08-12 09:19:12
 tags: ["paper reading", "3D Detection", "Deep Learning", "autonomous driving", "Point Cloud"]
 categories:
 - 3D Detection
