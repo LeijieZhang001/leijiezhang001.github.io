@@ -1,6 +1,7 @@
 ---
 title: '[paper_reading]-"MotionNet"'
 date: 2020-08-17 09:23:18
+updated: 2020-08-18 09:19:12
 tags: ["paper reading", Deep Learning", "autonomous driving", "Point Cloud"]
 categories:
 - Deep Learning
