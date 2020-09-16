@@ -2,7 +2,7 @@
 title: '[paper_reading]-"AFDet"'
 date: 2020-08-28 09:45:09
 updated: 2020-09-02 09:19:12
-tags: ["paper reading", "3D Detection", "Deep Learning", "autonomous driving", "Point Cloud"]
+tags: ["paper reading", "3D Detection", "Deep Learning", "Autonomous Driving", "Point Cloud"]
 categories:
 - 3D Detection
 mathjax: true
