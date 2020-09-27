@@ -1,7 +1,7 @@
 ---
 title: A General Framework for Uncertainty Estimation in Deep Learning
 date: 2020-09-04 09:16:44
-updated: 2020-09-08 09:19:12
+updated: 2020-09-27 09:19:12
 tags: ["Deep Learning", "Uncertainty"]
 categories:
 - Uncertainty
