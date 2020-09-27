@@ -109,7 +109,10 @@ class Softmax(nn.Module):
                 return outputs_mean, outputs_variance
 ```
 
-## 3.&ensp;Reference
+## 4.&ensp;Experiments
+　　本文在 Steering Angle Prediction，Object Future Motion Prediction，Object Recognition，Closed-Loop Control of a Quadrotor 等任务上作了 Uncertainty 的估计，用 KL，NLL 来评估预测好坏。KL 本质上用于描述两个分布的距离。NLL(Negative Log-likelihood) 数学形式为 \\(\\frac{1}{2}\\mathrm{log}(\\sigma _ {tot})+\\frac{1}{2\\sigma _ {tot}}(y _ {gt}-y _ {pred}) ^ 2\\)，即为 {%post_link Heteroscedastic-Aleatoric-Uncertainty Heteroscedastic Aleatoric Uncertainty%} 中预测 Uncertainty 方法中的 Loss 项。  
+
+## 5.&ensp;Reference
 <a id="1" href="#1ref">[1]</a> Loquercio, Antonio , Segù, Mattia, and D. Scaramuzza . "A General Framework for Uncertainty Estimation in Deep Learning." (2019).  
 <a id="2" href="#2ref">[2]</a> https://github.com/mattiasegu/uncertainty_estimation_deep_learning/blob/master/contrib/adf.py
 
