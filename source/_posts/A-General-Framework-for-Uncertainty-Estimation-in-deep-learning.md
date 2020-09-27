@@ -54,7 +54,7 @@ $$\left\{\begin{array}{l}
 2. 手机 \\(T\\) 次蒙特卡洛采样的网络输出；
 3. 计算网络输出的 Mean 和 Variance；
 
-其中步骤一不用作任何额外训练的操作，神经网络中的每个操作都有对应的 ADF 操作，代码可参考<a href="#2" id="2ref">[2]</a>。比如基于 Pytorch的 2D 卷积：
+其中步骤一不用作任何额外训练的操作，神经网络中的每个操作都有对应的 ADF 操作，详见<a href="#2" id="2ref">[2]</a>，代码可参考<a href="#3" id="3ref">[3]</a>。比如基于 Pytorch的 2D 卷积：
 ```
 class Conv2d(_ConvNd):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1,
@@ -114,5 +114,5 @@ class Softmax(nn.Module):
 
 ## 5.&ensp;Reference
 <a id="1" href="#1ref">[1]</a> Loquercio, Antonio , Segù, Mattia, and D. Scaramuzza . "A General Framework for Uncertainty Estimation in Deep Learning." (2019).  
-<a id="2" href="#2ref">[2]</a> https://github.com/mattiasegu/uncertainty_estimation_deep_learning/blob/master/contrib/adf.py
-
+<a id="2" href="#2ref">[2]</a> Gast, Jochen , and S. Roth . "Lightweight Probabilistic Deep Networks." (2018).  
+<a id="3" href="#3ref">[3]</a> https://github.com/mattiasegu/uncertainty_estimation_deep_learning/blob/master/contrib/adf.py
