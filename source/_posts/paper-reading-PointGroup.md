@@ -1,5 +1,5 @@
 ---
-title: '[paper_reading] "PointGroup"'
+title: '[paper_reading]-"PointGroup"'
 date: 2020-09-28 10:02:56
 updated: 2020-09-29 09:34:12
 tags: ["paper reading", "Segmentation", "Deep Learning", "Autonomous Driving", "Point Cloud", "Instance Segmentation"]
