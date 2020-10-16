@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://leijiezhang001.github.io/"/>
-  <updated>2020-10-15T01:34:12.000Z</updated>
+  <updated>2020-10-16T09:29:12.000Z</updated>
   <id>https://leijiezhang001.github.io/</id>
   
   <author>
@@ -15,6 +15,41 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>[paper_reading]-&quot;P2B&quot;</title>
+    <link href="https://leijiezhang001.github.io/paper-reading-P2B/"/>
+    <id>https://leijiezhang001.github.io/paper-reading-P2B/</id>
+    <published>2020-10-14T01:42:39.000Z</published>
+    <updated>2020-10-16T09:29:12.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>　　3D 目标状态估计中，对目标的跟踪测量非常重要，所谓跟踪测量，指的是给定前后目标框或者目标点云，计算目标的 R,t 的过程，由此可得到目标位置及速度的观测。<strong>一般的测量量有：目标框中心点距离，目标点云重心距离，目标点云 ICP 结果</strong>。<strong>在目标点云观测较为完备的情况下，理论上类 ICP 方法的结果是最为准确的，但是在点云较少的情况下，通过基于深度学习脑补预测出来的目标框中心点可能会更靠谱</strong>。ICP 一个比较大的问题是速度较慢，<a href="/ADH-Tracker/" title="ADH-Tracker">ADH-Tracker</a> 中的测量量本质上类似 ICP，但是其通过退火算法将 T 的搜索空间进行压缩，获得了极大的效率提升，但是对旋转量的估计还是比较棘手。<br>　　将跟踪测量问题往外扩，就是图像领域常说的单目标跟踪：给定上一帧目标位置，找到当前帧目标的位置。点云场景中，一般不会作目标的单目标跟踪，而是直接采用目标运动模型预测当前帧位置以及目标检测当前帧位置，所以目标的定位精度基本完全靠目标检测结果以及卡尔曼平滑结果。本文<a href="#1" id="1ref"><sup>[1]</sup></a> 提出一种基于深度学习的点云单目标跟踪方法。类似图像中的单目标跟踪，输入为上一帧目标或目标的模型，以及当前帧搜索区域，输出为当前帧目标的位置。进一步讲，<strong>套用目标框中心，点云重心以及类 ICP 计算后，该模块结果可作为另一种更准确（相比直接采用检测框）的跟踪测量量</strong>。</p><h2 id="framework">1. Framework</h2><p><img src="/paper-reading-P2B/framework.png" width="90%" height="90%" title="图 1. Framework"> 　　如图 1. 所示，P2B 首先将目标(目标模型)特征与搜索区域的特征作融合，用来预测潜在的目标中心点，然后作端到端的目标 proposal 以及 verification。其网络主要由两部分组成：1. Target-specific feature augmentation; 2. 3D target proposal and verification。</p><h3 id="target-specific-feature-augmentation">1.1. Target-specific feature augmentation</h3><p>　　目标点云为 \(P _ {tmp}\in\mathbb{R} ^ {N _ 1\times 3}\)，搜索区域的点云为 \(P _ {sea}\in\mathbb{R} ^ {N _ 2\times 3}\)。经过 PointNet++ 采样及提取特征后，得到目标点云的种子点集 \(Q=\{q _ i\} _ {i=1} ^ {M _ 1}\)，搜索区域的种子点集 \(R=\{r _ j\} _ {j=1} ^ {M _ 2}\)，每个点特征向量为 \([x;f]\in\mathbb{R} ^ {3+d _ 1}\)。计算 \(Q,R\) 的相似度： <span class="math display">\[Sim _ {j,i} =\frac{f _ {q _ i} ^ T\cdot f _ {r _ j}}{\Vert f _ {q _ i}\Vert _ 2\cdot\Vert f _ {r _ j} \Vert _ 2},\;\forall q _ i\in Q,\;r _ j\in R \tag{1}\]</span> <img src="/paper-reading-P2B/feat.png" width="90%" height="90%" title="图 2. Feature Aggregation"> 　　得到的相似性特征图 \(Sim\) 与目标种子点集 \(Q\) 的顺序有关，如图 2. 所示，Target-Specific Feature Augmentation 模块目的就是消除 \(Q\) 顺序的影响。其基本思想也是通过对称操作将 \(Q\) 所在的 \(M _ 1\) 维度进行压缩。具体的，将 \(Sim \in\mathbb{R} ^ {M _ 2\times M _ 1}\) 变换为 \(M _ 2\times (3+d _ 2)\) 维度的特征。图 2 采用了 \(Q\) 特征，也可以采用其它方式，实验表明这种方式最好。</p><h3 id="d-target-proposal-and-verification">1.2. 3D target proposal and verification</h3><p>　　有了搜索区域每个种子点的特征后，可以基于此作候选目标框的预测。接下来分为两个分支，一个分支输出 \(M _ 2\times 1\)，表示每个种子点作为目标中心的概率分数；另一个分支采用 VoteNet<a href="#2" id="2ref"><sup>[2]</sup></a> ，输出相同维度及尺寸的特征，表示种子点与中心点的<strong>坐标及特征残差</strong>。VoteNet 中种子点的坐标残差用目标中心点与该种子点的距离来监督，而特征残差没有监督 Loss。这与 Instance-Seg 里面的套路非常相似，特征残差其实可以加上类内 Pull Loss 项，详见 <a href="/paper-reading-JSNet-JSIS3D/" title="JSNet-JSIS3D">JSNet-JSIS3D</a>。<br>　　对每个种子点作残差补偿后，类似 Instance-Seg 中的套路，可采用 Ball-Query 作目标的点集聚类，然后对聚类后的点集归一化并用 PointNet 即可预测目标的分数以及目标的 3D 属性，这里不作展开，详见<a href="#2" id="2ref">[2]</a>。<br>　　Loss 项由残差回归，是否是 proposal 的概率，proposal 质量分数及目标 3D 属性回归等组成： <span class="math display">\[L = L _ {reg} +\gamma _ 1L _ {cla} + \gamma _ 2L _ {prop} + \gamma _ 3L _ {box} \tag{2}\]</span> 其中 \(\gamma\) 分别设计为 \(0.2, 1.5, 0.2\)。</p><h2 id="workflow">2. Workflow</h2><p><img src="/paper-reading-P2B/workflow.png" width="60%" height="60%" title="图 3. Workflow"> 　　P2B 的整个算法流程如图 3. 所示，需要注意的是，最后得到的 \(K\) 个 Proposal 只需要取分数最高的即可。</p><h2 id="reference">3. Reference</h2><p><a id="1" href="#1ref">[1]</a> Qi, Haozhe, et al. &quot;P2B: Point-to-Box Network for 3D Object Tracking in Point Clouds.&quot; Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. 2020.<br><a id="2" href="#2ref">[2]</a> Qi, Charles R., et al. &quot;Deep hough voting for 3d object detection in point clouds.&quot; Proceedings of the IEEE International Conference on Computer Vision. 2019.</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;　　3D 目标状态估计中，对目标的跟踪测量非常重要，所谓跟踪测量，指的是给定前后目标框或者目标点云，计算目标的 R,t 的过程，由此可得到目标位置及速度的观测。&lt;strong&gt;一般的测量量有：目标框中心点距离，目标点云重心距离，目标点云 ICP 结果&lt;/strong&gt;。&lt;s
+      
+    
+    </summary>
+    
+      <category term="MOT" scheme="https://leijiezhang001.github.io/categories/MOT/"/>
+    
+    
+      <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
+    
+      <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
+    
+      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
+    
+      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
+    
+      <category term="Tracking" scheme="https://leijiezhang001.github.io/tags/Tracking/"/>
+    
+      <category term="MOT" scheme="https://leijiezhang001.github.io/tags/MOT/"/>
+    
+  </entry>
   
   <entry>
     <title>[paper_reading]-&quot;JSNet, JSIS3D&quot;</title>
@@ -618,35 +653,6 @@
       <category term="Tracking" scheme="https://leijiezhang001.github.io/tags/Tracking/"/>
     
       <category term="MOT" scheme="https://leijiezhang001.github.io/tags/MOT/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Rethinking of Sparse 3D Convolution</title>
-    <link href="https://leijiezhang001.github.io/Rethinking-of-Sparse-3D-Convolution/"/>
-    <id>https://leijiezhang001.github.io/Rethinking-of-Sparse-3D-Convolution/</id>
-    <published>2020-06-23T09:37:12.000Z</published>
-    <updated>2020-06-25T01:19:12.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>　　Sparse 3D Convolution 最早在<a href="#1" id="1ref">[1]</a>中提出，然后该作者又提出了 Submanifold Sparse Convolution<a href="#2" id="2ref"><sup>[2]</sup></a>，并将其应用于 3D 语义分割中<a href="#3" id="3ref"><sup>[3]</sup></a>。<a href="#4" id="4ref">[4]</a>则改进了 Sparse 3D Convolution 的实现方式，并应用于 3D 目标检测中。之前一直没仔细看 Sparse 3D Convolution 原理，以为只是基于稀疏矩阵的矩阵相乘加速，最近的一些实验发现 Sparse 3D Convolution 在点云相关的任务中不仅仅是加速，还能提升网络特征提取的性能，所以回过头来重新思考 Sparse 3D Convolution 原理及作用。</p><h2 id="sparse-convolution">1. Sparse Convolution</h2><p><img src="/Rethinking-of-Sparse-3D-Convolution/spconv.png" width="85%" height="85%" title="图 1. sparse VS. submanifold sparse"> 　　如图 1. 左图所示，对于稀疏的特征输入，传统的 Sparse Convolution 与 Convolution 一致，只是对于卷积核覆盖的输入特征为零的区域不做计算，直接置为零。这种方式下，随着卷积层的增加，特征层会变得不那么稀疏，这样不仅使得计算量上升，而且会使得提取的信息变得不那么准确。</p><h2 id="submanifold-sparse-convolution">2. Submanifold Sparse Convolution</h2><p>　　如图 1. 右图所示，Submanifold Sparse Convolution 解决了 Sparse Convolution 存在的问题。原理也很直观：只计算输出特征层映射到输入特征层不为零的位置区域。这种方式下，随着卷积层的增加，不仅能保持稀疏性，而且能保证原始信息的准确性。 <img src="/Rethinking-of-Sparse-3D-Convolution/flops.png" width="85%" height="85%" title="图 2. Flops"> 　　如图 2. 所示，Sparse Convolution 相比传统的 Convolution 已经能减少较多的计算量，而 Submanifold Sparse Convolution 则能减少更多的计算量。特征输入越稀疏，减少的计算量就越多，这对点云的三维特征提取，或者是俯视图下的二维特征提取有很大的帮助。</p><h2 id="implementation">3. Implementation</h2><p><img src="/Rethinking-of-Sparse-3D-Convolution/speed.png" width="85%" height="85%" title="图 3. Speed"> 　　<a href="#2" id="2ref">[2]</a> 中实现了 Submanifold Sparse Convolution，其中的卷积运算是手写的矩阵相乘，所以速度较慢；<a href="#4" id="4ref">[4]</a> 则基于 GEMM 实现了更高效的 Submanifold Sparse Convolution。如图 3. 所示，其有将近一倍的速度提升。 <img src="/Rethinking-of-Sparse-3D-Convolution/imple.png" width="90%" height="90%" title="图 4. Implementation"> 　　图 4. 描述了<a href="#4" id="4ref">[4]</a>实现的 Submanifold Sparse Convolution 原理。其首先通过 gather 操作将非零的元素进行矩阵相乘，然后通过 scatter 操作将结果映射回原位置。为了加速，前后元素的映射矩阵计算比较关键，这里实现了一种 GPU 计算方法，这里不做展开。</p><h2 id="application">4. Application</h2><p><img src="/Rethinking-of-Sparse-3D-Convolution/second.png" width="90%" height="90%" title="图 5. SECOND Framework"> 　　Submanifold Sparse Convolution 可应用于点云的分类，分割，检测等任务的特征提取中，SECOND<a href="#4" id="4ref"><sup>[4]</sup></a>是一种点云检测方法，如图 5. 所示，其检测框架与传统的一致，只是将体素化后的点云特征信息，进一步用 Sparse Convolution 来作特征提取。该方法不仅速度较快，而且性能也有不少提升。所以 Submanifold Sparse Convolution 是非常高效的，可作为点云特征提取的基本操作。但是传统的 Convolution，在 GPU 平台下，已经有较多的硬件级优化(cudnn)，在 CPU 平台下也有很多的指令集优化，所以最终在特定硬件下作 Inference 时，到底 Submanifold Sparse Convolution 速度能提升多少，还得看 Submanifold Sparse Convolution 实现的好不好。不过可以猜测，在目前的实现下，Submanifold Sparse Convolution 在 GPU 平台下应该能有不少的速度提升。<br>　　此外，传统的卷积量化操作也比较成熟，cudnn 已经有基本的操作引擎，而 Submanifold Sparse Convolution 的 INT8 引擎则目前还没有。所以 float32/float16 的 Submanifold Sparse Convolution 与 INT8 的 Convolution，孰快孰慢？这两条路大概就是部署的思路了，当然 INT8 的 Submanifold Sparse Convolution 会更好，但是开发成本会比较高。</p><h2 id="reference">5. Reference</h2><p><a id="1" href="#1ref">[1]</a> Graham, Ben. &quot;Sparse 3D convolutional neural networks.&quot; arXiv preprint arXiv:1505.02890 (2015).<br><a id="2" href="#2ref">[2]</a> Graham, Benjamin, and Laurens van der Maaten. &quot;Submanifold sparse convolutional networks.&quot; arXiv preprint arXiv:1706.01307 (2017).<br><a id="3" href="#3ref">[3]</a> Graham, Benjamin, Martin Engelcke, and Laurens Van Der Maaten. &quot;3d semantic segmentation with submanifold sparse convolutional networks.&quot; Proceedings of the IEEE conference on computer vision and pattern recognition. 2018.<br><a id="4" href="#4ref">[4]</a> Yan, Yan, Yuxing Mao, and Bo Li. &quot;Second: Sparsely embedded convolutional detection.&quot; Sensors 18.10 (2018): 3337.</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;　　Sparse 3D Convolution 最早在&lt;a href=&quot;#1&quot; id=&quot;1ref&quot;&gt;[1]&lt;/a&gt;中提出，然后该作者又提出了 Submanifold Sparse Convolution&lt;a href=&quot;#2&quot; id=&quot;2ref&quot;&gt;&lt;sup&gt;[2]&lt;/sup
-      
-    
-    </summary>
-    
-      <category term="Deep Learning" scheme="https://leijiezhang001.github.io/categories/Deep-Learning/"/>
-    
-    
-      <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
-    
-      <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
-    
-      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
     
   </entry>
   
