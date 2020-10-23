@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://leijiezhang001.github.io/paper-reading-OccuSeg/</loc>
+    <lastmod>2020-10-20</lastmod>
+  </url>  <url>
     <loc>https://leijiezhang001.github.io/paper-reading-P2B/</loc>
     <lastmod>2020-10-16</lastmod>
   </url>  <url>
@@ -19,10 +22,10 @@
     <loc>https://leijiezhang001.github.io/paper-reading-PnPNet/</loc>
     <lastmod>2020-09-16</lastmod>
   </url>  <url>
-    <loc>https://leijiezhang001.github.io/Self-Driving-Sensing/</loc>
+    <loc>https://leijiezhang001.github.io/Self-Driving-Localization/</loc>
     <lastmod>2020-09-10</lastmod>
   </url>  <url>
-    <loc>https://leijiezhang001.github.io/Self-Driving-Localization/</loc>
+    <loc>https://leijiezhang001.github.io/Self-Driving-Sensing/</loc>
     <lastmod>2020-09-10</lastmod>
   </url>  <url>
     <loc>https://leijiezhang001.github.io/paper-reading-AFDet/</loc>
@@ -64,10 +67,10 @@
     <loc>https://leijiezhang001.github.io/CenterTrack/</loc>
     <lastmod>2020-07-08</lastmod>
   </url>  <url>
-    <loc>https://leijiezhang001.github.io/Rethinking-of-Sparse-3D-Convolution/</loc>
+    <loc>https://leijiezhang001.github.io/End-to-End-Pseudo-LiDAR-for-3D-Det/</loc>
     <lastmod>2020-06-25</lastmod>
   </url>  <url>
-    <loc>https://leijiezhang001.github.io/End-to-End-Pseudo-LiDAR-for-3D-Det/</loc>
+    <loc>https://leijiezhang001.github.io/Rethinking-of-Sparse-3D-Convolution/</loc>
     <lastmod>2020-06-25</lastmod>
   </url>  <url>
     <loc>https://leijiezhang001.github.io/How-to-Build-An-ADAS/</loc>
