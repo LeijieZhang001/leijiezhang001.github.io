@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://leijiezhang001.github.io/paper-reading-Learning-Efficient-Convolutional-Networks-through-Network-Slimming/</loc>
+    
+    <lastmod>2020-11-02T01:34:12.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://leijiezhang001.github.io/paper-reading-OccuSeg/</loc>
     
     <lastmod>2020-10-20T01:34:12.000Z</lastmod>
@@ -51,14 +58,14 @@
   </url>
   
   <url>
-    <loc>https://leijiezhang001.github.io/Self-Driving-Sensing/</loc>
+    <loc>https://leijiezhang001.github.io/Self-Driving-Localization/</loc>
     
     <lastmod>2020-09-10T03:19:12.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://leijiezhang001.github.io/Self-Driving-Localization/</loc>
+    <loc>https://leijiezhang001.github.io/Self-Driving-Sensing/</loc>
     
     <lastmod>2020-09-10T03:19:12.000Z</lastmod>
     
@@ -156,14 +163,14 @@
   </url>
   
   <url>
-    <loc>https://leijiezhang001.github.io/Rethinking-of-Sparse-3D-Convolution/</loc>
+    <loc>https://leijiezhang001.github.io/End-to-End-Pseudo-LiDAR-for-3D-Det/</loc>
     
     <lastmod>2020-06-25T01:19:12.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://leijiezhang001.github.io/End-to-End-Pseudo-LiDAR-for-3D-Det/</loc>
+    <loc>https://leijiezhang001.github.io/Rethinking-of-Sparse-3D-Convolution/</loc>
     
     <lastmod>2020-06-25T01:19:12.000Z</lastmod>
     
@@ -541,14 +548,14 @@
   </url>
   
   <url>
-    <loc>https://leijiezhang001.github.io/about/index.html</loc>
+    <loc>https://leijiezhang001.github.io/categories/index.html</loc>
     
     <lastmod>2019-10-07T14:29:47.148Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://leijiezhang001.github.io/categories/index.html</loc>
+    <loc>https://leijiezhang001.github.io/about/index.html</loc>
     
     <lastmod>2019-10-07T14:29:47.148Z</lastmod>
     

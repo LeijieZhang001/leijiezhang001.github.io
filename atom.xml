@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://leijiezhang001.github.io/"/>
-  <updated>2020-10-20T01:34:12.000Z</updated>
+  <updated>2020-11-02T01:34:12.000Z</updated>
   <id>https://leijiezhang001.github.io/</id>
   
   <author>
@@ -15,6 +15,37 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>[paper_reading]-&quot;Learning Efficient Convolutional Networks through Network Slimming&quot;</title>
+    <link href="https://leijiezhang001.github.io/paper-reading-Learning-Efficient-Convolutional-Networks-through-Network-Slimming/"/>
+    <id>https://leijiezhang001.github.io/paper-reading-Learning-Efficient-Convolutional-Networks-through-Network-Slimming/</id>
+    <published>2020-10-26T01:35:44.000Z</published>
+    <updated>2020-11-02T01:34:12.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>　　剪枝是神经网络加速的重要手段之一，<a href="/pruning/" title="Pruning">Pruning</a> 中较详细的描述了剪枝的特性与基本方法，<a href="/Filter-Pruning/" title="Filter-Pruning">Filter-Pruning</a> 则描述了卷积核剪枝的基本方法。Filter Pruning 属于结构化剪枝(Structure Pruners)，能在不改变硬件计算单元的情况下，提升网络计算速度。本文<a href="#1" id="1ref"><sup>[1]</sup></a> 就属于 Filter Pruning 方法，简单有效，较为经典。</p><h2 id="framework">1. Framework</h2><p><img src="/paper-reading-Learning-Efficient-Convolutional-Networks-through-Network-Slimming/framework.png" width="90%" height="90%" title="图 1. Framework"> 　　如图 1. 所示，本文提出的方法非常简单：将各通道特征(对应各卷积核)乘以一个尺度系数，并用正则化方法来稀疏化尺度系数。训练后卷积核对应的较小的尺度，则认为其不重要，进行剪枝。最终 Fine-Tune 剩下的网络即可。<br><img src="/paper-reading-Learning-Efficient-Convolutional-Networks-through-Network-Slimming/pipeline.png" width="70%" height="70%" title="图 2. Pipeline"> 　　其剪枝及 Fine-Tune 过程如图 2. 所示，可迭代进行，以获得最优的剪枝效果。<br>　　实际操作中用 BN 层中的 \(\gamma\) 系数来代替该尺度系数。BN 层计算过程为： <span class="math display">\[\hat{z}=\frac{z _ {in}-\mu _ {\mathcal{B}}}{\sqrt{\sigma _ {\mathcal{B}} ^ 2 + \epsilon}}; \; z _ {out}=\gamma \hat{z}+\beta\tag{1}\]</span> 其中 \(z _ {in}, z _ {out}\) 表示 BN 层的输入输出，\(\mathcal{B}\) 表示当前 mini-batch，\(\mu _ {\mathcal{B}},\sigma _ {\mathcal{B}}\) 表示 mini-batch 中 channel-wise 的均值和方差，\(\gamma,\beta\) 为可训练的 channel-wise 的尺度及偏移系数。<br>　　对 \(\gamma\) 进行 L1 正则化，较小的 \(\gamma\) 对应的卷积核即认为是不重要的，可裁剪掉。</p><h2 id="thinking">2. Thinking</h2><p>　　本方法非常简单，但是为什么仅凭较小的 \(\gamma\) 即可确定对应的卷积核不重要呢？我的思考如下：</p><ul><li>为什么不需要考虑卷积核的 L1 值？<br>因为 BN 的 \(\mu _ {\mathcal{B}},\sigma _ {\mathcal{B}}\) 将输出归一化了，所以卷积核的值幅度对之后没有影响，故其值幅度无法体现其重要性；</li><li>为什么不需要考虑 \(\beta\) 值？<br>因为 \(\beta\) 只会影响输出特征的均值，而不会影响输出特征的方差，神经网络的表达能力在于特征的方差，而不是均值，故 \(\gamma\) 才能体现卷积核的重要性，而 \(\beta\) 不能。</li></ul><h2 id="reference">3. Reference</h2><p><a id="1" href="#1ref">[1]</a> Liu, Zhuang, et al. &quot;Learning efficient convolutional networks through network slimming.&quot; Proceedings of the IEEE International Conference on Computer Vision. 2017.</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;　　剪枝是神经网络加速的重要手段之一，&lt;a href=&quot;/pruning/&quot; title=&quot;Pruning&quot;&gt;Pruning&lt;/a&gt; 中较详细的描述了剪枝的特性与基本方法，&lt;a href=&quot;/Filter-Pruning/&quot; title=&quot;Filter-Pruning&quot;&gt;F
+      
+    
+    </summary>
+    
+      <category term="Model Compression" scheme="https://leijiezhang001.github.io/categories/Model-Compression/"/>
+    
+      <category term="Pruning" scheme="https://leijiezhang001.github.io/categories/Model-Compression/Pruning/"/>
+    
+    
+      <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
+    
+      <category term="Model Compression" scheme="https://leijiezhang001.github.io/tags/Model-Compression/"/>
+    
+      <category term="Pruning" scheme="https://leijiezhang001.github.io/tags/Pruning/"/>
+    
+  </entry>
   
   <entry>
     <title>[paper_reading]-&quot;OccuSeg&quot;</title>
@@ -625,38 +656,6 @@
       <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
     
       <category term="SLAM" scheme="https://leijiezhang001.github.io/tags/SLAM/"/>
-    
-      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>[paper_reading]-&quot;Point-GNN: Graph Neural Network for 3D Object Detection in a Point Cloud&quot;</title>
-    <link href="https://leijiezhang001.github.io/paper-reading-Point-GNN/"/>
-    <id>https://leijiezhang001.github.io/paper-reading-Point-GNN/</id>
-    <published>2020-07-10T01:22:07.000Z</published>
-    <updated>2020-07-14T01:19:12.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>　　本文<a href="#1" id="1ref"><sup>[1]</sup></a>提出了一种基于图网络来提取点云特征的方法，理论上可在不损失原始信息的情况下，高效的学习点云特征，其在点云 3D 检测任务中效果提升明显。</p><h2 id="different-point-cloud-representations">1. Different Point Cloud Representations</h2><p><img src="/paper-reading-Point-GNN/repr.png" width="65%" height="65%" title="图 1. Point Cloud Representations"> 　　如图 1. 所示，目前点云表示方式以及对应的特征学习方式有三种：Grids，栅格化后类似图像 2D/3D 卷积的形式；Sets，以 PointNet 为代表的最近邻查找周围点并学习的形式；Graph，将无序点集转换为图模型，特征信息通过点云顶点传递学习的形式。Grids 及 Sets 形式我们已经比较熟悉了，Graph 则查询效率比 Sets 高，特征提取能力又比 Grids 高。Graph 的建图时间复杂度为 \(\mathcal{O}(cN)\)，领域查询复杂度则为 \(\mathcal{O}(1)\)，Sets 中的 KNN 建树及查询复杂度可见 <a href="/PointCloud-Feature-Extraction/" title="PointCloud Feature Extraction">PointCloud Feature Extraction</a>。当然 KNN 式的领域查询方式可以用近似 \(\mathcal{O}(1)\) 方法实现，但是会影响特征学习的准确度。</p><h2 id="framework">2. Framework</h2><p><img src="/paper-reading-Point-GNN/framework.png" width="95%" height="95%" title="图 2. Framework of Point-GNN"> 　　如图 2. 所示，基于 Graph 的 3D 点云检测，首先对点云作 Graph Construction，然后用 GNN 来学习每个顶点的特征，接着对每个顶点预测目标框，最后作目标框的整合和 NMS。</p><h3 id="graph-construction">2.1. Graph Construction</h3><p>　　设点云集：\(P=\{p _ 1,...,p _ N\}\)，其中 \(p _ i=(x _ i, s _ i)\) 分别表示坐标 \(x _ i\in\mathbb{R} ^ 3\)，以及该点反射率，领域点相对位置等信息 \(s _ i\in\mathbb{R} ^ k\)。对该点集建图 \(G=(P,E)\)，将距离小于一定阈值的两个点进行连接，即： <span class="math display">\[E = \{(p _ i, p _ j)|\Vert x _ i-x _ j\Vert _ 2 &lt; r\} \tag{1}\]</span> 这种建图方式是 Fixed Radius Near-Neighbors 问题，可在 \(\mathcal{O}(cN)\) 时间复杂度下解决，其中 \(c\) 为最大连接数。<br>　　建图完成后，要对每个点信息状态 \(s _ i\) 作初始化。这里采用类似 Sets 的特征提取方式，即将该点的反射率，以及与领域内点的相对位置，串联成特征向量，然后用 MLP 作空间变换，最后在点维度上作 Max Pooling，即可得到初始化的该点特征状态量 \(s _ i\)。</p><h3 id="graph-neural-network-with-auto-registration">2.2. Graph Neural Network with Auto-Registration</h3><p>　　传统的图神经网络，通过边迭代每个顶点的特征。在 \((t+1) ^ {th}\) 迭代时： <span class="math display">\[\begin{align} v _ i ^ {t+1} &amp;= g ^ t\left(\rho\left(\{e _ {ij} ^ t|(i,j)\in E\}\right), v _ i ^ t\right) \\e _ {ij} ^ t &amp;= f ^ t(v _ i ^ t, v _ j ^ t) \tag{2}\end{align}\]</span> 其中 \(e ^ t,v ^ t\) 分别是边和顶点特征，\(f ^ t(\cdot)\) 计算两个顶点之间边的特征，\(\rho(\cdot)\) 将与该点连接的边特征整合，得到该点特征增量，\(g ^ t(\cdot)\) 将该点特征增量与原特征进行整合得到本次迭代后该点的最终特征。<br>　　对于边特征，一种设计方式为，描述领域特征对该点位置的作用力，重写式 (2)： <span class="math display">\[s _ i ^ {t+1} = g ^ t\left(\rho\left(\{f ^ t(x _ j-x _ i,s _ j^t)|(i,j)\in E\}\right), s _ i ^ t\right) \tag{3}\]</span> 这样就得到了图神经网络的迭代模型。此外，本文还指出，由于边特征对领域点的距离较为敏感，所以作者提出对相对位置作自动补偿，实验表明其实意义不大： <span class="math display">\[\begin{align}\Delta x _ i ^ t &amp;= h ^ t(s _ i^t) \\s _ i ^ {t+1} &amp;= g ^ t\left(\rho\left(\{f ^ t(x _ j-x _ i+\Delta x _ i ^ t,s _ j^t)|(i,j)\in E\}\right), s _ i ^ t\right) \tag{4}\end{align}\]</span> 　　具体的，\(f ^ t(\cdot),g ^ t(\cdot), h ^ t(\cdot)\) 可用 MLP 来建模，\(\rho(\cdot)\) 则采用 Max 操作： <span class="math display">\[\begin{align}\Delta x _ i ^ t &amp;= MLP _ h ^ t(s _ i^t) \\e _ {ij} ^ t &amp;= MLP _ f ^ t([x _ j - x _ i + \Delta x _ i ^ t, s _ j ^ t]) \\s _ i ^ {t+1} &amp;= MLP _ g ^ t\left(MAX(\{e _ {ij}|(i,j)\in E\})\right)+ s _ i ^ t \tag{5}\end{align}\]</span></p><h3 id="loss">2.3. Loss</h3><p>　　为了作 3D 检测的任务，网络头输出为每个顶点的类别，目标框中心的 offset，以及目标框的尺寸，朝向。这与传统的基于 Ancho-Free 的 3D 目标检测基本一致，这里不做展开。</p><h3 id="box-merging-and-scoring">2.4. Box Merging and Scoring</h3><p>　　本方法的 3D 检测需要作 NMS 后处理，由于分类的 Score 不能反应目标框的 Uncertainty，所以基于 Score 的 NMS 是不合理的。这个问题在 2D 检测中也有比较多的研究，比如采用预测 IoU 值的方式来作权重。本文则认为遮挡信息能作为 NMS 操作的指导，由此定义了遮挡值的计算方式。但是实验显示，其实提升并不明显，所以这里不做具体展开。</p><h2 id="reference">3. Reference</h2><p><a id="1" href="#1ref">[1]</a> Shi, Weijing, and Raj Rajkumar. &quot;Point-gnn: Graph neural network for 3d object detection in a point cloud.&quot; Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. 2020.</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;　　本文&lt;a href=&quot;#1&quot; id=&quot;1ref&quot;&gt;&lt;sup&gt;[1]&lt;/sup&gt;&lt;/a&gt;提出了一种基于图网络来提取点云特征的方法，理论上可在不损失原始信息的情况下，高效的学习点云特征，其在点云 3D 检测任务中效果提升明显。&lt;/p&gt;
-&lt;h2 id=&quot;different-p
-      
-    
-    </summary>
-    
-      <category term="3D Detection" scheme="https://leijiezhang001.github.io/categories/3D-Detection/"/>
-    
-    
-      <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
-    
-      <category term="3D Detection" scheme="https://leijiezhang001.github.io/tags/3D-Detection/"/>
-    
-      <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
     
       <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
     
