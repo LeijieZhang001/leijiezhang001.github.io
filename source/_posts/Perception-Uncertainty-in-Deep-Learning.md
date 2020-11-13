@@ -12,7 +12,7 @@ mathjax: true
 　　另一方面，多传感器融合是 L4/L5 自动驾驶的基础，而传感器及模型的不确定性估计，则又是多传感器后融合的基础。以下以多目标状态估计任务为例，来描述不确定的作用及估计方式。
 
 ## 1.&ensp;基于多传感器的目标状态估计
-　　这里考虑基于毫米波雷达，相机，激光雷达等三种传感器的目标状态估计后融合方案。假设 3D 毫米波雷达测量的目标属性为 \\(x, y, v\\)；基于深度学习的相机与激光雷达测量的目标属性均为 \\(x, y, z, l, w, h, \\theta\\)。经过前后多目标的数据关联后，这些量通过 KF 或 UKF 进行融合，最终得到目标状态的鲁邦估计。以最简单的 KF 为例，融合的过程需要测量量以及测量的方差。这里的方差就是我们要讨论的不确定性，即假设测量满足高斯分布。  
+　　这里考虑基于毫米波雷达，相机，激光雷达等三种传感器的目标状态估计后融合方案。假设 3D 毫米波雷达测量的目标属性为 \\(x, y, v\\)；基于深度学习的相机与激光雷达测量的目标属性均为 \\(x, y, z, l, w, h, \\theta\\)。经过前后多目标的数据关联后，这些量通过 KF 或 UKF 进行融合，最终得到目标状态的鲁邦估计。以最简单的 KF 为例，融合的过程需要测量量以及测量的方差。这里的方差就是我们要讨论的不确定性，即假设测量满足高斯分布下对应的方差。  
 　　传统的做法是将测量方差设为经验固定值，但是在多传感器融合框架里，这样无法区分 1) 单传感器在不同场景下算法模型的性能；2) 多传感器在同一场景下算法模型的性能。由此，基于深度学习的感知测量输出需要同时估计测量值的不确定性，以此作更鲁棒的状态估计。  
 
 ## 2.&ensp;不确定性概述
@@ -37,20 +37,11 @@ $$p(\omega|\mathbf{X},\mathbf{Y})\approx q(\mathbf{\omega};\mathbf{\Phi})=Bern(\
 $$\mathbf{Var} _ {p(\mathbf{y}|\mathbf{x})} ^ {model}(\mathbf{y})=\sigma _ {model} = \frac{1}{T}\sum _ {t=1} ^ T(\mathbf{y} _ t-\bar{\mathbf{y}}) ^ 2\tag{10}$$
 其中 \\(\\{\\mathbf{y} _ t\\} _ {t=1} ^ T\\) 是不同权重 \\(\\omega ^ t\\sim q(\\omega;\\mathbf{\\Phi})\\) 采样下的输出。  
 
-　　Monte-Carlo 采样下，假设获得的回归量为 \\(\\{\\mathbf{v}\\} _ {t=1}^T\\)。那么其均值和方差为：
-$$\left\{\begin{array}{l}
-\mathcal{M} _ {\mathbf{v}} \approx \frac{1}{T}\sum _ {t=1}^T\mathbf{v} _ t \\
-\mathcal{C} _ {\mathbf{v}} = \frac{1}{T}\sum _ {t=1}^T\mathbf{v} _ t\mathbf{v} _ t^T-\mathcal{M} _ {\mathbf{v}}\mathcal{M} _ {\mathbf{v}}^T
-\end{array}\tag{6}\right.$$
-由此得到回归量的 Uncertainty：
-$$TV _ {\mathbf{v}} = trace\left(\mathcal{C} _ {\mathbf{v}} \right) \tag{7}$$
-该 Uncertainty 越大，说明该数据对模型的信息也越多，所以可进一步标注训练。  
-
-　　这种模型不确定性的计算方式，直观的理解为：当模型对某些数据预测比较好，误差比较小的时候，那么模型对这些数据的冗余度肯定是较高的，所以去掉模型的一部分网络，模型对这些数据的预测与原模型应该会有较高的一致性。
+　　这种模型不确定性的计算方式，直观的理解为：当模型对某些数据预测比较好，误差比较小的时候，那么模型对这些数据的冗余度肯定是较高的，所以去掉模型的一部分网络，模型对这些数据的预测与原模型应该会有较高的一致性，即不确定性会较小。
 
 ### 3.2.&ensp;偶然不确定性
 
-　　偶然不确定性估计是最大化高斯似然过程。设模型权重 \\(\\mathbf{W}\\)，输入 \\(\\mathbf{x}\\)，输出为 \\(\\mathbf{f^W(x)}\\)。对于回归任务，定义模型输出为高斯似然形式：
+　　偶然不确定性估计是最大化高斯似然过程。对于回归任务，定义模型输出为高斯分布：
 $$p\left(\mathbf{y}\vert\mathbf{f^W(x)}\right) = \mathcal{N}\left(\mathbf{f^W(x)}, \sigma ^2\right) \tag{1}$$
 其中 \\(\\sigma\\) 为观测噪声方差，描述了模型输出中含有多大的噪声。对于分类任务，玻尔兹曼分布下的模型输出概率分布为：
 $$p\left(\mathbf{y}\vert\mathbf{f^W(x)},\sigma\right) = \mathrm{Softmax}\left(\frac{1}{\sigma ^2}\mathbf{f^W(x)}\right) \tag{2}$$
@@ -79,8 +70,8 @@ $$\mathcal{L}(\mathbf{W}, s_1, s_2) = \frac{1}{2}\mathrm{exp}(-s_1)\mathcal{L}_1
 ## 4.&ensp;不确定性估计方法
 
 ### 4.1.&ensp;统计法
-　　观测量的方差(不确定性)与目标的属性有关，如距离，遮挡，类别等。可以按照不同属性，统计不同的方差。这种统计出来的方差实际上就是标注的不确定性，比如随着距离越远点云越稀少，标注误差也会越大。这样统计出来的方差与实际网络输出的不确定性不是等价的，但是只要模型训练好后，模型预测的分布是与训练集分布相似的，所以用训练集的方差来直接代替模型预测的方差也合理。  
-　　更准确的来说，不确定性与物体的属性以及标注误差有关，这里只统计了标注误差(标注误差在大多数情况下都是同分布的)，而实际上遮挡大的目标，是更难学习的(目标学习有难易之分，即预测分布与训练集分布会有偏差)，即预测结果会有额外量的不确定性，所以这种离线统计方法也有很大的局限性。
+　　观测量的方差(不确定性)与目标的属性有关，如距离，遮挡，类别等。可以按照不同属性，统计不同的方差。这种统计出来的方差实际上就是在特定传感器精度下，标注的不确定性，比如随着距离越远点云越稀少，标注误差也会越大。这样统计出来的方差与实际网络输出的不确定性不是等价的，但是只要模型训练好后，模型预测的分布是与训练集分布相似的，所以用训练集的方差来直接代替模型预测的方差也合理。  
+　　但是更准确的来说，不确定性对每个目标都应该是不同的，这里只统计了特定属性以及标注误差所产生的不确定性，而实际上遮挡大的目标，是更难学习的(目标学习有难易之分，即预测分布与训练集分布会有偏差)，即预测结果会有额外的不确定性，所以这种离线统计方法也有很大的局限性。
 
 ### 4.2.&ensp;网络分支预测法
 
@@ -95,13 +86,13 @@ p\left(\mathbf{y}\vert\mathbf{f^W(x)}\right) = \sum_k \alpha_k \mathcal{N}\left(
 - \\(K\\) 个对数方差 \\(\\{s_k\\}\\)；
 - \\(K\\) 个混合高斯模型权重参数 \\(\\{\\alpha_k\\}\\)；
 
-　　训练时，找出与真值分布最近的一组预测量，混合高斯模型权重用 softmax 回归并用 cross-entropy loss，找到最相似的分布后，将该分布的方差用式(3)作用于回归的 Loss 项；测试时，找到混合高斯模型最大的权重项，对应的高斯分布，即作为最终的输出分布。这里只考虑了输出 3D 框的一个整体的方差，也可以输出定位方差+尺寸方差+角度方差，只要将该方差作用于对应的 Loss 项即可。当 \\(K=1\\) 时，就是多变量单高斯模型。
+　　训练时，找出与真值分布最近的一组预测量，混合高斯模型权重用 softmax 分类，找到最相似的分布后，将该分布的方差用式(3)作用于回归的 Loss 项；测试时，找到混合高斯模型最大的权重项，对应的高斯分布，即作为最终的输出分布。这里只考虑了输出 3D 框的一个整体的方差，也可以输出定位方差+尺寸方差+角度方差，只要将该方差作用于对应的 Loss 项即可。当 \\(K=1\\) 时，就是多变量单高斯模型。
 
 
 ### 4.3.&ensp;Assumed Density Filtering(ADF) 估计法 
 　　假设传感器得到的数据符合噪音水平 \\(\\mathbf{v}\\) 的高斯分布，那么输入网络的数据 \\(\\mathbf{z}\\) 与其真实数据 \\(\\mathbf{x}\\) 的关系为：
 $$q(\mathbf{z}|\mathbf{x})\sim \mathcal{N}(\mathbf{z};\mathbf{x},\mathbf{v})\tag{1}$$
-为了计算网络输出的 Data Uncertainty，通过 Assumed Density Filtering(ADF) 来传递输入数据的噪音，从而计算模型的偶然不确定性。网络的联合概率分布为：
+为了计算网络预测量的不确定性，通过 Assumed Density Filtering(ADF) 来传递输入数据的噪音，从而计算模型的偶然不确定性。网络的联合概率分布为：
 $$p(\mathbf{z}^{(0:l)})=p(\mathbf{z}^{(0)})\prod _ {i=1} ^ l p(\mathbf{z}^{(i)}|\mathbf{z} ^ {(i-1)}) \tag{2}$$
 其中：
 $$p(\mathbf{z}^{(i)}|\mathbf{z}^{(i-1)})=\sigma[\mathbf{z} ^ {(i)}-\mathbf{f} ^ {(i)}(\mathbf{z}^{(i-1)})]\tag{3}$$
@@ -118,20 +109,31 @@ $$\begin{align}
 \mathbf{\mu}^{(i)}=\mathbb{E} _ {q(\mathbf{z}^{(i-1)})}[\mathbf{f}^{(i)}(z^{(i-1)})]\\
 \mathbf{v}^{(i)}=\mathbb{V} _ {q(\mathbf{z}^{(i-1)})}[\mathbf{f}^{(i)}(z^{(i-1)})]\\
 \end{align}\tag{8}$$
+以映射方程 \\(\\mathbf{f} ^{(i)}\\) 为卷积层为例，均值传递就是正常的卷积操作，方差传递则需要将卷积权重平方，然后作卷积操作。其它神经网络层都可推导出对应的方差传递方程。  
 　　结合蒙特卡洛采样计算认知不确定性与 ADF 方法计算偶然不确定性，网络预测的结果与对应的总的不确定性可计算为：
 $$\left\{\begin{array}{l}
 \mu = \frac{1}{T}\sum _ {t=1} ^ T \mathbf{\mu} _ t ^ {(l)}\\
 \sigma _ {tot} = \frac{1}{T}\sum _ {t=1} ^ {T} \mathbf{v} _ t ^ {(l)} + \frac{1}{T}\sum _ {t=1} ^ T\left(\mathbf{\mu} _ t ^ {(l)}-\bar{\mathbf{\mu}}\right) ^ 2
 \end{array}\tag{11}\right.$$
-其中 \\(\\{\\mathbf{\\mu} _ t ^ {(l)},\\mathbf{v} _ t ^ {(l)}\\} _ {t=1} ^ T\\) 是 ADF 网络 \\(T\\) 次蒙特卡洛采样结果。**由此可见，不同于以往将 Model Uncertainty 和 Data Uncertainty 完全作独立假设的方式，本文方法是将二者联合来估计的。这也比较好理解，如果数据噪音很大，那么模型的不确定性也会很大，所以二者不可能是完全独立的**。  
-　　该方法可归纳为：
+其中 \\(\\{\\mathbf{\\mu} _ t ^ {(l)},\\mathbf{v} _ t ^ {(l)}\\} _ {t=1} ^ T\\) 是 ADF 网络 \\(T\\) 次蒙特卡洛采样结果。**由此可见，不同于以往将认知不确定性和偶然不确定性完全作独立假设的方式，本文方法是将二者联合来估计的。这也比较好理解，如果数据噪音很大，那么模型就很难训，其模型不确定性也会很大，所以二者不可能是完全独立的**。该方法可归纳为：
 
-1. 将现有的网络转换为 ADF 网络形式；
+0. 以正常方式训练网络；
+1. 将现有的网络转换为 ADF 网络形式，增加每层的方差传递函数；
 2. 计算 \\(T\\) 次蒙特卡洛采样的网络输出；
-3. 计算网络输出的 Mean 和 Variance；
+3. 计算网络预测的均值和方差。
 
 ## 5.&ensp;总结
 　　本文以多传感器目标检测后融合任务为出发，介绍了基于深度学习的感知不确定性估计方法。需要注意的是，一般情况下，同一传感器同一模型的不同预测量之间不确定性的相对大小才有意义。所以进行多传感器融合时，需要对不同模型估计的不确定性进行幅值标定，这里不作展开。
 
 ## 6.&ensp;参考文献
-
+<a id="1" href="#1ref">[1]</a> Kendall, Alex, and Yarin Gal. "What uncertainties do we need in bayesian deep learning for computer vision?." Advances in neural information processing systems. 2017.  
+<a id="2" href="#2ref">[2]</a> Feng, Di, Lars Rosenbaum, and Klaus Dietmayer. "Towards safe autonomous driving: Capture uncertainty in the deep neural network for lidar 3d vehicle detection." 2018 21st International Conference on Intelligent Transportation Systems (ITSC). IEEE, 2018.  
+<a id="3" href="#3ref">[3]</a> Feng, Di, et al. "Leveraging heteroscedastic aleatoric uncertainties for robust real-time lidar 3d object detection." 2019 IEEE Intelligent Vehicles Symposium (IV). IEEE, 2019.  
+<a id="1" href="#1ref">[1]</a> Feng, Di, et al. "Deep active learning for efficient training of a lidar 3d object detector." arXiv preprint arXiv:1901.10609 (2019).  
+<a id="2" href="#2ref">[2]</a> Gal, Yarin. Uncertainty in deep learning. Diss. PhD thesis, University of Cambridge, 2016.  
+<a id="3" href="#1ref">[3]</a> Feng, Di, Lars Rosenbaum, and Klaus Dietmayer. "Towards safe autonomous driving: Capture uncertainty in the deep neural network for lidar 3d vehicle detection." 2018 21st International Conference on Intelligent Transportation Systems (ITSC). IEEE, 2018.  
+<a id="1" href="#1ref">[1]</a> Loquercio, Antonio , Segù, Mattia, and D. Scaramuzza . "A General Framework for Uncertainty Estimation in Deep Learning." (2019).  
+<a id="2" href="#2ref">[2]</a> Gast, Jochen , and S. Roth . "Lightweight Probabilistic Deep Networks." (2018).  
+<a id="3" href="#3ref">[3]</a> https://github.com/mattiasegu/uncertainty_estimation_deep_learning/blob/master/contrib/adf.py
+<a id="1" href="#1ref">[1]</a> Kendall, Alex, Yarin Gal, and Roberto Cipolla. "Multi-task learning using uncertainty to weigh losses for scene geometry and semantics." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2018.  
+<a id="2" href="#2ref">[2]</a> Kendall, Alex, and Yarin Gal. "What uncertainties do we need in bayesian deep learning for computer vision?." Advances in neural information processing systems. 2017.
