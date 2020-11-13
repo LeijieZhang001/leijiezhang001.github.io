@@ -127,13 +127,6 @@ $$\left\{\begin{array}{l}
 
 ## 6.&ensp;参考文献
 <a id="1" href="#1ref">[1]</a> Kendall, Alex, and Yarin Gal. "What uncertainties do we need in bayesian deep learning for computer vision?." Advances in neural information processing systems. 2017.  
-<a id="2" href="#2ref">[2]</a> Feng, Di, Lars Rosenbaum, and Klaus Dietmayer. "Towards safe autonomous driving: Capture uncertainty in the deep neural network for lidar 3d vehicle detection." 2018 21st International Conference on Intelligent Transportation Systems (ITSC). IEEE, 2018.  
-<a id="3" href="#3ref">[3]</a> Feng, Di, et al. "Leveraging heteroscedastic aleatoric uncertainties for robust real-time lidar 3d object detection." 2019 IEEE Intelligent Vehicles Symposium (IV). IEEE, 2019.  
-<a id="1" href="#1ref">[1]</a> Feng, Di, et al. "Deep active learning for efficient training of a lidar 3d object detector." arXiv preprint arXiv:1901.10609 (2019).  
 <a id="2" href="#2ref">[2]</a> Gal, Yarin. Uncertainty in deep learning. Diss. PhD thesis, University of Cambridge, 2016.  
-<a id="3" href="#1ref">[3]</a> Feng, Di, Lars Rosenbaum, and Klaus Dietmayer. "Towards safe autonomous driving: Capture uncertainty in the deep neural network for lidar 3d vehicle detection." 2018 21st International Conference on Intelligent Transportation Systems (ITSC). IEEE, 2018.  
-<a id="1" href="#1ref">[1]</a> Loquercio, Antonio , Segù, Mattia, and D. Scaramuzza . "A General Framework for Uncertainty Estimation in Deep Learning." (2019).  
-<a id="2" href="#2ref">[2]</a> Gast, Jochen , and S. Roth . "Lightweight Probabilistic Deep Networks." (2018).  
-<a id="3" href="#3ref">[3]</a> https://github.com/mattiasegu/uncertainty_estimation_deep_learning/blob/master/contrib/adf.py
-<a id="1" href="#1ref">[1]</a> Kendall, Alex, Yarin Gal, and Roberto Cipolla. "Multi-task learning using uncertainty to weigh losses for scene geometry and semantics." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2018.  
-<a id="2" href="#2ref">[2]</a> Kendall, Alex, and Yarin Gal. "What uncertainties do we need in bayesian deep learning for computer vision?." Advances in neural information processing systems. 2017.
+<a id="3" href="#1ref">[3]</a> Loquercio, Antonio , Segù, Mattia, and D. Scaramuzza . "A General Framework for Uncertainty Estimation in Deep Learning." (2019).  
+<a id="4" href="#1ref">[4]</a> Kendall, Alex, Yarin Gal, and Roberto Cipolla. "Multi-task learning using uncertainty to weigh losses for scene geometry and semantics." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2018.  
