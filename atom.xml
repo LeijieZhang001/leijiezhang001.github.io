@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://leijiezhang001.github.io/"/>
-  <updated>2020-11-02T01:34:12.000Z</updated>
+  <updated>2020-10-19T01:34:12.000Z</updated>
   <id>https://leijiezhang001.github.io/</id>
   
   <author>
@@ -15,6 +15,43 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>[paper_reading]-&quot;Instance Segmentation by Jointly Optimizing Spatial Embeddings and Clustering Bandwidth&quot;</title>
+    <link href="https://leijiezhang001.github.io/paper-reading-Instance-Segmentation-by-Jointly-Optimizing-Spatial-Embeddings-and-Clustering-Bandwidth/"/>
+    <id>https://leijiezhang001.github.io/paper-reading-Instance-Segmentation-by-Jointly-Optimizing-Spatial-Embeddings-and-Clustering-Bandwidth/</id>
+    <published>2020-11-16T01:11:51.000Z</published>
+    <updated>2020-10-19T01:34:12.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>　　基于点云的 Instance Segmentation 方法之前已经介绍过几种，其中将点云在 Bird-View 进行 Instance Segmentation 的思路基本与图像 Instance Segmentation 相似。本文<a href="#1" id="1ref"><sup>[1]</sup></a> 介绍一种图像 Instance Segmentation 方法，其能处理各种尺寸的目标，以及不用做聚类后处理，可直接得到目标实例。由于能处理较大尺寸的目标，所以也能应用于车道线检测领域，其思路值得借鉴。</p><h2 id="framework">1. Framework</h2><p><img src="/paper-reading-Instance-Segmentation-by-Jointly-Optimizing-Spatial-Embeddings-and-Clustering-Bandwidth/framework.png" width="90%" height="90%" title="图 1. Framework"> 　　如图 1. 所示，网络输出 Seed Branch 以及 Instance Branch。Seed Branch 中分数较高的表示每个类别每个实例的中心点，中心点具体坐标由该像素坐标以及对应的 offset 预测值决定。<br>　　Instance Branch 输出 offset vectors 以及 sigma maps。offset vectors 表示该像素点指向的对应实例的中心位置；sigma maps 表示 offset 指向中心的宽松度，是本方法能预测较大尺寸目标的关键。</p><h2 id="loss">2. Loss</h2><p>　　Instance Segmentation 的目标是将一堆二维像素点 \(\mathcal{X}=\{x _ 0, x _ 1, ..., x _ N\}\)，聚类成实例 \(\mathcal{S} = \{S _ 0, S _ 1, ..., S _ K\}\)。</p><h3 id="instance-branch">2.1. Instance Branch</h3><p>　　传统的做法是将每个像素点 \(x _ i\) 回归其与对应实例中心 \(C _ k=\frac{1}{N}\sum _ {x\in S _ k} x\) 的 offset 向量 \(o _ i\)，得到的 \(e _ i=x _ i+o _ i\) 即为该像素点指向的实例中心点。Loss 设计为： <span class="math display">\[\mathcal{L} _ {regr} = \sum _ {i=1} ^ n\Vert o _ i-\hat{o} _ i\Vert\tag{1}\]</span> 其中 \(\hat{o} _ i=C _ k-x _ i\)。<br>　　因为 \(e _ i\) 很难正好指向实例中心点，所以引入 hinge loss，让其指向实例中心周围 \(\sigma\) 范围区域： <span class="math display">\[\mathcal{L} _ {hinge} = \sum _ {k=1} ^ K\sum _ {e _ i\in S _ k}\mathrm{max}(\Vert e _ i-C _ k\Vert-\sigma, 0) \tag{2}\]</span> 从而保证： <span class="math display">\[e _ i\in S _ k \iff \Vert e _ i-C _ k\Vert &lt; \sigma \tag{3}\]</span> 但是这种方法需要根据最小目标来选择 \(\sigma\) 值，对于大目标，选取的 \(\sigma\) 又不太合理。<br>　　为了选取的 \(\sigma\) 能处理不同尺寸的实例目标，本文设计网络输出 sigma maps，在以实例中心为高斯概率分布下，每个像素属于该实例的概率为： <span class="math display">\[\phi _ k(e _ i) = \mathrm{exp}\left(-\frac{\Vert e _ i-C _ k\Vert ^ 2}{2\sigma _ k ^ 2}\right)\tag{4}\]</span> 当 \(\phi _ k(e _ i) &gt; 0.5\) 时，表示该像素点属于该实例。即： <span class="math display">\[e _ i\in S _ k \iff \mathrm{exp}\left(-\frac{\Vert e _ i-\hat{C} _ k\Vert ^ 2}{2\hat{\sigma} _ k ^ 2}\right) &gt; 0.5 \tag{5}\]</span> 由此像素回归指向中心点的区域可由 \(\sigma\) 控制： <span class="math display">\[\mathrm{margin} = \sqrt{-2\sigma _ k ^ 2\mathrm{ln}0.5} \tag{6}\]</span> 进一步得，可将 \(\sigma\) 分解为两个方向的值，形成椭圆状的二维高斯分布，这样能适应狭长型的目标： <span class="math display">\[\phi _ k(e _ i) = \mathrm{exp}\left(-\frac{\Vert e _ {ix}-C _ {kx}\Vert ^ 2}{2\sigma _ {kx} ^ 2}-\frac{\Vert e _ {iy}-C _ {ky}\Vert ^ 2}{2\sigma _ {ky} ^ 2}\right)\tag{7}\]</span> 以及，可将实例中心点像素坐标向量用特征向量代替： <span class="math display">\[\phi _ k(e _ i) = \mathrm{exp}\left(-\frac{\Vert e _ i-\frac{1}{\vert S _ k\vert}\sum _ {e _ j\in S _ k}e _ j\Vert ^ 2}{2\sigma _ k ^ 2}\right)\tag{8}\]</span> \(\sigma _ k\) 定义为： <span class="math display">\[\sigma _ k=\frac{1}{\vert S _ k\vert}\sum _ {\sigma _ i\in S _ k}\sigma _ i\tag{9}\]</span> 　　采用 Lovase-hinge loss 作用于像素点属于对应实例的概率图，\(\sigma\) 通过概率图隐式地学到。以及为了保证式 (9) 的一致性，增加 \(\sigma\) 平滑 Loss： <span class="math display">\[\mathcal{L} _ {smooth}=\frac{1}{\vert S _ k\vert}\sum _ {\sigma _ i\in S _ k}\Vert\sigma _ i-\sigma _ k\Vert ^ 2\tag{10}\]</span></p><h3 id="seed-branch">2.2. Seed Branch</h3><p>　　实例中心点的预测采用回归方法，背景点标签为零，前景标签是以实例中心为原点的高斯分布。Loss 设计为： <span class="math display">\[\mathcal{L} _ {seed} = \frac{1}{N}\sum _ i ^ N\mathbb{1} _ {\{s _ i\in S _ k\}}\Vert s _ i-\phi _ k(e _ i)\Vert ^ 2+\mathbb{1} _ {\{s _ i\in\mathbf{bg}\}}\Vert s _ i-0\Vert ^ 2 \tag{11}\]</span> 此时 \(\phi _ k(e _ i)\) 不作梯度反传。</p><h2 id="reference">3. Reference</h2><p><a id="1" href="#1ref">[1]</a> even, Davy, et al. &quot;Instance segmentation by jointly optimizing spatial embeddings and clustering bandwidth.&quot; Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;　　基于点云的 Instance Segmentation 方法之前已经介绍过几种，其中将点云在 Bird-View 进行 Instance Segmentation 的思路基本与图像 Instance Segmentation 相似。本文&lt;a href=&quot;#1&quot; id=&quot;
+      
+    
+    </summary>
+    
+      <category term="Segmentation" scheme="https://leijiezhang001.github.io/categories/Segmentation/"/>
+    
+      <category term="Instance Segmentation" scheme="https://leijiezhang001.github.io/categories/Segmentation/Instance-Segmentation/"/>
+    
+    
+      <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
+    
+      <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
+    
+      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
+    
+      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
+    
+      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
+    
+      <category term="Instance Segmentation" scheme="https://leijiezhang001.github.io/tags/Instance-Segmentation/"/>
+    
+  </entry>
   
   <entry>
     <title>[paper_reading]-&quot;Learning Efficient Convolutional Networks through Network Slimming&quot;</title>
@@ -617,35 +654,6 @@
       
       
         &lt;p&gt;　　目前业界比较流行的基于激光雷达的 SLAM 是 &lt;a href=&quot;/LOAM/&quot; title=&quot;LOAM&quot;&gt;LOAM&lt;/a&gt;，其中 Mapping 又是非常重要的一环，LOAM 提取 Edge 点与 Surf 点然后建立以 Voxel 约束点个数的点云地图，该地图用于 
-      
-    
-    </summary>
-    
-      <category term="SLAM" scheme="https://leijiezhang001.github.io/categories/SLAM/"/>
-    
-    
-      <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
-    
-      <category term="SLAM" scheme="https://leijiezhang001.github.io/tags/SLAM/"/>
-    
-      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>AVP-SLAM</title>
-    <link href="https://leijiezhang001.github.io/AVP-SLAM/"/>
-    <id>https://leijiezhang001.github.io/AVP-SLAM/</id>
-    <published>2020-07-15T01:17:56.000Z</published>
-    <updated>2020-07-17T01:19:12.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>　　Visual-SLAM 一般采用特征点或像素直接法来建图定位，这种方式对光照较为敏感。本文<a href="#1" id="1ref"><sup>[1]</sup></a> 提出了一种基于语义特征的 Visual Semantic SLAM，应用于光照条件较为复杂的室内停车场环境，相比于采用特征点的 ORB-SLAM，性能较为鲁棒。</p><h2 id="framework">1. Framework</h2><p><img src="/AVP-SLAM/framework.png" width="95%" height="95%" title="图 1. AVP-SLAM Framework"> 　　如图 1. 所示，AVP-SLAM 由 Mapping，Localization 两部分组成。Mapping 阶段，将车周围的四张图通过 IPM 拼接并变换到俯视图，然后作 Guide Signs，Parking Lines，Speed Bumps 等语义信息的提取，接着通过 Odometry 将每帧的特征累积成局部地图，最后通过回环检测，全局优化出全局地图。Localization 阶段，提取出每帧的语义信息后，用 Odometry 初始化位姿，然后用 ICP 匹配求解当前帧在全局地图中的位姿，得到基于地图的位姿观测量，最后用 EKF 融合该观测量与 Odometry 信息，得到本车的最终位姿。<br>　　有了本车在全局地图下的位姿后，然后通过语义信息识别停车位，即可达到本车自动泊车的目的。</p><h2 id="mapping">2. Mapping</h2><h3 id="ipm">2.1. IPM</h3><p>　　传感器为车身四周四个鱼眼相机，相机内外参已知。IPM(Inverse Perspective Mapping) 是将图像中的像素点投影到车身物理坐标系下的俯视图中，具体的： <span class="math display">\[\frac{1}{\lambda}\;\begin{bmatrix}x ^ v \\y ^ v \\1\end{bmatrix} =[\mathbf{R} _ c \;\mathbf{t} _ c] ^ {-1} _ {col:1,2,4} \;\pi _ c ^ {-1}\begin{bmatrix}u \\v \\1\end{bmatrix}\tag{1}\]</span> 其中 \(\pi _ c(\cdot)\) 为鱼眼相机的内参矩阵，\([\mathbf{R} _ c\;\mathbf{t} _ c]\) 为每个相机到车身坐标系的外参矩阵，\([x ^ v\; y ^ v]\) 为车身坐标系下语义特征的位置。关于 IPM 更多细节可参考 <a href="/lane-det-from-BEV/" title="Apply IPM in Lane Detection from BEV">Apply IPM in Lane Detection from BEV</a>。<br>　　进一步将 IPM 图拼接成一张全景图： <span class="math display">\[\begin{bmatrix}u _ {ipm}\\v _ {ipm}\\1\end{bmatrix}=\mathbf{K} _ {ipm}\begin{bmatrix}x ^ v \\y ^ v \\1\end{bmatrix}\tag{2}\]</span> 其中 \(\mathbf{K} _ {ipm}\) 是全景图的内参。</p><h3 id="feature-detection">2.2. Feature Detection</h3><p><img src="/AVP-SLAM/segment.png" width="65%" height="65%" title="图 2. Segmentation in IPM Image"> 　　将每张 IPM 图拼接成一张大全景图，然后用基于深度学习的语义分割方法，对全景图作像素级别作 lane，parking line，guide sign，speed bump，free space，obstacle，wall 等类别的语义分割。如图 4. 所示，parking line，guide sign，speed bump 是稳定的特征，用于定位；parking line 用于车位的识别；free space 与 obstacle 用于路径规划。</p><h3 id="local-mapping">2.3. Local Mapping</h3><p>　　全景图语义分割得到的用于定位的特征(parking line，guide sign，speed bump)需要反投影回车身物理坐标系： <span class="math display">\[\begin{bmatrix}x ^ v \\y ^ v \\1\end{bmatrix}=\mathbf{K} _ {ipm} ^ {-1}\begin{bmatrix}u _ {ipm}\\v _ {ipm}\\1\end{bmatrix}\tag{3}\]</span> 然后基于 Odometry 的相对位姿，将当前的语义特征点转换到世界坐标系下： <span class="math display">\[\begin{bmatrix}x ^ w \\y ^ w \\z ^ w\end{bmatrix}=\mathbf{R _ o}\begin{bmatrix}x ^ v \\y ^ v \\0\end{bmatrix} + \mathbf{t _ o}\tag{4}\]</span> 由此得到局部地图，本文保持车身周边 30m 内的局部地图。</p><h3 id="loop-detection">2.4. Loop Detection</h3><p><img src="/AVP-SLAM/loop_det.png" width="65%" height="65%" title="图 3. Loop Detection"> 　　因为 Odometry 有累计误差，所以这里对局部地图作一个闭环检测。如图 3. 所示，通过 ICP 对两个局部地图作匹配，一旦匹配成功，就说明检测到了闭环，ICP 匹配的相对位姿用于之后的全局位子图优化，以消除里程计累计误差。</p><h3 id="global-optimization">2.5. Global Optimization</h3><p>　　检测到闭环后，需进行全局位姿图优化。位姿图中，节点(node)为每个局部地图的位姿：\((\mathbf{r, t})\)；边(edge)有两种：odometry 相对位姿以及闭环检测中 ICP 匹配位姿。由此位姿图优化的损失函数为： <span class="math display">\[\chi ^ * = \mathop{\arg\min}\limits _ \chi \sum _ t\Vert f(\mathbf{r} _ {t+1},\mathbf{t} _ {t+1}, \mathbf{r} _ t, \mathbf{t} _ t) - \mathbf{z} ^ o _ {t,t+1}\Vert ^ 2 + \sum _ {i,j\in\mathcal{L}}\Vert f(\mathbf{r} _ i,\mathbf{t} _ i,\mathbf{r} _ j, \mathbf{t} _ j)-\mathbf{z} ^ l _ {i,j}\Vert ^ 2 \tag{5}\]</span> 其中 \(\chi = [\mathbf{r} _ 0,\mathbf{t} _ 0,...,\mathbf{r} _ t,\mathbf{t} _ t] ^ T\) 是所有局部地图的位姿，也是待优化的参数。\(\mathbf{z} ^ 0 _ {t,t+1}\) 为 Odometry 得到的位姿。\(\mathbf{z} ^ l _ {i,j}\) 为闭环检测 ICP 得到的位姿。\(f(\cdot)\) 为计算两个局部地图相对位姿的方程。该优化问题可通过 Gauss-Newton 法求解。<br>　　用优化后的位姿将局部地图叠加起来，就获得了整个场景的全局地图。</p><h2 id="localization">3. Localization</h2><p><img src="/AVP-SLAM/loc.png" width="65%" height="65%" title="图 4. Localization"> 　　有了全局地图后，基于全局地图的定位观测量可通过当前帧与全局地图的匹配得到。如图 4. 所示，绿色为当前帧检测到的语义特征，与全局地图匹配后即可得到当前的绝对位置。匹配通过 ICP 算法实现： <span class="math display">\[ \mathbf{r ^ * ,t ^ * } =  \mathop{\arg\min}\limits _ {\mathbf{r,t}}\sum _ {k\in\mathcal{S}}\Vert\mathbf{R(r)}\begin{bmatrix}x ^ v  _ k\\y ^ v  _ k\\0\end{bmatrix} + \mathbf{t} - \begin{bmatrix}x ^ w _ k \\y ^ w _ k\\z ^ w _ k\end{bmatrix}\Vert ^ 2 \tag{6}\]</span> 其中 \(\mathcal{S}\) 为当前帧语义特征点集，\([x _ k ^ w\; y _ k ^ w\; z _ k ^ w]\) 分别为对应的全局地图中最近的特征点集。<br>　　ICP 的初始化非常重要，本文提出了两种初始化方法：1. 直接在地图上标记车库入口作为全局坐标点；2. 室外 GPS 信号初始化，然后用 Odometry 累积到车库。</p><h2 id="extended-kalman-filter">4. Extended Kalman Filter</h2><p>　　Visual Localization 在语义特征较少的情况下，比如车辆停满了，定位会不稳定，所以这里采用 EKF 对 Visual Localization 与 Odometry 中的轮速计和 IMU 作扩展卡尔曼融合，这里不做展开。</p><h2 id="thinkings">5. Thinkings</h2><p>　　Semantic SLAM 相比基于几何特征点的 SLAM 更加鲁棒。但是在车库场景下，一旦车子停满后，停车线等语义信息会急剧减少，所以实际商业应用中，AVP-SLAM 能满足室内自动泊车的需求吗？<br>　　对此我持怀疑态度。我认为，对于车库自动泊车的商业落地，可能最有效且低成本的方法还是得基于室内 UWB 定位技术。至少 UWB 可作为辅助。当然要将 UWB 应用于车载装置，目前好像还没有，不过随着车载软硬件系统的完善，手机上能做的事，车载平台问题也不大。</p><h2 id="reference">6. Reference</h2><p><a id="1" href="#1ref">[1]</a> Qin, Tong, et al. &quot;AVP-SLAM: Semantic Visual Mapping and Localization for Autonomous Vehicles in the Parking Lot.&quot; arXiv preprint arXiv:2007.01813 (2020).</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;　　Visual-SLAM 一般采用特征点或像素直接法来建图定位，这种方式对光照较为敏感。本文&lt;a href=&quot;#1&quot; id=&quot;1ref&quot;&gt;&lt;sup&gt;[1]&lt;/sup&gt;&lt;/a&gt; 提出了一种基于语义特征的 Visual Semantic SLAM，应用于光照条件较为复杂的室内
       
     
     </summary>
