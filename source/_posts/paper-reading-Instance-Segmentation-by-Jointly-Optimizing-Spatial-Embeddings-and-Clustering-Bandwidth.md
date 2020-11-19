@@ -1,7 +1,7 @@
 ---
 title: '[paper_reading]-"Instance Segmentation by Jointly Optimizing Spatial Embeddings and Clustering Bandwidth"'
 date: 2020-11-16 09:11:51
-updated: 2020-10-15 09:34:12
+updated: 2020-10-19 09:34:12
 tags: ["paper reading", "Segmentation", "Deep Learning", "Autonomous Driving", "Point Cloud", "Instance Segmentation"]
 categories:
 - Segmentation
@@ -27,7 +27,7 @@ $$\mathcal{L} _ {regr} = \sum _ {i=1} ^ n\Vert o _ i-\hat{o} _ i\Vert\tag{1}$$
 $$\mathcal{L} _ {hinge} = \sum _ {k=1} ^ K\sum _ {e _ i\in S _ k}\mathrm{max}(\Vert e _ i-C _ k\Vert-\sigma, 0) \tag{2}$$
 从而保证：
 $$e _ i\in S _ k \iff \Vert e _ i-C _ k\Vert < \sigma \tag{3}$$
-但是这种方法需要根据最小目标来选择 \\(\\sigma\\) 值，但是对于大目标，选取的 \\(\\sigma\\) 又不太合理。  
+但是这种方法需要根据最小目标来选择 \\(\\sigma\\) 值，对于大目标，选取的 \\(\\sigma\\) 又不太合理。  
 　　为了选取的 \\(\\sigma\\) 能处理不同尺寸的实例目标，本文设计网络输出 sigma maps，在以实例中心为高斯概率分布下，每个像素属于该实例的概率为：
 $$\phi _ k(e _ i) = \mathrm{exp}\left(-\frac{\Vert e _ i-C _ k\Vert ^ 2}{2\sigma _ k ^ 2}\right)\tag{4}$$
 当 \\(\\phi _ k(e _ i) > 0.5\\) 时，表示该像素点属于该实例。即：
@@ -36,11 +36,11 @@ $$e _ i\in S _ k \iff \mathrm{exp}\left(-\frac{\Vert e _ i-\hat{C} _ k\Vert ^ 2}
 $$\mathrm{margin} = \sqrt{-2\sigma _ k ^ 2\mathrm{ln}0.5} \tag{6}$$
 进一步得，可将 \\(\\sigma\\) 分解为两个方向的值，形成椭圆状的二维高斯分布，这样能适应狭长型的目标：
 $$\phi _ k(e _ i) = \mathrm{exp}\left(-\frac{\Vert e _ {ix}-C _ {kx}\Vert ^ 2}{2\sigma _ {kx} ^ 2}-\frac{\Vert e _ {iy}-C _ {ky}\Vert ^ 2}{2\sigma _ {ky} ^ 2}\right)\tag{7}$$
-进一步得，可将实例中心点向量用特征向量代替：
+以及，可将实例中心点像素坐标向量用特征向量代替：
 $$\phi _ k(e _ i) = \mathrm{exp}\left(-\frac{\Vert e _ i-\frac{1}{\vert S _ k\vert}\sum _ {e _ j\in S _ k}e _ j\Vert ^ 2}{2\sigma _ k ^ 2}\right)\tag{8}$$
 \\(\\sigma _ k\\) 定义为：
 $$\sigma _ k=\frac{1}{\vert S _ k\vert}\sum _ {\sigma _ i\in S _ k}\sigma _ i\tag{9}$$
-　　采用 Lovase-hinge loss 作用于像素点属于对应实例的概率图，以及为了保证式 (6) 的一致性，增加 \\(\\sigma\\) 平滑 Loss：
+　　采用 Lovase-hinge loss 作用于像素点属于对应实例的概率图，\\(\\sigma\\) 通过概率图隐式地学到。以及为了保证式 (9) 的一致性，增加 \\(\\sigma\\) 平滑 Loss：
 $$\mathcal{L} _ {smooth}=\frac{1}{\vert S _ k\vert}\sum _ {\sigma _ i\in S _ k}\Vert\sigma _ i-\sigma _ k\Vert ^ 2\tag{10}$$
 
 ### 2.2.&ensp;Seed Branch
