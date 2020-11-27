@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://leijiezhang001.github.io/Deep-Learning-for-3D-Point-Clouds/</loc>
+    <lastmod>2020-11-27</lastmod>
+  </url>  <url>
     <loc>https://leijiezhang001.github.io/Perception-Uncertainty-in-Deep-Learning/</loc>
     <lastmod>2020-11-23</lastmod>
   </url>  <url>
@@ -31,10 +34,10 @@
     <loc>https://leijiezhang001.github.io/paper-reading-PnPNet/</loc>
     <lastmod>2020-09-16</lastmod>
   </url>  <url>
-    <loc>https://leijiezhang001.github.io/Self-Driving-Sensing/</loc>
+    <loc>https://leijiezhang001.github.io/Self-Driving-Localization/</loc>
     <lastmod>2020-09-10</lastmod>
   </url>  <url>
-    <loc>https://leijiezhang001.github.io/Self-Driving-Localization/</loc>
+    <loc>https://leijiezhang001.github.io/Self-Driving-Sensing/</loc>
     <lastmod>2020-09-10</lastmod>
   </url>  <url>
     <loc>https://leijiezhang001.github.io/paper-reading-AFDet/</loc>
