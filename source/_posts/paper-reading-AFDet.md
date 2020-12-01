@@ -28,7 +28,7 @@ $$M _ {x,y,z} =
 $$\mathcal{L} _ {heat} = -\frac{1}{N}\sum _ {x,y,c}
 \left\{\begin{array}{l}
 \left(1-\hat{M} _ {x,y,c}\right) ^ {\alpha}\;\mathrm{log}\left(\hat{M} _ {x,y,c}\right), \;\mathrm{if}\; M _ {x,y,c} = 1 \\
-\left(1-\hat{M} _ {x,y,c}\right) ^ {\beta}\; \left(\hat{M} _ {x,y,c}\right) ^ {\alpha}\mathrm{log}\left(1-\hat{M} _ {x,y,c}\right), \;\mathrm{else} \\
+\left(1-M _ {x,y,c}\right) ^ {\beta}\; \left(\hat{M} _ {x,y,c}\right) ^ {\alpha}\mathrm{log}\left(1-\hat{M} _ {x,y,c}\right), \;\mathrm{else} \\
 \end{array}\tag{2}\right.$$
 　　另一方面，Offset Regression 分支可以解决量化误差，以及当 Heatmap 中心点分类错误的时候，补救预测准确的中心点位置。选择中心点周围半径 \\(r\\) 区域作 Offset 预测：
 $$\mathcal{L} _ {off} = \frac{1}{N}\sum _ p\sum ^ r _ {\sigma =-r}\sum ^ r _ {\epsilon = -r}\left\vert\hat{O} _ {\bar{p}}-b(p-\bar{p}+(\sigma,\epsilon))\right\vert\tag{3}$$
