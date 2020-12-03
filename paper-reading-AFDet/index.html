@@ -503,7 +503,7 @@
 \end{array}\tag{1}\right.\]</span> 其中 \(d\) 表示目标框中心点与对应像素点的距离，Heatmap 中预测量 \(\hat{M} _ {x,y,c}=1\) 表示其为目标框中心点，\(\hat{M} _ {x,y,c}=0\) 则表示是背景。Heatmap 中 \(\bar{p}\) 位置定义为正样本点，其余 Pillars 为负样本点，使用 Focal Loss： <span class="math display">\[\mathcal{L} _ {heat} = -\frac{1}{N}\sum _ {x,y,c}
 \left\{\begin{array}{l}
 \left(1-\hat{M} _ {x,y,c}\right) ^ {\alpha}\;\mathrm{log}\left(\hat{M} _ {x,y,c}\right), \;\mathrm{if}\; M _ {x,y,c} = 1 \\
-\left(1-\hat{M} _ {x,y,c}\right) ^ {\beta}\; \left(\hat{M} _ {x,y,c}\right) ^ {\alpha}\mathrm{log}\left(1-\hat{M} _ {x,y,c}\right), \;\mathrm{else} \\
+\left(1-M _ {x,y,c}\right) ^ {\beta}\; \left(\hat{M} _ {x,y,c}\right) ^ {\alpha}\mathrm{log}\left(1-\hat{M} _ {x,y,c}\right), \;\mathrm{else} \\
 \end{array}\tag{2}\right.\]</span> 　　另一方面，Offset Regression 分支可以解决量化误差，以及当 Heatmap 中心点分类错误的时候，补救预测准确的中心点位置。选择中心点周围半径 \(r\) 区域作 Offset 预测： <span class="math display">\[\mathcal{L} _ {off} = \frac{1}{N}\sum _ p\sum ^ r _ {\sigma =-r}\sum ^ r _ {\epsilon = -r}\left\vert\hat{O} _ {\bar{p}}-b(p-\bar{p}+(\sigma,\epsilon))\right\vert\tag{3}\]</span> 只对 \(2r+1\) 的矩形区域作 Offset 预测。</p>
 <h3 id="z-axis-location-head">1.2. z-axis Location Head</h3>
 <p>　　高度预测值 \(\hat{Z}\in\mathbb{R} ^ {W\times H\times 1}\)，其 Loss 为： <span class="math display">\[\mathcal{L _ z} = \frac{1}{N}\sum _ {k=1} ^ N\left\vert\hat{Z} _ {p ^ {(k)}}-z ^ {(k)}\right\vert\tag{4}\]</span></p>
@@ -705,7 +705,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">82</span>
+                  <span class="site-state-item-count">83</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -716,7 +716,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-count">23</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -727,7 +727,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">32</span>
+                  <span class="site-state-item-count">34</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>
@@ -826,7 +826,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">135.2k</span>
+    <span title="Site words total count">136.1k</span>
   
 </div>
 <!--

@@ -104,6 +104,41 @@ U2FsdGVkX1+0L8PFl7dVZZE9ttrl+crlcJSRG8lHAOtuLr8L5pVTVxVB0blsE4YdKG9+eBdnnTOTSwdT
       </tags>
   </entry>
   <entry>
+    <title>[paper_reading]-&quot;CenterFusion&quot;</title>
+    <url>/paper-reading-CenterFusion/</url>
+    <content><![CDATA[<p>　　自动驾驶领域多传感器融合对感知及定位都非常重要，对于感知而言，融合可分为数据前融合，特征级融合，目标状态后融合等类型。前融合对外参标定要求较高，后融合没有深度融合各传感器特征，特征级融合是比较折中的方法。<a href="/MOT-Fusion/" title="MOT Multimodal Fusion">MOT Multimodal Fusion</a> 中介绍了基于 BCM 来实现目标状态后融合的方法，本文<a href="#1" id="1ref"><sup>[1]</sup></a> 提出一种特征级融合相机以及毫米波雷达数据的目标检测方法。<br>
+　　<a href="/paper-reading-RadarNet/" title="RadarNet">RadarNet</a> 中详细介绍了毫米波雷达与激光雷达的优劣势，并提出了一种特征级融合方法，能更准确的测量目标的速度。此外，相机与激光雷达一样对恶劣天气环境比较敏感，所以毫米波与相机的结合，能有效利用毫米波能测量目标径向速度，应对恶劣环境以及测量范围较远等优势，并且保留相机高分辨率捕捉环境视觉信息的特性。</p>
+<h2 id="framework">1. Framework</h2>
+<p><img src="/paper-reading-CenterFusion/framework.png" width="100%" height="100%" title="图 1. Framework"> 　　如图 1. 所示，CenterFusion 网络首先用 CenterNet 作图像的 3D 目标检测，然后通过 Frustum Association Module 提取并融合对应的图像特征以及毫米波雷达特征，最后通过网络进一步准确估计目标的 3D 属性。<br>
+　　<a href="/Anchor-Free-Detection/" title="Anchor Free Detection">Anchor Free Detection</a> 以及 <a href="/CenterTrack/" title="CenTrack">CenTrack</a> 已经较为详细的介绍了 CenterNet 的网络结构和 Loss 形式，其真值 Heatmap 生成方式与 <a href="/paper-reading-AFDet/" title="AFDet">AFDet</a> 也类似，这里不做展开。<br>
+<img src="/paper-reading-CenterFusion/vel.png" width="60%" height="60%" title="图 2. Radial Velocity"> 　　目前广泛使用的 3D 毫米波雷达测量的量有 \(x,y,v\)，如图 2. 所示，其中 \(v\) 是径向速度，为目标实际速度在径向的投影。为了准确估计目标的实际速度，需要估计目标的运动方向。</p>
+<h2 id="association-and-feature-fusion">2. Association and Feature Fusion</h2>
+<p>　　图像经过 CenterNet 得到目标的 2D size, Center Offset 等 2D 属性，以及 dimensions，depth, rotation 等 3D 属性。接下来要将 CenterNet 得到的目标与毫米波雷达的测量量进行数据关联，以便作进一步的特征融合与属性估计。</p>
+<h3 id="frustum-association-mechanism">2.1. Frustum Association Mechanism</h3>
+<p>　　基于图像的目标检测结果与毫米波雷达关联最简单的方法是将毫米波的测量点投影到图像中，看其是否处于图像 2D 框内。但是毫米波雷达测测量量没有 \(z\) 信息，所以这种方式不准确。<br>
+<img src="/paper-reading-CenterFusion/asso.png" width="90%" height="90%" title="图 3. Frustum Association"> 　　本文提出一种锥形关联方法，如图 3. 所示，在俯视三维坐标下的锥形中进行关联，其中 \(\sigma\) 用来控制感兴趣锥形的尺寸，因为基于图像的目标 depth 估计准确度较差，所以 \(\sigma\) 可用来调节 depth 范围。图像目标只关联距离坐标原点最近的毫米波测量量。</p>
+<h3 id="radar-feature-fusion">2.2. Radar Feature Fusion</h3>
+<p>　　 当图像 2D 目标框与毫米波雷达测量量关联上后，将毫米波雷达的测量信息融合到 2D 框中。具体的，在 2D 目标框提取出的图像特征上，concate 毫米波雷达测量的 heatmap。heatmap 尺寸与 2D 目标框尺寸相关，heatmaps 定义为： <span class="math display">\[ F ^ j _ {x,y,i} = \frac{1}{M _ i}
+\left\{\begin{array}{l}
+f _ i \;\;\vert x - c _ x ^ j\vert \leq \alpha w ^j \;\mathrm{and}\;\vert y- c _ y ^ i\vert\leq\alpha h ^ j\\
+0 \;\;\mathrm{otherwise}
+\end{array}\tag{1}\right.\]</span> 其中 \(\alpha\) 是 heatmap 尺寸比例；\(i\in 1,2,3\) 是 heatmaps 特征维度；\(M _ i\) 是归一化系数；\(f _ i\in d, v _ x, v _ y\) 为毫米波雷达的测量量。<br>
+　　有了目标框内融合的图像及毫米波雷达特征后，可进一步精确估计目标的位置，朝向，速度，尺寸等 3D 属性。</p>
+<h2 id="reference">3. Reference</h2>
+<p><a id="1" href="#1ref">[1]</a> Nabati, Ramin, and Hairong Qi. &quot;CenterFusion: Center-based Radar and Camera Fusion for 3D Object Detection.&quot; arXiv preprint arXiv:2011.04841 (2020).</p>
+]]></content>
+      <categories>
+        <category>3D Detection</category>
+        <category>Fusion</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>3D Detection</tag>
+        <tag>Radar</tag>
+        <tag>Fusion</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>[paper_reading]-&quot;Instance Segmentation by Jointly Optimizing Spatial Embeddings and Clustering Bandwidth&quot;</title>
     <url>/paper-reading-Instance-Segmentation-by-Jointly-Optimizing-Spatial-Embeddings-and-Clustering-Bandwidth/</url>
     <content><![CDATA[<p>　　基于点云的 Instance Segmentation 方法之前已经介绍过几种，其中将点云在 Bird-View 进行 Instance Segmentation 的思路基本与图像 Instance Segmentation 相似。本文<a href="#1" id="1ref"><sup>[1]</sup></a> 介绍一种图像 Instance Segmentation 方法，其能处理各种尺寸的目标，以及不用做聚类后处理，可直接得到目标实例。由于能处理较大尺寸的目标，所以也能应用于车道线检测领域，其思路值得借鉴。</p>
@@ -707,7 +742,7 @@ PQ &amp;= \frac{\sum _ {(p,g)\in TP}IoU(p,g)}{\vert TP\vert+\frac{1}{2}\vert FP\
 \end{array}\tag{1}\right.\]</span> 其中 \(d\) 表示目标框中心点与对应像素点的距离，Heatmap 中预测量 \(\hat{M} _ {x,y,c}=1\) 表示其为目标框中心点，\(\hat{M} _ {x,y,c}=0\) 则表示是背景。Heatmap 中 \(\bar{p}\) 位置定义为正样本点，其余 Pillars 为负样本点，使用 Focal Loss： <span class="math display">\[\mathcal{L} _ {heat} = -\frac{1}{N}\sum _ {x,y,c}
 \left\{\begin{array}{l}
 \left(1-\hat{M} _ {x,y,c}\right) ^ {\alpha}\;\mathrm{log}\left(\hat{M} _ {x,y,c}\right), \;\mathrm{if}\; M _ {x,y,c} = 1 \\
-\left(1-\hat{M} _ {x,y,c}\right) ^ {\beta}\; \left(\hat{M} _ {x,y,c}\right) ^ {\alpha}\mathrm{log}\left(1-\hat{M} _ {x,y,c}\right), \;\mathrm{else} \\
+\left(1-M _ {x,y,c}\right) ^ {\beta}\; \left(\hat{M} _ {x,y,c}\right) ^ {\alpha}\mathrm{log}\left(1-\hat{M} _ {x,y,c}\right), \;\mathrm{else} \\
 \end{array}\tag{2}\right.\]</span> 　　另一方面，Offset Regression 分支可以解决量化误差，以及当 Heatmap 中心点分类错误的时候，补救预测准确的中心点位置。选择中心点周围半径 \(r\) 区域作 Offset 预测： <span class="math display">\[\mathcal{L} _ {off} = \frac{1}{N}\sum _ p\sum ^ r _ {\sigma =-r}\sum ^ r _ {\epsilon = -r}\left\vert\hat{O} _ {\bar{p}}-b(p-\bar{p}+(\sigma,\epsilon))\right\vert\tag{3}\]</span> 只对 \(2r+1\) 的矩形区域作 Offset 预测。</p>
 <h3 id="z-axis-location-head">1.2. z-axis Location Head</h3>
 <p>　　高度预测值 \(\hat{Z}\in\mathbb{R} ^ {W\times H\times 1}\)，其 Loss 为： <span class="math display">\[\mathcal{L _ z} = \frac{1}{N}\sum _ {k=1} ^ N\left\vert\hat{Z} _ {p ^ {(k)}}-z ^ {(k)}\right\vert\tag{4}\]</span></p>
@@ -1417,33 +1452,29 @@ s _ i ^ {t+1} &amp;= MLP _ g ^ t\left(MAX(\{e _ {ij}|(i,j)\in E\})\right)+ s _ i
       </tags>
   </entry>
   <entry>
-    <title>[paper_reading]-&quot;SA-SSD: Structure Aware Single-stage 3D Object Detection from Point Cloud&quot;</title>
-    <url>/SA-SSD/</url>
-    <content><![CDATA[<p>　　Voxel-based 3D Detection 相比 <a href="/Point-based-3D-Det/" title="Point-based 3D Detection">Point-based 3D Detection</a> 的缺点是特征提取不仅在 Voxel 阶段损失了一定的点云信息，而且 Voxel 化后丢失了点云之间的拓扑关系。<a href="/Point-based-3D-Det/" title="Point-based 3D Detection">Point-based 3D Detection</a> 中详细描述了几种 Point-based 方法，这种方法目前比较棘手的地方是，即使作 Inference 时，也需要作 kd-tree 搜索与采样等运算量较大的操作。那么如何榨干 Voxel-based 的性能对工业界落地就显得比较重要了，本文<a href="#1" id="1ref"><sup>[1]</sup></a>提出了一种单阶段的 Voxel-based 3D 检测方法，并借助了 Point 级别特征提取的相关策略，使得检测性能有较大提升。</p>
+    <title>[paper_reading]-&quot;Joint 3D Instance Segmentation and Objection Detection for Autonomous Driving&quot;</title>
+    <url>/Instance-Seg-and-Obj-Det/</url>
+    <content><![CDATA[<p>　　检测的发展基本上是从 Anchor-based 这种稀疏的方式到 Anchor-free 这种密集检测方案演进的。相比于 Anchor-free 这种特征层像素级别的回归与分类来检测，更密集的方式，是直接作 Instance Segmentation，然后经过聚类等后处理来得到目标框属性。越密集的检测方案，因为样本较多(一定程度增大了样本空间)，所以学习越困难，但是理论上有极高的召回率。随着一系列技术的发展，如 Focal-loss 等，密集检测性能得以超过二阶段的 Anchor-based 方案，具体描述可参考 <a href="/Anchor-Free-Detection/" title="Anchor-Free Detection">Anchor-Free Detection</a>。<br>
+　　本文<a href="#1" id="1ref"><sup>[1]</sup></a>借鉴 2D Instance Segmentation 思路，提出了一种同时作 3D Instance Segmentation 与 Detection 的方法。百度 Apollo 中的点云分割方法就是俯视图下 Instance Segmentation 然后后处理得到目标 Polygon 与 BBox 的思路，这种方法虽然后处理较为复杂，但是有超参数较少且召回率高的特点。本文算是该方法的 3D 版本(想法很自然，被人捷足先登。。)。</p>
 <h2 id="framework">1. Framework</h2>
-<p><img src="/SA-SSD/framework.png" width="100%" height="100%" title="图 1. Framework of SA-SSD"> 　　如图 1. 所示，SA-SSD 由三部分组成：Backbone，Detection Head，Auxiliary Network。<br>
-　　Backbone 的输入是栅格化后的点云表示方式，文中栅格大小设定为 \(0.05m,0.05m,0.1m\)。Backbone 由一系列的 3D convolution 组成，因为需要保留空间三维位置信息，作 Voxel-to-Point 的映射。这里如果用 2D convolution 代替，那么 Auxiliary Network 估计也只能作 BridView 的分割了。<br>
-　　Detection Head 主体就是传统 Anchor-Free 结构，一个分支用于预测每个特征层像素点的 Confidence，另一个分支用于预测基于每个特征层像素点的 BBox 属性，如，以该点为 &quot;Anchor&quot; 的四个顶点坐标。此外，为了消除 One-Stage 方法中目标框与置信度不对齐的问题，本文引入 Part-sensitive Warping 来实现与 PSRoiAlign 类似的作用，实现两者的对齐。<br>
-　　Auxiliary Network 只在训练的阶段起作用，Inference 阶段不需要计算。该模块的作用是训练时通过 Voxel-to-Point 特征映射来反向传播监督 Backbone 中的 Voxel 特征学习 Point 级别的特征，包括点云的空间拓扑关系。<strong>当然 Inference 时也可以保留该分割模块，那么还可以增加点级别的特征反映射到 Voxel 的模块(Point-to-Voxel)，进一步作特征增强。</strong></p>
-<h2 id="detachable-auxiliary-network">2. Detachable Auxiliary Network</h2>
-<p><img src="/SA-SSD/sa.png" width="60%" height="60%" title="图 2. Structured Aware Feature Learning"> 　　如图 2. 所示，随着 Backbone 特征提取的感受野增大(特征分辨率下降)，背景点会接近目标的边缘，使得目标框大小不容易预测准确。本文提出的 Auxiliary Network，通过增加点级别分割及目标中心坐标预测任务，来监督 Backbone 特征层捕捉这种结构信息，从而达到更准确的目标检测的目的。<br>
-　　Auxiliary Network 的输入来自 Backbone 各个分辨率的特征层。将特征层上不为零的特征点，通过 Voxel-to-Point 反栅格化映射到三维空间，设该特征点表示为 \(\{(f _ j,p _ j):j=1,...,M\}\)，其中 \(f\) 为特征向量，\(p\) 为坐标向量。有了栅格对应的伪三维坐标点下的特征表示后，即可插值出实际点云中每个点的特征向量。设点云中点的插值特征为：\(\{(\hat{f} _ i,p _ i):i=1,...,N\}\)，采用 Inverse Distance Weighted 方法进行插值： <span class="math display">\[ \hat{f} _ i = \frac{\sum _ {j=1}^Mw _ j(p _ i)f _ j}{\sum _ {j=1}^Mw _ j(p _ i)} \tag{1}\]</span> 其中： <span class="math display">\[w _ j(p _ i)=\left\{\begin{array}{l}
-\frac{1}{\Vert p _ i-p _ j\Vert _ 2} &amp; \mathrm{if} p _ j\in\mathcal{N}(p _ i)\\
-0 &amp; \mathrm{otherwise}
-\end{array}\tag{2}\right.\]</span> \(\mathcal{N}(p _ i)\) 为球状区域，本文在四个分辨率下分别设定为：0.05m，0.1m，0.2m，0.4m。然后通过 cross-stage link 对各个分辨率下的点特征进行 concatenate 融合。最后通过感知机进行点云分割及目标中心点预测任务的构建。<br>
-　　对于点级别前景分割的任务，经过 sigmoid 函数后，应用二分类的 Focal Loss： <span class="math display">\[ \mathcal{L} _ {seg} = \frac{1}{N _ {pos}}\sum _ i^N -\alpha(1-\hat{s} _ i)^{\gamma}\mathrm{log}(\hat{s} _ i) \tag{3}\]</span> 该分割任务使得目标检测的框更加准确，如图 2.c 所示。但是还得优化其尺度与形状。<br>
-　　中心点的预测任务则能有效约束目标框的尺度与形状，具体的，预测的是每个属于目标的点云与中心点的相对位置(残差)。可用 Smooth-l1 来构建预测的中心点与实际中心点的 Loss。</p>
-<h2 id="part-sensitive-warping">3. Part-sensitive Warping</h2>
-<p><img src="/SA-SSD/psw.png" width="60%" height="60%" title="图 3. Part-sensitive Warping"> 　　One-Stage 方法都会有 Confidence 和 BBox 错位的现象，本文提出一种类似 PSROIAlign 但更有高效的 PSW 方法，具体步骤为：</p>
-<ol type="1">
-<li>对于分类分支，修改为 \(K\) 个 Part-sensitive 的 cls maps，每个 map 包含目标的部分信息，比如当 \(K=4\) 时，可以理解为将目标切分为 \(2\times 2\) 部分；</li>
-<li>对于回归分支，将每个目标框的 Feature map 划分为 \(K\) 个子区域，每个区域的中心点作为采样点；</li>
-<li>如图 3. 所示，通过采样得到最终 cls map 的平均值。</li>
-</ol>
-<h2 id="experiment">4. Experiment</h2>
-<p><img src="/SA-SSD/ablation.png" width="60%" height="60%" title="图 4. Ablation Study"> 　　如图 4. 所示，Auxiliary Network 能有效提升网络的定位精度，PSWarp 也能有效消除 Confidence 与 BBox 的错位影响。</p>
-<h2 id="reference">5. Reference</h2>
-<p><a id="1" href="#1ref">[1]</a> henhang, et al. &quot;Structure Aware Single-stage 3D Object Detection from Point Cloud.&quot;</p>
+<p><img src="/Instance-Seg-and-Obj-Det/framework.png" width="100%" height="100%" title="图 1. Framework"> 　　如图 1. 所示，本方法由三部分构成：点级别的分类及回归，候选目标聚类，目标框优化。</p>
+<ul>
+<li><strong>点级别的分类与回归</strong><br>
+原始点云经过 Backbone 网络提取局部及全局特征，这里的 Backbone 网络可以是任意能提取点级别特征的网络。基于 Backbone 网络提取的特征，可进行点级别的 Semantic Segmentation 以及 Instance-aware SE(Spatial Embedding)。SE 回归的是每个点距离目标中心点的 offset，该目标的 size，以及该目标的朝向。</li>
+<li><strong>候选目标聚类</strong><br>
+基于预测的 SE，将每个点的位置加上距离目标中心点的 offset，然后可通过简单的聚类算法(如 K-means)即可得到各个目标的点云集合，取 top k 个该点云集合回归的目标框属性，作下一步的目标框进一步优化。</li>
+<li><strong>目标框优化</strong><br>
+基于候选目标聚类得到的目标框，提取目标点集，将其转换到该目标 Local 坐标系下，作进一步的目标框优化。</li>
+</ul>
+<h2 id="instance-aware-se">2. Instance-aware SE</h2>
+<p>　　该框架的关键是 Instance-aware SE 的回归，回归量有：距离目标中心点的 offset，目标 size，目标 orientation。传统的 Instance Segmentation 做法是 Feature Embedding，将相同 Instance 的特征拉近，不同的 Instance 的特征推远，这种方法很难构造有效的 Loss 函数，而且同为车的不同 Instance，其特征已经非常接近。而本文 Spatial Embedding 中 offset 的回归量，经过聚类后处理，可以很容易的得到 Instance Segmentation 结果。<br>
+　　Apollo 点云分割的方案中，是在俯视图的 2D 栅格下做的，主要回归量也是这三种，不同的是，2D 栅格是离散的，所以根据 offset 找某一点的中心点时，可以迭代的进行，然后投票出中心点位置，后处理可以做的更细致。这里不做展开，有机会以后写一篇详解。</p>
+<h2 id="loss">3. Loss</h2>
+<p>　　Loss 项由 Semantic Segmentation，SE，3D BBox regression 组成： <span class="math display">\[ L = L _ {seg-cls}+L _ {SE}+L _ {reg} \tag{1}\]</span> Semantic Segmentation Loss 为： <span class="math display">\[ L _ {seg-cls}=-\sum _ {i=1}^C (y _ i\mathrm{log}(p _ i)(1-p _ i)^{\gamma}\alpha _ i+(1- y _ i)\mathrm{log}(1-p _ i)(p _ i)^{\gamma}(1-\alpha _ i)) \tag{2}\]</span> 其中 \(C\) 表示类别数；如果某点属于某类，那么 \(y _ i=1\)；\(p _ i\) 表示预测为第 \(i\) 类的概率；\(\gamma,\alpha\) 为超参数。<br>
+SE Loss 为： <span class="math display">\[ L _ {SE} = \frac{1}{N}\sum _ {i=1}^N\frac{1}{N _ c}\sum _ {i\in ins _ c}^{N _ c}(\mathcal{l} _ {offset}^i+\mathcal{l} _ {size}^i+\mathcal{l} _ {\theta}^i) \tag{3}\]</span> 其中 \(N\) 为 Instance 个数，\(N _ c\) 为内部点数，\(\mathcal{l}\) 为 L1 Smooth Loss。<br>
+BBox regression Loss 为 rotated 3D IOU Loss： <span class="math display">\[ L _ {reg} = 1-\mathbf{IoU}(B _ g,B _ d)\tag{4}\]</span></p>
+<h2 id="reference">4. Reference</h2>
+<p><a id="1" href="#1ref">[1]</a> Zhou, Dingfu, et al. &quot;Joint 3D Instance Segmentation and Object Detection for Autonomous Driving.&quot; Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. 2020.</p>
 ]]></content>
       <categories>
         <category>3D Detection</category>
@@ -1453,6 +1484,7 @@ s _ i ^ {t+1} &amp;= MLP _ g ^ t\left(MAX(\{e _ {ij}|(i,j)\in E\})\right)+ s _ i
         <tag>3D Detection</tag>
         <tag>paper reading</tag>
         <tag>Autonomous Driving</tag>
+        <tag>Semantic Segmentation</tag>
       </tags>
   </entry>
   <entry>
@@ -1489,29 +1521,33 @@ s _ i ^ {t+1} &amp;= MLP _ g ^ t\left(MAX(\{e _ {ij}|(i,j)\in E\})\right)+ s _ i
       </tags>
   </entry>
   <entry>
-    <title>[paper_reading]-&quot;Joint 3D Instance Segmentation and Objection Detection for Autonomous Driving&quot;</title>
-    <url>/Instance-Seg-and-Obj-Det/</url>
-    <content><![CDATA[<p>　　检测的发展基本上是从 Anchor-based 这种稀疏的方式到 Anchor-free 这种密集检测方案演进的。相比于 Anchor-free 这种特征层像素级别的回归与分类来检测，更密集的方式，是直接作 Instance Segmentation，然后经过聚类等后处理来得到目标框属性。越密集的检测方案，因为样本较多(一定程度增大了样本空间)，所以学习越困难，但是理论上有极高的召回率。随着一系列技术的发展，如 Focal-loss 等，密集检测性能得以超过二阶段的 Anchor-based 方案，具体描述可参考 <a href="/Anchor-Free-Detection/" title="Anchor-Free Detection">Anchor-Free Detection</a>。<br>
-　　本文<a href="#1" id="1ref"><sup>[1]</sup></a>借鉴 2D Instance Segmentation 思路，提出了一种同时作 3D Instance Segmentation 与 Detection 的方法。百度 Apollo 中的点云分割方法就是俯视图下 Instance Segmentation 然后后处理得到目标 Polygon 与 BBox 的思路，这种方法虽然后处理较为复杂，但是有超参数较少且召回率高的特点。本文算是该方法的 3D 版本(想法很自然，被人捷足先登。。)。</p>
+    <title>[paper_reading]-&quot;SA-SSD: Structure Aware Single-stage 3D Object Detection from Point Cloud&quot;</title>
+    <url>/SA-SSD/</url>
+    <content><![CDATA[<p>　　Voxel-based 3D Detection 相比 <a href="/Point-based-3D-Det/" title="Point-based 3D Detection">Point-based 3D Detection</a> 的缺点是特征提取不仅在 Voxel 阶段损失了一定的点云信息，而且 Voxel 化后丢失了点云之间的拓扑关系。<a href="/Point-based-3D-Det/" title="Point-based 3D Detection">Point-based 3D Detection</a> 中详细描述了几种 Point-based 方法，这种方法目前比较棘手的地方是，即使作 Inference 时，也需要作 kd-tree 搜索与采样等运算量较大的操作。那么如何榨干 Voxel-based 的性能对工业界落地就显得比较重要了，本文<a href="#1" id="1ref"><sup>[1]</sup></a>提出了一种单阶段的 Voxel-based 3D 检测方法，并借助了 Point 级别特征提取的相关策略，使得检测性能有较大提升。</p>
 <h2 id="framework">1. Framework</h2>
-<p><img src="/Instance-Seg-and-Obj-Det/framework.png" width="100%" height="100%" title="图 1. Framework"> 　　如图 1. 所示，本方法由三部分构成：点级别的分类及回归，候选目标聚类，目标框优化。</p>
-<ul>
-<li><strong>点级别的分类与回归</strong><br>
-原始点云经过 Backbone 网络提取局部及全局特征，这里的 Backbone 网络可以是任意能提取点级别特征的网络。基于 Backbone 网络提取的特征，可进行点级别的 Semantic Segmentation 以及 Instance-aware SE(Spatial Embedding)。SE 回归的是每个点距离目标中心点的 offset，该目标的 size，以及该目标的朝向。</li>
-<li><strong>候选目标聚类</strong><br>
-基于预测的 SE，将每个点的位置加上距离目标中心点的 offset，然后可通过简单的聚类算法(如 K-means)即可得到各个目标的点云集合，取 top k 个该点云集合回归的目标框属性，作下一步的目标框进一步优化。</li>
-<li><strong>目标框优化</strong><br>
-基于候选目标聚类得到的目标框，提取目标点集，将其转换到该目标 Local 坐标系下，作进一步的目标框优化。</li>
-</ul>
-<h2 id="instance-aware-se">2. Instance-aware SE</h2>
-<p>　　该框架的关键是 Instance-aware SE 的回归，回归量有：距离目标中心点的 offset，目标 size，目标 orientation。传统的 Instance Segmentation 做法是 Feature Embedding，将相同 Instance 的特征拉近，不同的 Instance 的特征推远，这种方法很难构造有效的 Loss 函数，而且同为车的不同 Instance，其特征已经非常接近。而本文 Spatial Embedding 中 offset 的回归量，经过聚类后处理，可以很容易的得到 Instance Segmentation 结果。<br>
-　　Apollo 点云分割的方案中，是在俯视图的 2D 栅格下做的，主要回归量也是这三种，不同的是，2D 栅格是离散的，所以根据 offset 找某一点的中心点时，可以迭代的进行，然后投票出中心点位置，后处理可以做的更细致。这里不做展开，有机会以后写一篇详解。</p>
-<h2 id="loss">3. Loss</h2>
-<p>　　Loss 项由 Semantic Segmentation，SE，3D BBox regression 组成： <span class="math display">\[ L = L _ {seg-cls}+L _ {SE}+L _ {reg} \tag{1}\]</span> Semantic Segmentation Loss 为： <span class="math display">\[ L _ {seg-cls}=-\sum _ {i=1}^C (y _ i\mathrm{log}(p _ i)(1-p _ i)^{\gamma}\alpha _ i+(1- y _ i)\mathrm{log}(1-p _ i)(p _ i)^{\gamma}(1-\alpha _ i)) \tag{2}\]</span> 其中 \(C\) 表示类别数；如果某点属于某类，那么 \(y _ i=1\)；\(p _ i\) 表示预测为第 \(i\) 类的概率；\(\gamma,\alpha\) 为超参数。<br>
-SE Loss 为： <span class="math display">\[ L _ {SE} = \frac{1}{N}\sum _ {i=1}^N\frac{1}{N _ c}\sum _ {i\in ins _ c}^{N _ c}(\mathcal{l} _ {offset}^i+\mathcal{l} _ {size}^i+\mathcal{l} _ {\theta}^i) \tag{3}\]</span> 其中 \(N\) 为 Instance 个数，\(N _ c\) 为内部点数，\(\mathcal{l}\) 为 L1 Smooth Loss。<br>
-BBox regression Loss 为 rotated 3D IOU Loss： <span class="math display">\[ L _ {reg} = 1-\mathbf{IoU}(B _ g,B _ d)\tag{4}\]</span></p>
-<h2 id="reference">4. Reference</h2>
-<p><a id="1" href="#1ref">[1]</a> Zhou, Dingfu, et al. &quot;Joint 3D Instance Segmentation and Object Detection for Autonomous Driving.&quot; Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. 2020.</p>
+<p><img src="/SA-SSD/framework.png" width="100%" height="100%" title="图 1. Framework of SA-SSD"> 　　如图 1. 所示，SA-SSD 由三部分组成：Backbone，Detection Head，Auxiliary Network。<br>
+　　Backbone 的输入是栅格化后的点云表示方式，文中栅格大小设定为 \(0.05m,0.05m,0.1m\)。Backbone 由一系列的 3D convolution 组成，因为需要保留空间三维位置信息，作 Voxel-to-Point 的映射。这里如果用 2D convolution 代替，那么 Auxiliary Network 估计也只能作 BridView 的分割了。<br>
+　　Detection Head 主体就是传统 Anchor-Free 结构，一个分支用于预测每个特征层像素点的 Confidence，另一个分支用于预测基于每个特征层像素点的 BBox 属性，如，以该点为 &quot;Anchor&quot; 的四个顶点坐标。此外，为了消除 One-Stage 方法中目标框与置信度不对齐的问题，本文引入 Part-sensitive Warping 来实现与 PSRoiAlign 类似的作用，实现两者的对齐。<br>
+　　Auxiliary Network 只在训练的阶段起作用，Inference 阶段不需要计算。该模块的作用是训练时通过 Voxel-to-Point 特征映射来反向传播监督 Backbone 中的 Voxel 特征学习 Point 级别的特征，包括点云的空间拓扑关系。<strong>当然 Inference 时也可以保留该分割模块，那么还可以增加点级别的特征反映射到 Voxel 的模块(Point-to-Voxel)，进一步作特征增强。</strong></p>
+<h2 id="detachable-auxiliary-network">2. Detachable Auxiliary Network</h2>
+<p><img src="/SA-SSD/sa.png" width="60%" height="60%" title="图 2. Structured Aware Feature Learning"> 　　如图 2. 所示，随着 Backbone 特征提取的感受野增大(特征分辨率下降)，背景点会接近目标的边缘，使得目标框大小不容易预测准确。本文提出的 Auxiliary Network，通过增加点级别分割及目标中心坐标预测任务，来监督 Backbone 特征层捕捉这种结构信息，从而达到更准确的目标检测的目的。<br>
+　　Auxiliary Network 的输入来自 Backbone 各个分辨率的特征层。将特征层上不为零的特征点，通过 Voxel-to-Point 反栅格化映射到三维空间，设该特征点表示为 \(\{(f _ j,p _ j):j=1,...,M\}\)，其中 \(f\) 为特征向量，\(p\) 为坐标向量。有了栅格对应的伪三维坐标点下的特征表示后，即可插值出实际点云中每个点的特征向量。设点云中点的插值特征为：\(\{(\hat{f} _ i,p _ i):i=1,...,N\}\)，采用 Inverse Distance Weighted 方法进行插值： <span class="math display">\[ \hat{f} _ i = \frac{\sum _ {j=1}^Mw _ j(p _ i)f _ j}{\sum _ {j=1}^Mw _ j(p _ i)} \tag{1}\]</span> 其中： <span class="math display">\[w _ j(p _ i)=\left\{\begin{array}{l}
+\frac{1}{\Vert p _ i-p _ j\Vert _ 2} &amp; \mathrm{if} p _ j\in\mathcal{N}(p _ i)\\
+0 &amp; \mathrm{otherwise}
+\end{array}\tag{2}\right.\]</span> \(\mathcal{N}(p _ i)\) 为球状区域，本文在四个分辨率下分别设定为：0.05m，0.1m，0.2m，0.4m。然后通过 cross-stage link 对各个分辨率下的点特征进行 concatenate 融合。最后通过感知机进行点云分割及目标中心点预测任务的构建。<br>
+　　对于点级别前景分割的任务，经过 sigmoid 函数后，应用二分类的 Focal Loss： <span class="math display">\[ \mathcal{L} _ {seg} = \frac{1}{N _ {pos}}\sum _ i^N -\alpha(1-\hat{s} _ i)^{\gamma}\mathrm{log}(\hat{s} _ i) \tag{3}\]</span> 该分割任务使得目标检测的框更加准确，如图 2.c 所示。但是还得优化其尺度与形状。<br>
+　　中心点的预测任务则能有效约束目标框的尺度与形状，具体的，预测的是每个属于目标的点云与中心点的相对位置(残差)。可用 Smooth-l1 来构建预测的中心点与实际中心点的 Loss。</p>
+<h2 id="part-sensitive-warping">3. Part-sensitive Warping</h2>
+<p><img src="/SA-SSD/psw.png" width="60%" height="60%" title="图 3. Part-sensitive Warping"> 　　One-Stage 方法都会有 Confidence 和 BBox 错位的现象，本文提出一种类似 PSROIAlign 但更有高效的 PSW 方法，具体步骤为：</p>
+<ol type="1">
+<li>对于分类分支，修改为 \(K\) 个 Part-sensitive 的 cls maps，每个 map 包含目标的部分信息，比如当 \(K=4\) 时，可以理解为将目标切分为 \(2\times 2\) 部分；</li>
+<li>对于回归分支，将每个目标框的 Feature map 划分为 \(K\) 个子区域，每个区域的中心点作为采样点；</li>
+<li>如图 3. 所示，通过采样得到最终 cls map 的平均值。</li>
+</ol>
+<h2 id="experiment">4. Experiment</h2>
+<p><img src="/SA-SSD/ablation.png" width="60%" height="60%" title="图 4. Ablation Study"> 　　如图 4. 所示，Auxiliary Network 能有效提升网络的定位精度，PSWarp 也能有效消除 Confidence 与 BBox 的错位影响。</p>
+<h2 id="reference">5. Reference</h2>
+<p><a id="1" href="#1ref">[1]</a> henhang, et al. &quot;Structure Aware Single-stage 3D Object Detection from Point Cloud.&quot;</p>
 ]]></content>
       <categories>
         <category>3D Detection</category>
@@ -1521,7 +1557,6 @@ BBox regression Loss 为 rotated 3D IOU Loss： <span class="math display">\[ L 
         <tag>3D Detection</tag>
         <tag>paper reading</tag>
         <tag>Autonomous Driving</tag>
-        <tag>Semantic Segmentation</tag>
       </tags>
   </entry>
   <entry>
