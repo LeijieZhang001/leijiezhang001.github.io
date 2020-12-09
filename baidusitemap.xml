@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://leijiezhang001.github.io/paper-reading-Panoptic-Segmentation-via-Dynamic-Shifting-Network/</loc>
+    <lastmod>2020-12-09</lastmod>
+  </url>  <url>
     <loc>https://leijiezhang001.github.io/paper-reading-CenterFusion/</loc>
     <lastmod>2020-12-02</lastmod>
   </url>  <url>
@@ -82,10 +85,10 @@
     <loc>https://leijiezhang001.github.io/CenterTrack/</loc>
     <lastmod>2020-07-08</lastmod>
   </url>  <url>
-    <loc>https://leijiezhang001.github.io/End-to-End-Pseudo-LiDAR-for-3D-Det/</loc>
+    <loc>https://leijiezhang001.github.io/Rethinking-of-Sparse-3D-Convolution/</loc>
     <lastmod>2020-06-25</lastmod>
   </url>  <url>
-    <loc>https://leijiezhang001.github.io/Rethinking-of-Sparse-3D-Convolution/</loc>
+    <loc>https://leijiezhang001.github.io/End-to-End-Pseudo-LiDAR-for-3D-Det/</loc>
     <lastmod>2020-06-25</lastmod>
   </url>  <url>
     <loc>https://leijiezhang001.github.io/How-to-Build-An-ADAS/</loc>

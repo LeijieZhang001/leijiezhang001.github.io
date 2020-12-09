@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://leijiezhang001.github.io/"/>
-  <updated>2020-12-02T01:34:12.000Z</updated>
+  <updated>2020-12-09T01:34:12.000Z</updated>
   <id>https://leijiezhang001.github.io/</id>
   
   <author>
@@ -15,6 +15,46 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>[paper_reading]-&quot;Panoptic Segmentation via Dynamic Shifting Network&quot;</title>
+    <link href="https://leijiezhang001.github.io/paper-reading-Panoptic-Segmentation-via-Dynamic-Shifting-Network/"/>
+    <id>https://leijiezhang001.github.io/paper-reading-Panoptic-Segmentation-via-Dynamic-Shifting-Network/</id>
+    <published>2020-12-03T02:00:27.000Z</published>
+    <updated>2020-12-09T01:34:12.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>　　实例分割一般与语义分割同时进行，其难点是后处理如何准确的聚类出实例目标。目标聚类可归纳出的策略或方法有：</p><ul><li><strong>提高语义分割的准确率</strong>，在聚类的时候加入语义约束，能改善不同类别的欠分割，以及同类别的过分割；</li><li><strong>Spatial Offset &amp; Embedding Offset</strong>，提升聚类空间下的目标的聚集性，如 <a href="/paper-reading-OccuSeg/" title="OccuSeg">OccuSeg</a>，<a href="/paper-reading-PointGroup/" title="PointGroup">PointGroup</a>，<a href="/paper-reading-JSNet-JSIS3D/" title="JSNet, JSIS3D">JSNet, JSIS3D</a>；</li><li><strong>将聚类问题转换为每个点属于对应实例的概率问题</strong>，网络下 End-to-End 来优化聚类效果，如 <a href="/paper-reading-Instance-Segmentation-by-Jointly-Optimizing-Spatial-Embeddings-and-Clustering-Bandwidth/" title="Instance Segmentation by Jointly Optimizing Spatial Embeddings and Clustering Bandwidth">Instance Segmentation by Jointly Optimizing Spatial Embeddings and Clustering Bandwidth</a>；</li><li><strong>引入聚类时的 Bandwidth</strong>，不同尺寸的实例容忍不同程度的 Offset，如 <a href="/paper-reading-Instance-Segmentation-by-Jointly-Optimizing-Spatial-Embeddings-and-Clustering-Bandwidth/" title="Instance Segmentation by Jointly Optimizing Spatial Embeddings and Clustering Bandwidth">Instance Segmentation by Jointly Optimizing Spatial Embeddings and Clustering Bandwidth</a>；</li></ul><p>　　本文<a href="#1" id="1ref"><sup>[1]</sup></a>属于引入聚类时的 Bandwidth 策略，对于大目标，聚类时自适应选择更大的 offset 容忍度，同时可调节点经过 offset 迭代至中心点的次数来提高聚类准确率。</p><h2 id="framework">1. Framework</h2><p><img src="/paper-reading-Panoptic-Segmentation-via-Dynamic-Shifting-Network/framework.png" width="100%" height="100%" title="图 1. Framework"> 　　如图 1. 所示，DS-Net 由 Cylinder-Convolution Backbone，Semantic Branch，Instance Branch 构成。<a href="/paper-reading-Cylinder3D/" title="Cylinder3D">Cylinder3D</a> 以及 <a href="/paper-reading-Pillar-based-Object-Detection/" title="[paper_reading]-" pillar-based object detection"">[paper_reading]-"Pillar-based Object Detection"</a> 已经较为详细得介绍了在 Cylinder 视野下的卷积过程，其相比 Spherical 和 Bird-eye 视野有一定的优势。Instance Branch 则由 Dynamic Shifting 以及 Consensus-driven Fusion 构成，以聚类实例目标。</p><h2 id="instance-branch">2. Instance Branch</h2><p>　　Instance Branch 预测每个实例目标的点 \(P\in\mathbb{R} ^ {M\times 3}\) 到实例中心 \(C _ {gt}\in\mathbb{R} ^ {M\times 3}\) 的 offset \(O\in\mathbb{R} ^ {M\times 3}\)。其 Loss 的基本形式为： <span class="math display">\[ L _ {ins} = \frac{1}{M}\sum _ {i=0} ^ M\Vert O[i]-(C _ {gt}[i]-P[i])\Vert \tag{1}\]</span> 其中 \(M\) 是实例目标的点个数，预测的回归中心点 \(O+P\) 可用于实例目标的聚类，一般通过 Heuristic Clustering 方法，本文则提出 Dynamic Shifting 方法。<br>　　自底向上的 Heuristic Clustering 方法有 Breadth First Search(BFS)，DBSCAN，HDBSCAN，Mean Shift 等。<a href="/paper-reading-PointGroup/" title="PointGroup">PointGroup</a> 采用了 BFS 方法，对于点云这种密度不一样的数据形式，固定的搜索半径是不太合理的，小的搜索半径容易过分割，大的搜索半径则容易欠分割。DBSCAN/HDBSCAN 是 density-based 方法，所以与 BFS 一样，对密度不一致的点云聚类效果不好。Mean Shift 对密度不一致的点云聚类更加友好，但是固定的 bandwidth 也不是一个好的选择。</p><h3 id="dynamic-shifting">2.1. Dynamic Shifting</h3><p>　　对于待聚类的点云集 \(X\in\mathbb{R} ^ {M\times 3}\)，预测的实例中心由回归的 offset \(S\in\mathbf{R} ^ {M\times 3}\) 与点云坐标计算得到： <span class="math display">\[X\leftarrow X + \eta S\tag{2}\]</span> offset \(S\) 的计算可定义为 \(S=f(X)-X\)，其中 \(f(\cdot)\) 为核函数。一种简单的平面核函数为： <span class="math display">\[f(X)=D ^ {-1} KX \tag{3}\]</span> 其中 \(K=(XX ^ T\leq \delta)\) 表示点周围 bandwidth \(\delta\) 区域的点集；\(D=diag(K\mathbf{1})\) 表示 \(\delta\) 内点集个数。<br>　　为了自适应不同的 bandwidth，设计 \(l\) 个候选 bandwidth \(L=\{\delta _ 1,\delta _ 2,...,\delta _ l\}\)。对候选 bandwidth 作权重化处理，权重通过 MLP，Softmax 得到 \(\sum _ {j=1} ^ l W[:,j] = \mathbf{1}\)。最终的核函数为： <span class="math display">\[\hat{f}(X) = \sum _ {j=1} ^ l W[:,j]\odot(D _ j ^ {-1}K _ j X) \tag{4}\]</span> 其中 \(K _ j=(XX ^ T\leq\delta _ j)\), \(D _ j=diag(K _ j\mathbf{1})\)。 <img src="/paper-reading-Panoptic-Segmentation-via-Dynamic-Shifting-Network/DSM.png" width="60%" height="60%" title="图 2. Dynamic Shifting Module"> 　　DSM 算法流程如图 2. 所示，种子点通过 offset 预测实例中心点迭代 \(I\) 次，第 \(i\) 次回归的 Loss 为： <span class="math display">\[l _ i=\frac{1}{M &#39;}\sum _ {x=1} ^ {M &#39;}\Vert X _ i[x]-C &#39; _ {gt}[x]\Vert _ 1 \tag{5}\]</span> 总的 Loss 为： <span class="math display">\[L _ {ds} = \sum _ {i=1} ^ I w _ i l _ i \tag{6}\]</span> 其中 \(w _ i\) 为权重，设为 1。</p><h3 id="consensus-driven-fusion">2.2. Consensus-driven Fusion</h3><p>　　最终实例的类别由点集合投票决定。</p><h2 id="reference">3. Reference</h2><p><a id="1" href="#1ref">[1]</a> Hong, Fangzhou, et al. &quot;LiDAR-based Panoptic Segmentation via Dynamic Shifting Network.&quot; arXiv preprint arXiv:2011.11964 (2020).</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;　　实例分割一般与语义分割同时进行，其难点是后处理如何准确的聚类出实例目标。目标聚类可归纳出的策略或方法有：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;提高语义分割的准确率&lt;/strong&gt;，在聚类的时候加入语义约束，能改善不同类别的欠分割，以及同类别的过分割；&lt;/li&gt;
+
+      
+    
+    </summary>
+    
+      <category term="Segmentation" scheme="https://leijiezhang001.github.io/categories/Segmentation/"/>
+    
+      <category term="Instance Segmentation" scheme="https://leijiezhang001.github.io/categories/Segmentation/Instance-Segmentation/"/>
+    
+    
+      <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
+    
+      <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
+    
+      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
+    
+      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
+    
+      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
+    
+      <category term="Instance Segmentation" scheme="https://leijiezhang001.github.io/tags/Instance-Segmentation/"/>
+    
+  </entry>
   
   <entry>
     <title>[paper_reading]-&quot;CenterFusion&quot;</title>
@@ -646,39 +686,6 @@
       <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
     
       <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>[paper_reading]-&quot;RadarNet&quot;</title>
-    <link href="https://leijiezhang001.github.io/paper-reading-RadarNet/"/>
-    <id>https://leijiezhang001.github.io/paper-reading-RadarNet/</id>
-    <published>2020-08-07T01:25:41.000Z</published>
-    <updated>2020-08-12T01:19:12.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>　　Radar 相比 LiDAR/Camera，对天气影响鲁棒性较强，而且能直接测量目标速度，所以是多传感器融合感知里比较重要的一个输入。其在 ADAS 领域应用已经较为广泛。但是 Radar 的测量噪声较大，这给有效的多传感器融合带来了难度。本文提出了 RadarNet<a href="#1" id="1ref"><sup>[1]</sup></a>，利用 Radar 的几何数据以及动态数据，同时做特征级别的前融合以及注意力机制下的后融合，达到了较好的效果。</p><h2 id="comparison-between-lidar-and-radar">1. Comparison between LiDAR and Radar</h2><p><img src="/paper-reading-RadarNet/compare.png" width="90%" height="90%" title="图 1. Comparison"> 　　LiDAR 可分为三种类型：Spinning，Solid State，Flash。目前主要采用的是 Spinning 旋转式的激光雷达。激光雷达的缺点有：</p><ul><li>对雨雾雪，车尾气等比较敏感；</li><li>对玻璃等物体没有反射;</li><li>点云密度随着距离增加而下降，远距离探测能力较弱。</li></ul><p>毫米波雷达则能克服以上缺点，并且能直接测量速度；但是缺点也比较明显：</p><ul><li>分辨率低，对小目标探测能力较弱；</li><li>误检较多；</li><li>测量的速度只是径向速度。</li></ul><p>毫米波雷达可输出三种形式的数据：1. 原始点运数据；2. 经过 DBSCAN 等聚类算法获得的聚类点集数据；3. 对点集作跟踪的数据。三种数据越来越高层，但是噪音越来越大。本文考虑输出点集的数据，设探测到的点集目标为 \(Q = (q, v _ {||},m,t)\)，其中 \(q = (x,y)\) 是俯视图下的位置，\(v _ {||}\) 是径向速度，\(m\) 代表目标是否运动，\(t\) 则为时间戳。我们需要进一步估计出目标的 2D 速度，由此在毫米波雷达的辅助下，能获得更长的检测距离，以及更准确的速度。 <img src="/paper-reading-RadarNet/fusion.png" width="90%" height="90%" title="图 2. Fusion"> 　　激光雷达数据与毫米波雷达数据融合示意图如图 2. 所示。</p><h2 id="radarnet">2. RadarNet</h2><p><img src="/paper-reading-RadarNet/framework.png" width="90%" height="90%" title="图 3. Framework"> 　　如图 3. 所示，RadarNet 主要由 Voxel-Based Early Fusion，Detection Network 以及 Attention-Based Late Fusion 来做融合检测。前融合将各传感器数据通过俯视图形式进行表示并融合；后融合则通过基于注意力的数据关联及整合机制来对目标速度进行精细估计。检测网络是在传统的分类＋回归基础上，多了速度预测的分支。具体的，所有回归的预测量为 \((x-p _ x,y - p _ y,w,l,\mathrm{cos}(\theta),\mathrm{sin}(\theta),m,v _ x, v _ y)\)，其中 \(p _ x,p _ y\) 为体素/栅格的中心点，\(m\) 为目标是运动的概率，如果 \(m &lt; 0.5\)，则将速度置为 0。</p><h3 id="early-fusion">2.1. Early Fusion</h3><p>　　对于激光雷达数据，类似 <a href="/paperreading-Fast-and-Furious/" title="FAF">FAF</a>，将时序多帧(0.5s)的点云数据在本车坐标系下打成俯视图体素表示，然后在通道维度进行串联。如果体素内没有点，那么该体素值为 0；如果体素内有点 \(\{(x _ i,y _ i,z _ i),i=1,...,N\}\)，那么体素值为 \(\sum _ i\left( 1- \frac{|x _ i-a|}{dx / 2}\right)\left( 1- \frac{|y _ i-b|}{dy / 2}\right)\left( 1- \frac{|z _ i-c|}{dz / 2}\right)\)，其中 \((a,b,c)\) 为体素中心坐标，\(dx,dy,dz\) 为体素尺寸。<br>　　对于毫米波雷达数据，将其转到激光雷达坐标系后，也进行 BEV 时序串联，并将每一帧中不同线束的数据在 BEV 下体素化，然后串联。具体的，如果体素(本文丢掉了高度信息，所以退化为栅格)中没有毫米波探测到的目标，那么置为 0，如果探测到动态目标，则置为 1，如果探测到静态目标，则置为 -1。<br>　　分别得到激光雷达与毫米波雷达的 BEV 表示后，将二者在通道维度串联起来，就完成了前融合。</p><h3 id="late-fusion">2.2. Late Fusion</h3><p>　　<strong>前融合关注毫米波雷达探测到的目标的位置和密度，后融合则使用毫米波雷达探测到的目标径向速度信息</strong>。检测网络输出的目标状态为 \(D = (c,x,y,w,l,\theta,\mathbf{v})\)，毫米波雷达输出的目标状态为 \(Q=(q,v _ {||},m,t)\)。两者的目标级别的后融合通过 Association 和 Aggregation 两步骤组成。 <img src="/paper-reading-RadarNet/late-fusion.png" width="90%" height="90%" title="图 4. Late-Fusion"> 　　本文将 Association 和 Aggregation 用 End-to-End 的网络来处理。如图 4. 所示，首先进行检测目标与毫米波目标的成对特征提取，然后经过 MLP/Softmax 作匹配分数估计，最后根据分数作速度的加权优化。</p><h4 id="pairwise-detection-radar-association">2.2.1. Pairwise Detection-Radar Association</h4><p>　　定义 Pairwise Feature 为： <span class="math display">\[\begin{align}f(D,Q) &amp;= \left(f ^ {det}(D),f ^ {det-radar}(D,Q)\right) \tag{1}\\f ^ {det}(D) &amp;= \left(w,l,||\mathbf{v}||,\frac{v _ x}{||\mathbf{v}||},\frac{v _ y}{||\mathbf{v}||},\mathrm{cos}(\gamma)\right) \tag{2}\\f ^ {det-radar}(D,Q) &amp;= \left(dx,dy,dt,v ^ {bp}\right) \tag{3}\\v ^ {bp} &amp;= \mathrm{min}\left(50,\frac{v _ {||}}{\mathrm{cos}(\phi)}\right) \tag{4}\end{align}\]</span> 其中 \((\cdot,\cdot)\) 是 Concatenation 操作；\(\gamma\) 是网络检测 \(D\) 的运动方向与径向方向的夹角；\(\phi\) 是 \(D\) 运动方向与雷达探测目标 \(Q\) 的径向方向的夹角；\(v ^ {bp}\) 是径向速度反投影到运动方向(朝向)的速度值；\((dx,dy,dt)\) 为俯视图下 \(D,Q\) 的相对位置和时间。由此，通过 MLP 学习匹配分数： <span class="math display">\[s _ {i,j}=\mathrm{MLP} _ {match}\left(f(D _ i,Q _ j)\right)\tag{5}\]</span></p><h4 id="velocity-aggregation">2.2.2. Velocity Aggregation</h4><p>　　根据 \(D,Q\) 间的匹配分数，优化<strong>目标的绝对速度值</strong>。为了解决没有匹配的情况，分数 Concate 1，然后计算归一化的匹配分数： <span class="math display">\[s _ i ^ {norm}=\mathrm{softmax}((1,s _ {i,:})) \tag{6}\]</span> 然后优化每个检测目标 \(i\) 的绝对速度值： <span class="math display">\[v _ i&#39; = s _ i ^ {norm}\cdot\begin{bmatrix}||\mathbf{v} _ i|| \\v _ {i,:} ^ {bp}\end{bmatrix}\tag{7}\]</span> 最终可得到目标的 2D 速度： <span class="math display">\[\mathbf{v}&#39; _ i = v&#39; _ i\cdot\left(\frac{v _ x}{||\mathbf{v}||},\frac{v _ y}{||\mathbf{v}||}\right) \tag{8}\]</span> 　　<strong>由此可知，该后融合优化的只是目标的绝对速度(毫米波雷达也没办法探测目标的朝向或运动方向)，目标的朝向准确度还是由检测网络决定。</strong></p><h2 id="experiments">3. Experiments</h2><p>　　根据式(2,3)提取的特征，作者设计了基于 Heuristic 的关联方法，毫米波雷达探测的目标与网络检测的目标关联的条件为： <span class="math display">\[\left\{\begin{array}{rl}\sqrt{(dx) ^ 2+(dy) ^ 2} &amp;&lt; 3m \\\gamma &amp;&lt; 40°\\||\mathbf{v}|| &amp;&gt; 1m/s\\v ^ {bp} &amp;&lt; 30m/s \\\end{array}\tag{9}\right.\]</span> 一旦关联上后，去毫米波雷达速度的中位数作目标速度的进一步优化。这种传统的 Heuristic 与本文的 Attention 方法对比如下，优势明显。 <img src="/paper-reading-RadarNet/exp.png" width="80%" height="80%" title="图 5. Heuristic VS. Attention"></p><h2 id="reference">4. Reference</h2><p><a id="1" href="#1ref">[1]</a> Yang, Bin, et al. &quot;RadarNet: Exploiting Radar for Robust Perception of Dynamic Objects.&quot; arXiv preprint arXiv:2007.14366 (2020).</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;　　Radar 相比 LiDAR/Camera，对天气影响鲁棒性较强，而且能直接测量目标速度，所以是多传感器融合感知里比较重要的一个输入。其在 ADAS 领域应用已经较为广泛。但是 Radar 的测量噪声较大，这给有效的多传感器融合带来了难度。本文提出了 RadarNet&lt;
-      
-    
-    </summary>
-    
-      <category term="3D Detection" scheme="https://leijiezhang001.github.io/categories/3D-Detection/"/>
-    
-    
-      <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
-    
-      <category term="3D Detection" scheme="https://leijiezhang001.github.io/tags/3D-Detection/"/>
-    
-      <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
-    
-      <category term="autonomous driving" scheme="https://leijiezhang001.github.io/tags/autonomous-driving/"/>
-    
-      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
     
   </entry>
   
