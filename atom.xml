@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://leijiezhang001.github.io/"/>
-  <updated>2020-12-09T01:34:12.000Z</updated>
+  <updated>2020-12-16T01:34:12.000Z</updated>
   <id>https://leijiezhang001.github.io/</id>
   
   <author>
@@ -15,6 +15,34 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Uncertainty Calibration</title>
+    <link href="https://leijiezhang001.github.io/Uncertainty-Calibration/"/>
+    <id>https://leijiezhang001.github.io/Uncertainty-Calibration/</id>
+    <published>2020-12-09T01:43:03.000Z</published>
+    <updated>2020-12-16T01:34:12.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>　　If you don’t know the measurement uncertainty, don’t make the measurement at all!<a href="#1" id="1ref"><sup>[1]</sup></a><br>　　Uncertainty 在自动驾驶测量中的重要性在之前的文章，如 <a href="/Perception-Uncertainty-in-Deep-Learning/" title="Perception Uncertainty in Deep Learning">Perception Uncertainty in Deep Learning</a> 中已经有较详细的阐述，这里不做赘述。但更重要的是，如何确保 Uncertainty 估计的准确性。如图 1. 所示，本文讨论如何评估 Uncertainty 估计的准确性，以及通过 Uncertainty Calibration 来修正其估计误差。<br><img src="/Uncertainty-Calibration/framework.png" width="100%" height="100%" title="图 1. Framework"></p><h2 id="uncertainty-estimation-for-object-detection">1. Uncertainty Estimation for Object Detection</h2><p>　　以目标检测任务为例，深度学习中的 Uncertainty 估计可分为两大类方法：Ensemble Approach，以及 Direct-modeling Approach。本文以 Direct-modeling 方法为例，假设网络输出符合多多变量高斯分布。对于 Anchor-Free 的 3D 目标检测，分类的预测量为目标类别分数 \(p(y _ c=1|) = s _ {\mathbf{x}}\)，回归预测量为： <span class="math display">\[\mathbf{u _ x} = [\mathrm{cos}(\theta), \mathrm{sin}(\theta), dx,dy,\mathrm{log}(l),\mathrm{log}(w)] \tag{1}\]</span> 假设回归输出量符合多变量独立高斯分布 \(p(\mathbf{y _ r}| \mathbf{x})=(\mathbf{u _ x,\Sigma _ x})\)，那么其协方差矩阵为对角矩阵： <span class="math display">\[\mathbf{\sigma _ x} ^ 2=[\sigma ^2 _ {\mathrm{cos}(\theta)}, \sigma ^2 _ {\mathrm{sin}(\theta)}, \sigma ^ 2 _ {dx}, \sigma ^ 2 _ {dy}, \sigma ^ 2 _ {\mathrm{log}(l)}, \sigma ^ 2 _ {\mathrm{log}(w)}] _ {\mathbf{x}} \tag{2}\]</span> 由此加入预测的 Uncertainty 分支，Loss 项为： <span class="math display">\[L _ {reg}=\frac{1}{2}(\mathbf{y _ r-u _ x})\mathrm{diag}(\frac{1}{\mathbf{\sigma ^ 2 _ x}})(\mathbf{y _ r-u _ x}) ^ T+\frac{1}{2}\mathrm{log}(\mathbf{\sigma ^ 2 _ x})\mathbf{1} ^ T \tag{3}\]</span></p><h2 id="uncertainty-evaluation">2. Uncertainty Evaluation</h2><p>　　对于数据集 \(\{(\mathbf{x} ^ n,y _ c ^ n,\mathbf{y} _ r ^ n)\} _ {n=1} ^ N\)，\(\mathbf{X}\) 表示输入数据，\(\mathbf{Y} _ c\) 表示分类标签，\(\mathbf{Y _ r}\) 表示回归标签。概率描述为：\(\mathbf{X, Y} _ c \sim \mathbb{P} _ c\)，以及 \(\mathbf{X,Y _ r}\sim\mathbb{P} _ r\)。对于分类问题，，softmax score 预测了目标分类的概率分布，即 \(\mathbf{F} _ c ^ n(y _ c=1)=p(y _ c=1|\mathbf{x} ^ n)=s _ {\mathbf{x} ^ n}\)。对于回归问题，网络预测了概率密度函数 PDF：\(p(\mathbf{y _ r} ^ n | \mathbf{x} ^ n) = \mathcal{N}(\mathbf{u _ {x ^ n},\Sigma _ {x ^ n}})\)，其累积概率分布函数 CDF 定义为 \(\mathbf{F} _ r ^ n(\mathbf{y} _ r)\)，反函数为 \(\mathbf{F} _ r ^ {n ^ {-1}}(p)\)。<br>　　准确的不确定性预测意味着，预测的概率近似等于统计的频率。具体的：</p><ul><li><p>分类问题<br>0.9 的分数意味着 90% 的物体是被分类准确的。对于 \(\forall p\in[0,1]\)，数学形式为： <span class="math display">\[\mathbb{P} _ c(\mathbf{Y} _ c=1|\mathbf{F} _ c(\mathbf{Y} _ c=1)=p)\approx \frac{\sum _ {n=1} ^ N\mathbb{1}(y _ c ^ n=1,F _ c ^ n(y _ c=1)=p)}{\sum _ {n=1} ^ N\mathbb{1}(F _ c ^ n(y _ c=1)=p)} \tag{4}\]</span></p></li><li><p>回归问题<br>对于预测物体，其 90% 置信空间内，90% 的真值物体应该在置信空间内。对于 \(\forall p\in[0,1]\)，数学形式为： <span class="math display">\[\mathbb{P} _ r(\mathbf{Y} _ r\leq\mathbf{F} _ r ^ {-1}(p))\approx\frac{\sum _ {n=1} ^ N\mathbb{1}(y _ r ^ n\leq F _ r ^{n ^ {-1}}(p))}{N} \tag{5}\]</span></p></li></ul><p><img src="/Uncertainty-Calibration/cali-plot.png" width="60%" height="60%" title="图 2. Calibration Plot"> 　　由此可用 calibration plot 来刻画不确定性估计的准确性。如图 2. 所示，横坐标表示预测的概率，纵坐标表示统计的概率，将概率值划分为 \(0 &lt; p _ c ^ 1 &lt; ... &lt; p _ c ^ m &lt; ... &lt; 1\) 个置信区域，理想的 Calibration Plot 是对角线。计算该对角线与实际曲线的 Expected Calibration Error(ECE) 即可作为评估 Uncertainty 估计的准确性： <span class="math display">\[\mathrm{ECE} =\sum _ {m=1} ^ M\frac{N _ m}{N}\vert p ^ m-\hat{p} ^ m\vert\tag{6}\]</span></p><h2 id="uncertainty-recalibration">3. Uncertainty Recalibration</h2><p>　　为了使得 Calibration Plot 能完美贴合对角线，需要对 Uncertainty 进行标定。</p><h3 id="isotonic-regression">3.1. Isotonic Regression</h3><p>　　对于预测的累积概率分布函数 \(p=\mathbf{F} _ r(y _ r)\)，预测一个额外模型 \(g(p)\) 使得满足式 (5) 条件，该映射模型函数是非参单调递增的。额外模型通过 validation 数据集训练得到。</p><h3 id="temperature-scaling">3.2. Temperature Scaling</h3><p>　　对式 (2) 中的各方差作 \(T &gt; 0\) 的尺度变换：\(\hat{\sigma}\leftarrow\sigma ^ 2/T \)。最优的 \(T\) 通过最大化 Negative Log Likelihood(NLL) 实现，等价于最小化式 (3) 的 Loss 项。</p><h3 id="calibration-loss">3.3. Calibration Loss</h3><p>　　由式 (3) 可知，Variance 的预测是通过无监督的形式隐式来预测的，所以本质上就无法保证 Variance 的绝对正确性，所以可加入监督项来保证其正确性。因为一个准确的 Uncertainty 意味着预测的 Variance 与预测量和真值量的 Variance 是一致的，所以设计 calibration loss： <span class="math display">\[ L _ {calib} =\Vert \mathbf{\sigma _ x} ^ 2-(\mathbf{y _ r-u _ x})\odot (\mathbf{y _ r-u _ x})\Vert\tag{7}\]</span> 最终的 Loss 为： <span class="math display">\[L _ {total} = L _ {reg}+\lambda L _ {calib}\tag{8}\]</span></p><h2 id="recalibration-results">4. Recalibration Results</h2><p><img src="/Uncertainty-Calibration/calib.png" width="60%" height="60%" title="图 3. Calibration Plot After Recalibration"> 　　如图 3. 所示，经过标定后，预测的概率分布接近于实际统计分布。</p><p><img src="/Uncertainty-Calibration/pred.png" width="100%" height="100%" title="图 4. Predictions with Recalibration Uncertainties"> 　　图 4. 可视化了标定前后 Uncertainty 的准确程度，可见标定后，越是遮挡的目标，Uncertainty 越大，符合预期。此外，标定后目标检测的精度也有较大的提升。</p><h2 id="reference">5. Reference</h2><p><a id="1" href="#1ref">[1]</a> Feng, Di, et al. &quot;Can we trust you? on calibration of a probabilistic object detector for autonomous driving.&quot; arXiv preprint arXiv:1909.12358 (2019).<br><a id="2" href="#2ref">[2]</a> Kuleshov, Volodymyr, Nathan Fenner, and Stefano Ermon. &quot;Accurate uncertainties for deep learning using calibrated regression.&quot; arXiv preprint arXiv:1807.00263 (2018).</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;　　If you don’t know the measurement uncertainty, don’t make the measurement at all!&lt;a href=&quot;#1&quot; id=&quot;1ref&quot;&gt;&lt;sup&gt;[1]&lt;/sup&gt;&lt;/a&gt;&lt;br&gt;
+　　Uncert
+      
+    
+    </summary>
+    
+      <category term="Uncertainty" scheme="https://leijiezhang001.github.io/categories/Uncertainty/"/>
+    
+    
+      <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
+    
+      <category term="Uncertainty" scheme="https://leijiezhang001.github.io/tags/Uncertainty/"/>
+    
+  </entry>
   
   <entry>
     <title>[paper_reading]-&quot;Panoptic Segmentation via Dynamic Shifting Network&quot;</title>
@@ -647,45 +675,6 @@
       <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
     
       <category term="Deep Learning&quot;" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>[paper_reading]-&quot;Cylinder3D&quot;</title>
-    <link href="https://leijiezhang001.github.io/paper-reading-Cylinder3D/"/>
-    <id>https://leijiezhang001.github.io/paper-reading-Cylinder3D/</id>
-    <published>2020-08-12T03:43:33.000Z</published>
-    <updated>2020-08-17T01:19:12.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>　　Voxel-based 点云分割/检测等任务中，点云的投影表示方法有三种：</p><ul><li>Spherical</li><li>Bird-eye View</li><li>Cylinder</li></ul><p>其中 Spherical 球坐标投影代表为 <a href="/paper-reading-RandLA-Net/" title="RandLA-Net">RandLA-Net</a>；Bird-eye View 则是目前主流的方法。有关 Bird-eye View 点云处理的优劣已经说了很多了，这里不再赘述。本文<a href="#1" id="1ref"><sup>[1]</sup></a> 介绍一种 Cylinder 柱状投影的点云处理方式，类似 <a href="/paper-reading-Pillar-based-Object-Detection/" title="Pillar-based Object Detection">Pillar-based Object Detection</a>，也可以认为是 <a href="/paper-reading-PolarNet/" title="PolarNet">PolarNet</a> 的 3D 版本。 <img src="/paper-reading-Cylinder3D/vs.png" width="70%" height="70%" title="图 1. Comparison"> 　　<a href="/paper-reading-Pillar-based-Object-Detection/" title="Pillar-based Object Detection">Pillar-based Object Detection</a> 中详细说明了 Cylinder 投影比 Spherical 投影的优势，这里不做赘述，如图 1. 所示，相比 Spherical 投影，Cylinder 投影效果提升很明显。</p><h2 id="framework">1. Framework</h2><p><img src="/paper-reading-Cylinder3D/framework.png" width="80%" height="80%" title="图 2. Framework"> 　　如图 2. Cylinder3D 由 3D 柱坐标投影和 3D U-Net 特征提取两部分组成。框架比较简单，网络结构主要由 DownSample，UpSample，Asymmetry Residual Block，Dimension-Decomposition based Context Modeling 四种组件构成。</p><h2 id="cylinder-partition">2. Cylinder Partition</h2><p><img src="/paper-reading-Cylinder3D/coord.png" width="80%" height="80%" title="图 3. Cylinder Partition"> 　　如图 3. 所示，将笛卡尔坐标系下的点云 \((x,y,z)\) 转换到柱坐标系下 \((\rho,\theta,z)\)。对于每个扇形 Voxel，作 PointNet 特征提取，最终得到 3D Cylinder 点云特征表示 \(\mathbb{R}\in C\times H\times W\times L\)。</p><h2 id="network">3. Network</h2><p><img src="/paper-reading-Cylinder3D/block.png" width="70%" height="70%" title="图 4. A & DDCM"></p><h3 id="asymmetry-residual-block">3.1. Asymmetry Residual Block</h3><p>　　如图 4. 所示，Asymmetry Residual Block 将 \(3\times 3\times 3\) 卷积拆分成 \(1\times 3\times 3\) 和 \(3\times 1\times 3\) 两种，这样作有两个好处：</p><ul><li>由于待检测的目标都接近于长方体，这种卷积形式更有利于提取长方体样式的特征；</li><li>减少 33% 的计算量，类似 Depth-wise Convolution；</li></ul><p>该模块作为 3D 卷积的基本模块，嵌入在下采样前，以及上采样后。</p><h3 id="dimension-decomposition-based-context-modeling">3.2. Dimension-Decomposition based Context Modeling</h3><p>　　由于 3D 空间的特征表达是 high-rank 的，所以利用矩阵分解的思想，将其用 height，width，depth 三维的 low-rank 向量来权重化表达，由此设计如图 4. 中的 DDCM 模块。该模块将三个方向的特征计算各自的权重，然后与原始特征作权重化整合。输出的特征用于最终的预测，预测输出是 Voxel-based，维度为 \(Class\times H\times W\times L\)。</p><h2 id="reference">4. Reference</h2><p><a id="1" href="#1ref">[1]</a> Zhou, Hui, et al. &quot;Cylinder3D: An Effective 3D Framework for Driving-scene LiDAR Semantic Segmentation.&quot; arXiv preprint arXiv:2008.01550 (2020).</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;　　Voxel-based 点云分割/检测等任务中，点云的投影表示方法有三种：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Spherical&lt;/li&gt;
-&lt;li&gt;Bird-eye View&lt;/li&gt;
-&lt;li&gt;Cylinder&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;其中 Spherical 球坐标投影代
-      
-    
-    </summary>
-    
-      <category term="Semantic Segmentation" scheme="https://leijiezhang001.github.io/categories/Semantic-Segmentation/"/>
-    
-    
-      <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
-    
-      <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
-    
-      <category term="autonomous driving" scheme="https://leijiezhang001.github.io/tags/autonomous-driving/"/>
-    
-      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
-    
-      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
     
   </entry>
   
