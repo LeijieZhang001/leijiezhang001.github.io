@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://leijiezhang001.github.io/"/>
-  <updated>2020-12-16T01:34:12.000Z</updated>
+  <updated>2020-11-23T01:34:12.000Z</updated>
   <id>https://leijiezhang001.github.io/</id>
   
   <author>
@@ -15,6 +15,46 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Deep Multi-modal Object Detection and Semantic Segmentation for Autonomous Driving - Datasets, Methods, and Challenges</title>
+    <link href="https://leijiezhang001.github.io/Deep-Multi-modal-Object-Detection-and-Semantic-Segmentation/"/>
+    <id>https://leijiezhang001.github.io/Deep-Multi-modal-Object-Detection-and-Semantic-Segmentation/</id>
+    <published>2020-12-17T01:28:40.000Z</published>
+    <updated>2020-11-23T01:34:12.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>　　由于相机，激光雷达，毫米波雷达等传感器各有优劣，所以深度多模态数据融合在自动驾驶感知中非常重要。本文<a href="#1" id="1ref"><sup>[1]</sup></a>以目标检测及语义分割为例，详细阐述了深度多模态数据融合的发展及挑战。<br>　　多模传感器融合的目标检测及语义分割任务，可分解为三大问题：What to Fuse，When to Fuse，How to Fuse。以下就从这三个方面进行分析归纳。</p><h2 id="what-to-fuse">1. What to Fuse</h2><p>　　自动驾驶中用于全范围感知的有激光雷达，毫米波雷达，相机。<a href="/paper-reading-RadarNet/" title="RadarNet">RadarNet</a> 中比较详细得介绍了激光雷达与毫米波雷达的优劣，并融合二者作目标检测跟踪；<a href="/paper-reading-CenterFusion/" title="CenterFusion">CenterFusion</a> 则融合毫米波雷达与相机二者的优势，作目标检测与速度测量；激光雷达与相机的融合，研究已经较多，这里不作举例。同时融合三个传感器的算法暂时没看到。<br>　　激光点云的处理方法主要有三种: 1. 将点云物理空间 3D Voxel 化处理；2. 直接在点云连续空间内进行点级别的学习；3. 将点云投影到 2D 空间，如 Bird-View，Apherical-View，Cylinder-View 等，然后作 2D 卷积处理。<br>　　毫米波雷达数据 \(x,y,v\) 可表示为 2D 特征图，然后用 2D 卷积来处理；也可表示为点云的形式，然后用点云的操作来处理。</p><h2 id="how-to-fuse">2. How to Fuse</h2><p>　　考虑两个不同的传感器数据源 \(M _ i, M _ j\)，对应的第 \(l\) 层网络特征 \(f _ l ^ {M _ i}, f _ l ^ {M _ j}\)，以及操作 \( G _ l(\cdot)\)。融合方式有以下几种：</p><ul><li>Addition or Average Mean:<br>将两个特征图相加或者取平均，\(f _ l=G _ {l-1}\left(f _ {l-1} ^ {M _ i}+f _ {l-1} ^ {M _ j}\right)\)。</li><li>Concatenation:<br>将两个特征图在深度维度进行串联，\(f _ l=G _ {l-1}\left(f _ {l-1} ^ {M _ i}\frown f _ {l-1} ^ {M _ j}\right)\)。</li><li>Ensemble:<br>在目标检测任务中，对 ROI 内的特征进行整合，\(f _ l=G _ {l-1}\left(f _ {l-1} ^ {M _ i}\right)\cup G _ {l-1}\left( f _ {l-1} ^ {M _ j}\right)\)。</li><li>Mixture of Experts:<br>用 experts 网络预测带融合特征的权重，然后作权重融合，\(f _ l=G _ {l}\left(w ^ {M _ i}\cdot f _ {l-1} ^ {M _ i}+w ^ {M _ j}\cdot f _ {l-1} ^ {M _ j}\right)\)，其中 \(w ^ {M _ i}+ w ^ {M _ j} = 1\)。</li></ul><h2 id="when-to-fuse">3. When to Fuse</h2><p><img src="/Deep-Multi-modal-Object-Detection-and-Semantic-Segmentation/fusion-methods.png" width="90%" height="90%" title="图 1. Fusion Methods"> 　　如图 1 所示，融合的时间点可分为 early，middle，late 三种，<strong>本文归纳发现并没有哪一种融合是最优的，这与传感器类型，数据，网络结构等相关</strong>。设融合操作为 \(f _ l = f _ {l-1} ^ {M _ i}\oplus f _ {l-1} ^ {M _ j}\)，那么各融合方式可归纳为：</p><ul><li>Early Fusion<br>在传感器原始数据阶段进行数据融合: <span class="math display">\[f _ L = G _ L\left(G _ {L-1}\left(\dots G _ l\left(\dots G _ 2\left(G _ 1\left(f _ 0 ^ {M _ i}\oplus f _ 0 ^ {M _ j}\right)\right)\right)\right)\right)\tag{1}\]</span> 前融合的优势是深度整合传感器数据信息，理论上能挖掘最全的特征信息，以及计算量较小；劣势是模型灵活性较差，以及对多模态数据的空间对齐准确度非常敏感，其空间对齐的精度受传感器之间参数标定，采样频率，传感器缺陷等因素影响。</li><li><p>Late Fusion<br>在网络输出后进行融合： <span class="math display">\[f _ L=G _ L ^ {M _ i}\left(G _ {L-1} ^ {M _ i}\left(\dots G _ 1 ^ {M _ i}(f _ 0 ^ {M _ i})\right)\right) \oplus G _ L ^ {M _ j}\left(G _ {L-1} ^ {M _ j}\left(\dots G _ 1 ^ {M _ j}(f _ 0 ^ {M _ j})\right)\right)\tag{2}\]</span> 后融合是模块化的，所以有很强的灵活性；但是需要较多的计算资源，以及没有在特征层面对数据进行融合，可能丧失一定的信息量。</p></li><li><p>Middle Fusion<br>中融合变种非常多，如图 1. 所示，可以是 deep fusion 模式，也可以是 short-cut fusion 模式。网络结构上，还是比较难断定哪种结构是最优的。</p></li></ul><p><img src="/Deep-Multi-modal-Object-Detection-and-Semantic-Segmentation/fusion-arch.png" width="100%" height="100%" title="图 2. Fusion Archtectures"> 　　对于目标检测任务来说，two-stage 方法基本都是在 ROI 内作特征融合，经典的方法如图 2. 所示，这里不做展开。</p><h2 id="datasets-methodology">4. Datasets &amp; Methodology</h2><p><img src="/Deep-Multi-modal-Object-Detection-and-Semantic-Segmentation/challenges.png" width="100%" height="100%" title="图 3. Challenges and Open Questions"> 　　如图 3. 所示，目前基于多传感器融合的感知主要挑战有：</p><ul><li><p>Multi-modal data preparation<br>公开数据量及数据的多样性还较少，数据中多传感器的标定，标注准确性存疑。</p></li><li><p>Fusion Methodology<br>&quot;What to fuse&quot; 中融合的传感器数据还较少，还可以融合超声波雷达，V2X 信息，物理模型，先验模型等；&quot;How to fuse&quot; 中目前都是简单的融合，或者说整合，缺少对信息源不确定性的估计(Uncertainty)，可以采用 BNN 对不确定性进行估计；&quot;When to fuse&quot; 中目前基本凭经验去寻找最优的网络融合结构，缺少理论指导。</p></li><li><p>Others<br>评估指标上，还需进一步体现模型的鲁棒性；网络结构上，目前缺少时序融合。</p></li></ul><h2 id="reference">5. Reference</h2><p><a id="1" href="#1ref">[1]</a> Feng, Di, et al. &quot;Deep multi-modal object detection and semantic segmentation for autonomous driving: Datasets, methods, and challenges.&quot; IEEE Transactions on Intelligent Transportation Systems (2020).</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;　　由于相机，激光雷达，毫米波雷达等传感器各有优劣，所以深度多模态数据融合在自动驾驶感知中非常重要。本文&lt;a href=&quot;#1&quot; id=&quot;1ref&quot;&gt;&lt;sup&gt;[1]&lt;/sup&gt;&lt;/a&gt;以目标检测及语义分割为例，详细阐述了深度多模态数据融合的发展及挑战。&lt;br&gt;
+　　多模传
+      
+    
+    </summary>
+    
+      <category term="Deep Learning" scheme="https://leijiezhang001.github.io/categories/Deep-Learning/"/>
+    
+      <category term="Review" scheme="https://leijiezhang001.github.io/categories/Deep-Learning/Review/"/>
+    
+    
+      <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
+    
+      <category term="3D Detection" scheme="https://leijiezhang001.github.io/tags/3D-Detection/"/>
+    
+      <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
+    
+      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
+    
+      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
+    
+      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
+    
+      <category term="Multi-modal Fusion" scheme="https://leijiezhang001.github.io/tags/Multi-modal-Fusion/"/>
+    
+  </entry>
   
   <entry>
     <title>Uncertainty Calibration</title>
@@ -644,37 +684,6 @@
       <category term="autonomous driving" scheme="https://leijiezhang001.github.io/tags/autonomous-driving/"/>
     
       <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>[paper_reading]-&quot;MotionNet&quot;</title>
-    <link href="https://leijiezhang001.github.io/paper-reading-MotionNet/"/>
-    <id>https://leijiezhang001.github.io/paper-reading-MotionNet/</id>
-    <published>2020-08-17T01:23:18.000Z</published>
-    <updated>2020-08-18T01:19:12.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>　　基于点云的 3D 感知一般通过 3D 目标框实现，但是如果直接网络出 3D 目标框属性，那么召回率很难达到非常高的水平(所以之前提到检测的任务可以分解为分割+后处理聚类来作，这样召回率会比较高)。本文提出的 MotionNet<a href="#1" id="1ref"><sup>[1]</sup></a> 用于检测俯视图下每个栅格的类别及轨迹，可作为检测的辅助，能召回更小的目标，以及没有标注的动态障碍物目标。这种栅格级别或点级别的目标探测能力相比直接出目标框的优势有：</p><ol type="1"><li>目标框形式一般依赖于目标框区域的特征，不同目标类别之间的特征很难泛化，所以无法检测未见过的类别；</li><li>目标框形式一般会作 NMS 等处理去掉不确定性较大的框，而栅格级别的会保留；</li></ol><p><img src="/paper-reading-MotionNet/compare.png" width="40%" height="40%" title="图 1. Detection VS. Motion Prediction"> 　　如图 1. 所示，对于轮椅这种非正常类别(或预定义类别)的目标，检测任务可能会失效，此时 MotionNet 则会根据时序信息输出该区域的目标速度(未来运动轨迹)，这可作为 Motion Planning 阶段的另一重要线索。</p><h2 id="framework">1. Framework</h2><p><img src="/paper-reading-MotionNet/framework.png" width="80%" height="80%" title="图 2. Framework"> 　　如图 2. 所示，MotionNet 输入为连续帧点云在当前坐标系下的俯视图表示，然后经过 Spatio-temporal Pyramid 网络作特征提取，最后三个分支网络输出三个信息：</p><ul><li>Cell Classification，每个 cell 的类别；</li><li>Motion Prediction，每个 cell 的未来轨迹；</li><li>State Estimation，每个 cell 是否静止的判断；</li></ul><h2 id="spatio-temporal-pyramid-network">2. Spatio-temporal Pyramid Network</h2><p><img src="/paper-reading-MotionNet/stpn.png" width="50%" height="50%" title="图 3. STPN"> 　　 将时序点云组织成多层的俯视图表达后，面临两个问题：1. 如何整合时序信息；2. 如何提取多尺度的空间及时序特征。本文设计了 STPN 网络，如图 3. 所示，STC 模块由 2D Convolution 以及 \(k\times 1\times 1\) 的 3D Convolution (本质上退化成 1D Convolution)组成；此外设计了金字塔式的特征提取结构，最终输出 \(1\times C\times H\times W\) 大小的特征图。相比于直接 3D 卷积形式，这种方式 2D + 1D 卷积方式极大提高了网络计算效率(很多地方用到这种方式，如 <a href="/paperreading-Fast-and-Furious/" title="FaF">FaF</a>)。</p><h2 id="output-heads">3. Output Heads</h2><p>　　三个分支输出的细节为：</p><ol type="1"><li>Cell Classification，输出尺寸为 \(H\times W\times C\)，其中 \(C\) 为类别；</li><li>Motion Prediction，输出尺寸为 \(N\times H\times W\times 2\)，表示时间 \(\tau\in (t,t+N)\) 内 cell 的位置 \(\{X ^ {(\tau)}\} _ {\tau =t} ^ {t + N}\)，其中 \(X ^ {(\tau)}\in\mathbb{R} ^ {H\times W\times 2}\) 只估计平面 2D 的位置。</li><li>State Estimation，输出尺寸为 \(H\times W\)，表示 cell 静止的概率。</li></ol><p>　　直接对静止 Cell 的 Motion Prediction 回归，会引入运动的微小跳变。这里采用两种策略来抑制这种跳变：1. 根据类别分支，如果是背景的类别，则将其 Motion 置 0；2. 根据静止判断分支，如果是静止的，则将其 Motion 也置为 0。这样就能较好的解决静态 cell 出速度轨迹的情况。</p><h2 id="loss-function">4. Loss Function</h2><p>　　Classification 和 State Estimation 用 Cross-Entropy Loss，Motion Prediction 用 Smooth L1 Loss。此外为了保证空域与时域的一致性，引入另外三种 Loss：</p><ul><li><strong>Spatial Consistency Loss</strong><br>属于同一物体的 Cell 的 Motion 应该是一致的(这里其实不太准确，考虑到转向情况，目标区域内 Cell 轨迹其实是不一样的，所以一般有两种思路，一种认为都一样，即每个 Cell 都建模成目标的运动；另一种则基于刚体假设，作类似 Flow 的建模，稍复杂些)。由此设计空间一致性损失函数： <span class="math display">\[L _ s = \sum _ {k}\sum _ {(i,j),(i&#39;,j&#39;)\in o _ k}\left\Vert X _ {i,j}^{(\tau)}-X _ {i&#39;,j&#39;} ^ {(\tau)}\right\Vert \tag{1}\]</span> 其中 \(||\cdot||\) 为 Smooth L1 Loss，\(o _ k\) 为第 \(k\) 个目标，\(X _ {i,j} ^ {(\tau)}\in\mathbb{R} ^ 2\) 为时间 \(\tau\) 时 Cell \((i,j)\) 的 motion。为了减少计算量，这里只是采样一些相邻的 \(X _ {i,j} ^ {(\tau)},X _ {i',j'} ^ {(\tau)}\) 匹配对。</li><li><strong>Foreground Temporal Consistency Loss</strong><br>类似的，属于同一物体的 Motion 在时域上也应该是一致的，所以设计损失函数： <span class="math display">\[L _ {ft} = \sum _ k\left\Vert X _ {o _ k} ^ {(\tau)} - X _ {o _ k} ^ {(\tau+\Delta t)}\right\Vert\tag{2}\]</span> 其中 \(X _ {o _ k} ^ {(\tau)}\in\mathbb{R} ^ 2\) 为第 \(k\) 个目标的 Motion，计算方式为 \(X _ {o _ k} ^ {(\tau)}=\sum _ {(i,j)\in o _ k}X _ {i,j} ^ {(\tau)}/M\)，其中 \(M\) 为目标中 Cell 的个数。</li><li><strong>Background Temporal Consistency Loss</strong><br>对静止的背景区域，其时域上 Motion 应该也是一致的(均为 0)。设计损失函数： <span class="math display">\[L _ {bt} = \sum _ {(i,j)\;\in\; X ^ {(\tau)}\;\cap\; T\left(\tilde{X} ^ {(\tau-\Delta t)}\right)}\left\Vert X _ {i,j} ^ {(\tau)}-T _ {i,j}\left(\tilde{X} ^ {(\tau-\Delta t)}\right)\right\Vert\tag{3}\]</span> 其中 \(T\in SE(3)\) 是 \(\tau-\Delta t\) 到 \(\tau\) 的位姿变换。将 \(\tilde{X} ^ {\tau-\Delta t}\) 变换到当前时刻后，与 \(X ^ {(\tau)}\) 会有一定的重合，将重合部分的背景区域的 Motion 约束为一致。有点 <a href="/Grid-Mapping/" title="Grid-Mapping">Grid-Mapping</a> 的味道。</li></ul><p>综上，所有的 Loss 为： <span class="math display">\[ L = L _ {cls} + L _ {motion} + L _ {state} + \alpha L _ s+ \beta L _ {ft} + \gamma L _ {bt} \tag{4}\]</span></p><h2 id="reference">5. Reference</h2><p><a id="1" href="#1ref">[1]</a> Wu, Pengxiang, Siheng Chen, and Dimitris N. Metaxas. &quot;MotionNet: Joint Perception and Motion Prediction for Autonomous Driving Based on Bird's Eye View Maps.&quot; Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. 2020.</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;　　基于点云的 3D 感知一般通过 3D 目标框实现，但是如果直接网络出 3D 目标框属性，那么召回率很难达到非常高的水平(所以之前提到检测的任务可以分解为分割+后处理聚类来作，这样召回率会比较高)。本文提出的 MotionNet&lt;a href=&quot;#1&quot; id=&quot;1ref&quot;
-      
-    
-    </summary>
-    
-      <category term="Deep Learning" scheme="https://leijiezhang001.github.io/categories/Deep-Learning/"/>
-    
-    
-      <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
-    
-      <category term="autonomous driving" scheme="https://leijiezhang001.github.io/tags/autonomous-driving/"/>
-    
-      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
-    
-      <category term="Deep Learning&quot;" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
     
   </entry>
   
