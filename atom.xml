@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://leijiezhang001.github.io/"/>
-  <updated>2020-11-23T01:34:12.000Z</updated>
+  <updated>2021-01-21T01:34:12.000Z</updated>
   <id>https://leijiezhang001.github.io/</id>
   
   <author>
@@ -15,6 +15,43 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>A Review and Comparative Study on Probabilistic Object Detection in Autonomous Driving</title>
+    <link href="https://leijiezhang001.github.io/A-Review-and-Comparative-Study-on-Probabilistic-Object-Detection-in-Autonomous-Driving/"/>
+    <id>https://leijiezhang001.github.io/A-Review-and-Comparative-Study-on-Probabilistic-Object-Detection-in-Autonomous-Driving/</id>
+    <published>2020-12-24T01:40:41.000Z</published>
+    <updated>2021-01-21T01:34:12.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>　　概率目标检测是将不确定估计应用于目标检测任务中，不确定性估计之前已经描述很多了，包括 Epistemic Uncertainty，Aleatoric Uncertainty，以及 Uncertainty Calibration 相关技术。本文<a href="#1" id="1ref"><sup>[1]</sup></a>则详细阐述概率目标检测的进展。<br>　　在自动驾驶领域，不管是什么传感器，在极端天气环境或不熟悉的场景下，以及远距离或高遮挡情况下，基于深度学习的目标检测模型失效概率会比较大，或者说预测的不确定性会比较大。人类驾驶员在这方面比较擅长，比如在雨夜看不太清的场景，会先降低速度，增加观察时间，以获得观测的高确定性。所以对网络而言，不确定的估计才能为后续增加观测的确定性作准备。</p><h2 id="uncertainty-estimation-in-deep-learning">1. Uncertainty Estimation in Deep Learning</h2><p>　　<a href="/Perception-Uncertainty-in-Deep-Learning/" title="Perception Uncertainty in Deep Learning">Perception Uncertainty in Deep Learning</a> 中已经较为详细得阐述了 Uncertainty 的来龙去脉。贝叶斯神经网络框架下，不确定性可分解为认知不确定性(Epistemic Uncertainty)以及偶然不确定性(Aleatoric Uncertainty)。 <img src="/A-Review-and-Comparative-Study-on-Probabilistic-Object-Detection-in-Autonomous-Driving/uncert-cate.png" width="60%" height="60%" title="图 1. Uncertainty Categorization"> 　　从感知数据流角度，如图 1. 所示，会引入很多不确定性，从最原始的传感器不确定性，到标注不确定性，再到模型训练测试的不确定性，所有这些不确定性构成了最终模型输出结果的不确定性。<br>　　数学上，对于训练数据集 \(\mathscr{D}\) 贝叶斯神经网络的输出分布表示为: <span class="math display">\[p(\mathbf{y|x}, \mathscr{D}) = \int p(\mathbf{y|x}, \mathbf{W})p(\mathbf{W}| \mathscr{D}) \mathrm{d}\mathbf{W}\tag{1}\]</span> 其中 \(p(\mathbf{y|x,W})\) 表示观测似然，包含了偶然不确定性；\(p(\mathbf{W}|\mathscr{D})\) 表示模型后验分布，包含认知不确定性。</p><h3 id="practical-methods-for-uncertainty-estimation">1.1. Practical Methods for Uncertainty Estimation</h3><p>　　实际不确定性的估计需要在效率上考虑到其可行性。可分为用于估计模型认知不确定性的 MC-Dropout，Deep Ensembles 方法；用于估计偶然不确定性的 Direct Modeling 方法；以及用于估计模型认知及偶然不确定性的 Error Propagation 方法，以下作详细描述：</p><ul><li><p>Monte-Carlo Dropout<br>对网络进行 \(T\) 次前向 Inference，\(\mathbf{W} _ t\) 为网络经过 dropout 后的权重，那么网络预测的概率分布为： <span class="math display">\[p(\mathbf{y|x},\mathscr{D})\approx \frac{1}{T}\sum _ {t=1} ^ T p(\mathbf{y|x,W _ t}) \tag{2}\]</span> 对于回归问题，由此可计算其回归量的均值和方差。</p></li><li><p>Deep Ensembles<br>用网络模型集合来估计输出的概率分布，本质上 Monte-Carlo Dropout 方法也是一种网络模型集合的方法。设 \(M\) 个网络权重为 \(\{\mathbf{W} _ m\} _ {m=1} ^ M\)，那么输出概率分布为： <span class="math display">\[p(\mathbf{y|x},\mathscr{D})\approx \frac{1}{M}\sum _ {m=1} ^ M p(\mathbf{y|x,W _ m}) \tag{3}\]</span></p></li><li><p>Direct Modeling<br>该方法假设模型的回归输出符合多模态混合高斯分布，即 \(p(y|\mathbf{x,W}) = \mathcal{N}(y|\hat{\mu}(\mathbf{x,W}),\hat{\sigma} ^ 2(\mathbf{x,W}))\)，其中 \(\hat{\mu}(\mathbf{x,W})\) 为网络输出，\(\hat{\sigma} ^ 2(\mathbf{x,W})\) 为输出值的方差。最小化负对数似然函数，即可预测输出量的均值和方差： <span class="math display">\[L(\mathbf{x,W})=-\mathrm{log}(p(\mathbf{y|x,W})) \approx \frac{(y-\hat{\mu}(\mathbf{x,W}))^2}{2\hat{\sigma} ^ 2(\mathbf{x,W})}+\frac{\mathrm{log}\hat{\sigma} ^ 2(\mathbf{x,W})}{2}\tag{4}\]</span> 对于分类问题，假设 softmax 预测中的每个 logits 元素符合独立高斯分布，类似回归问题，网络同时预测均值 logits 以及方差 logits。训练的时候，用重采样的方法在每个高斯分布中采样出每个 logits，最后再用标准的分类误差函数计算其损失函数。<br>直接模型求解只需要增加额外的模型分支即可，引入的计算量并不大，但是会产生预测的方差不准的问题，需要进一步标定。</p></li><li><p>Error Propagation<br>误差传递方法计算效率最高，直接将数据源的误差通过每个操作层进行传递，比如 <a href="/A-General-Framework-for-Uncertainty-Estimation-in-deep-learning/" title="A General Framework for Uncertainty Estimation in Deep Learning">A General Framework for Uncertainty Estimation in Deep Learning</a>。</p></li></ul><h3 id="evaluation-and-benchmarking">1.2. Evaluation and Benchmarking</h3><p>　　评估不确定性估计的指标有：</p><ul><li><p>Shannon Entropy<br>用来描述分类任务的不确定性： <span class="math display">\[\mathcal{H}(y|\mathbf{x},\mathscr{D}) = -\sum _ {c=1} ^ C p(y=c|\mathbf{x},\mathscr{D})\mathrm{log}\left(p(y=c|\mathbf{x},\mathscr{D})\right) \tag{5}\]</span> 当 \(p(y=c|\mathbf{x},\mathscr{D}) = 0 \mathrm{or} 1\) 时，不确定性最小。个人认为，该指标只能描述不确定性的大小，无法描述不确定估计的准确性。</p></li><li><p>Mutual Information<br>与 SE 类似，也是描述分类任务的不确定性，但是引入了模型不确定性： <span class="math display">\[\mathcal{I}(y,\mathbf{W|x},\mathscr{D})=\mathcal{H}(y|\mathbf{x},\mathscr{D})-\mathbb{E} _ {p(\mathbf{W}|\mathscr{D})}\left[\mathcal{H}(y|\mathbf{x,W})\right] \tag{6}\]</span> 其中 conditional Shannon Entropy 通过采样模型权重(MC-Dropout)计算得到： <span class="math display">\[\mathcal{H}(y|\mathbf{x,W}) = -\sum _ {c=1} ^ C p(y=c|\mathbf{x,W})\mathrm{log}\left(p(y=c|\mathbf{x,W})\right) \tag{7}\]</span></p></li><li><p>Calibration Plot<br><a href="/Uncertainty-Calibration/" title="Uncertainty Calibration">Uncertainty Calibration</a> 中已经较为详细的阐述了 Calibration Plot 的作用，这里不作展开。由此可用 ECE Score 来评估不确定的准确度： <span class="math display">\[\mathrm{ECE}=\sum _ {t=1} ^ T\frac{N _ t}{N _ {eval}}|p _ t-\hat{p} _ t| \tag{8}\]</span></p></li><li><p>Negative Log Likelihood(NLL)<br>NLL 也是 Direct Modeling 方法中不确定性的预测的 Loss，其描述了预测的概率分布与真值分布的相似性，所以能评估不确定性预测的准确度： <span class="math display">\[\mathrm{NLL}=-\sum _ {n=1} ^ {N _ {test}}\mathrm{log}\left(p(\mathbf{y _ n|x _ n}, \mathscr{D})\right) \tag{9}\]</span></p></li><li><p>Brier Score<br>用于评估分类概率的准确性: <span class="math display">\[\mathrm{BS} = \frac{1}{N _ {test}}\sum _ {n=1} ^ {N _ {test}}\sum _ {c=1} ^ C (\hat{s} _ {n,c} - y _ {n,c}) ^ 2 \tag{10}\]</span> 其中 \(\hat{s} _ {n,c}\) 表示 softmax score, \(y _ {n,c}\in\{0, 1\}\) 表示真值。越小表示估计的不确定性越好。</p></li><li><p>Error Curve<br>不确定性越大，表示与真值的误差越大。所以逐步去掉不确定性较大的数据，剩下数据的误差会逐渐减少。</p></li><li><p>Total Variance(TV)<br>在回归任务中，计算 Covariance matrix 的 trace，作为回归任务的总的方差。</p></li></ul><h2 id="probabilistic-object-detection">2. Probabilistic Object Detection</h2><p>　　传统的目标检测方法都是确定性的，而 POD 目的是在目标检测的基础上，在分类及回归任务中，进一步估计可靠的不确定性。<br><img src="/A-Review-and-Comparative-Study-on-Probabilistic-Object-Detection-in-Autonomous-Driving/det.png" width="90%" height="90%" title="图 2. POD Pipeline"> 　　我们要估计的不确定性包括 Epistemic Uncertainty 以及 Aleatoric Uncertainty。认知不确定性用 MC-Dropout 来估计。偶然不确定性中的回归问题在 <a href="/Heteroscedastic-Aleatoric-Uncertainty/" title="Heteroscedastic Aleatoric Uncertainty">Heteroscedastic Aleatoric Uncertainty</a> 中已经较为详细的描述，基本就是用 NLL LOSS 来优化；对于分类问题，本文采用重采样高斯分布的 softmax logits 的方法，具体的，预测输出与分类 softmax logits 长度一样的 logits variance，然后对每个高斯分布的 logit 作重采样，作为最终的输出以作 Loss 优化。<br>　　综上，POD 估计不确定性可归纳为： <span class="math display">\[\left\{\begin{array}{l}\hat{\mu}(\mathbf{x}) = \frac{1}{T}\sum _ {t=1} ^ T(\mathbf{x,W} _ t) \\\hat{\sigma} ^ 2(\mathbf{x}) = \hat{\sigma} _ e ^ 2(\mathbf{x}) + \hat{\sigma} _ a ^ 2(\mathbf{x}) \\\hat{\sigma} _ e ^ 2(\mathbf{x}) = \frac{1}{T}\sum _ {t=1} ^ T\left(\hat{\mu}(\mathbf{x,W} _ t)\right) ^ 2 - \left(\hat{\mu}(\mathbf{x})\right) ^ 2\\\hat{\sigma} _ a ^ 2(\mathbf{x}) = \frac{1}{T} \sum _ {t=1} ^ T \hat{\sigma} ^ 2(\mathbf{x,W} _ t)\end{array}\tag{11}\right.\]</span> 通过 T 次蒙特卡洛采样，得到最终总的不确定性。</p><h2 id="comparative-study">3. Comparative Study</h2><p><img src="/A-Review-and-Comparative-Study-on-Probabilistic-Object-Detection-in-Autonomous-Driving/pod.png" width="90%" height="90%" title="图 3. Methods"> 　　用 Droupout 估计 Epistemic Uncertainty，对于 Aleatoric Uncertainty 的估计，实现了三种方法：</p><ul><li><p>Loss Attenuation<br>网络输出分类 logits 以及回归量的均值和方差，用 Direct Modeling 中的权重 Loss 来优化；</p></li><li><p>BayesOD<br>与 Loss Attenuation 不同的是，后处理用 Data Association + Bayesian Fusion 来代替标准的 NMS 算法；</p></li><li><p>Output Redundancy<br>网络输出不作改变，后处理采用 Data Association + Sample Statistics 来估计不确定性；</p></li></ul><p><img src="/A-Review-and-Comparative-Study-on-Probabilistic-Object-Detection-in-Autonomous-Driving/res.png" width="90%" height="90%" title="图 4. Evaluation Result"> 　　这几种方法对比如图 4. 所示，不确定性估计对目标检测性能有所提升，并且能提供预测的不确定性。具体方法的实现细节可见<a href="#2" id="2ref">[2]</a>。</p><h2 id="reference">4. Reference</h2><p><a id="1" href="#1ref">[1]</a> Feng, Di, et al. &quot;A Review and Comparative Study on Probabilistic Object Detection in Autonomous Driving.&quot; arXiv preprint arXiv:2011.10671 (2020).<br><a id="2" href="#2ref">[2]</a> https://github.com/asharakeh/pod_compare</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;　　概率目标检测是将不确定估计应用于目标检测任务中，不确定性估计之前已经描述很多了，包括 Epistemic Uncertainty，Aleatoric Uncertainty，以及 Uncertainty Calibration 相关技术。本文&lt;a href=&quot;#1&quot; i
+      
+    
+    </summary>
+    
+      <category term="Deep Learning" scheme="https://leijiezhang001.github.io/categories/Deep-Learning/"/>
+    
+      <category term="Review" scheme="https://leijiezhang001.github.io/categories/Deep-Learning/Review/"/>
+    
+    
+      <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
+    
+      <category term="3D Detection" scheme="https://leijiezhang001.github.io/tags/3D-Detection/"/>
+    
+      <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
+    
+      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
+    
+      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
+    
+      <category term="Multi-modal Fusion" scheme="https://leijiezhang001.github.io/tags/Multi-modal-Fusion/"/>
+    
+  </entry>
   
   <entry>
     <title>Deep Multi-modal Object Detection and Semantic Segmentation for Autonomous Driving - Datasets, Methods, and Challenges</title>
@@ -635,39 +672,6 @@
       
       
         &lt;p&gt;　　在大多数场景下，融合激光雷达与图像数据能有效提升各种深度学习任务性能。本文&lt;a href=&quot;#1&quot; id=&quot;1ref&quot;&gt;&lt;sup&gt;[1]&lt;/sup&gt;&lt;/a&gt;提出了一种图像数据与激光雷达的前融合框架，并且考虑到分类分数与定位置信度的不一致性，提出了一种约束两者一致性的 L
-      
-    
-    </summary>
-    
-      <category term="3D Detection" scheme="https://leijiezhang001.github.io/categories/3D-Detection/"/>
-    
-    
-      <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
-    
-      <category term="3D Detection" scheme="https://leijiezhang001.github.io/tags/3D-Detection/"/>
-    
-      <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
-    
-      <category term="autonomous driving" scheme="https://leijiezhang001.github.io/tags/autonomous-driving/"/>
-    
-      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>[paper_reading]-&quot;PV-RCNN&quot;</title>
-    <link href="https://leijiezhang001.github.io/paper-reading-PV-RCNN/"/>
-    <id>https://leijiezhang001.github.io/paper-reading-PV-RCNN/</id>
-    <published>2020-08-19T01:24:10.000Z</published>
-    <updated>2020-08-20T01:19:12.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>　　PV-RCNN<a href="#1" id="1ref"><sup>[1]</sup></a> 目前在 Waymo 数据集上排名第二，性能还是比较强悍的，顺便也看了下港中文多媒体实验室开源的 OpenPCDet<a href="#2" id="2ref"><sup>[2]</sup></a> 代码，收获还是蛮多，与图像点云通用的 mmdetection3d<a href="#3" id="3ref"><sup>[3]</sup></a> 各有优劣吧。虽然 PV-RCNN 对于实际应用还是略显复杂，以及超参数较麻烦，但是其相关思想还是非常值得借鉴。本文主要关注其 Point + Vexol 特征提取并融合的方式。</p><h2 id="framework">1. Framework</h2><p><img src="/paper-reading-PV-RCNN/framework.png" width="90%" height="90%" title="图 1. Framework"> 　　如图 1. 所示，PV-RCNN 首先将原始点云体素化，然后用 3D Sparse Convolution(<a href="/Rethinking-of-Sparse-3D-Convolution/" title="Rethinking of Sparse 3D Convolution">Rethinking of Sparse 3D Convolution</a>) 作 Voxel-level 的特征提取，并预测俯视图下的目标 ROI Proposal；另一方面，在原始点云中用 FPS 采样出特定数量的 key-point，然后通过 Voxel Set Abstraction 模块，将提取到的多尺度的 Voxel-level 特征融合到 key-point 特征；最后用 ROI-Grid 模块将 key-point 特征融合到 ROI Grid-Point 中，作进一步的 3D 目标框属性精细化预测。<br>　　由此不仅利用了 Voxel-level 3D Sparse Convolution 的高效性，还利用了 Point-based 模型对局部信息提取更加精细有效的特性。总体上，PV-RCNN 框架中特征提取操作由两大块组成：1. Voxel-to-Keypoint Scene Encoding；2. Point-to-Grid RoI Feature Abstraction。</p><h2 id="voxel-to-keypoint-scene-encoding">2. Voxel-to-Keypoint Scene Encoding</h2><p>　　该模块的作用是将提取的特征用特定数量的 Keypoint 来表示。所以有 Keypoints Sampling，Voxel Set Abstraction Module，Extended VSA Module，Predicted Keypoint Weighting 等组成。</p><h3 id="keypoints-sampling">2.1. Keypoints Sampling</h3><p>　　因为期望采样的 Keypoints 能完全覆盖整个场景，所以采用 Furthest-Point-Sampling(FPS) 来采样 \(n\) 个点 \(\mathcal{K}=\{p _ 1,...,p _ n\}\)。对于 KITTI 数据集，取 \(n=2048\)，对于 Waymo 数据集，取 \(n=4096\)。</p><h3 id="voxel-set-abstraction-module">2.2. Voxel Set Abstraction Module</h3><p>　　VSA 模块将经过 3D Sparse Convolution 得到的多尺度的 Voxel 特征编码为 Keypoints 表达形式，与 <a href="/PointNet-系列论文详读/" title="PointNet-系列论文详读">PointNet-系列论文详读</a> 类似，只不过这里点周围不是点，而是 Voxel。<br>　　具体的，设尺度 \(k\) 的 3D voxel 特征集合为 \(\mathcal{F}^ {(l _ k)}=\{f _ 1 ^ {(l _ k)},...,f _ {N _ k}^{(l _ k)}\}\)，对应的 Voxel 3D 坐标为 \(\mathcal{V}^ {(l _ k)}=\{v _ 1 ^ {(l _ k)},...,v _ {N _ k}^{(l _ k)}\}\)，其中 \(N _ k\) 为非零 Voxel 数量。对于 keypoint \(p _ i\)，在半径 \(r _ k\) 内找到所有 voxel 的特征向量： <span class="math display">\[S _ i ^ {(l _ k)} = \left\{\left[f _ j^{(l _ k)};v _ j^{(l _ k)}-p _ i\right] ^ T \left\vert\begin{array}{l}\Vert v _ j^{(l _ k)}-p _ i\Vert ^ 2 &lt; r _ k,\\\forall v _ j^{(l _ k)} \in \mathcal{V} ^ {(l _ k)},\\\forall f _ j ^ {(l _ k)} \in \mathcal{F} ^ {(l _ k)}\end{array}\right.\right\}\tag{1}\]</span> 其中 \(v _ j^{(l _ k)}-p _ i\) 为对应的 Voxel 与该点 \(p _ i\) 的相对位置，与特征向量串联得到该 Voxel 在该点的投影特征。由此用 PointNet 方式可得到该 Keypoint 融合领域内 Voxel 特征集 \(S _ i ^ {(l _ k)}\) 后的特征： <span class="math display">\[f _ i ^ {(pv _ k)}=\mathrm{max}\left\{G\left(\mathcal{M}(S _ i^{(l _ k)})\right)\right\}\tag{2}\]</span> 其中 \(\mathcal{M}\) 为随机采样 Voxel 的操作，目的是为了减少计算量；\(G\) 为 MLP 网络。<br>　　本文采用了 4 个尺度的 Voxel 特征，每个尺度的领域半径 \(r _ k\) 根据感受野而变化。最终得到的多尺度的语义的 Keypoint 特征为： <span class="math display">\[f _ i^{(pv)} = \left[f _ i^{(pv _ 1)},f _ i^{(pv _ 2)},f _ i^{(pv _ 3)},f _ i^{(pv _ 4)}\right],\;\mathrm{for}\; i = 1,...,n\tag{3}\]</span></p><h3 id="extended-vsa-module">2.3. Extended VSA Module</h3><p>　　此外，Keypoint 还利用了原始点云的特征以及经过 3D Sparse Convolution 和 ToBEV 后的 2D BEV 特征。Keypoint 通过双线性插值的方式从 BEV 特征层中计算对应空间位置的特征。综上，Keypoint 特征为： <span class="math display">\[f _ i^{(p)} = \left[f _ i^{(pv)},f _ i^{(raw)},f _ i^{(bev)}\right],\;\mathrm{for}\; i = 1,...,n\tag{4}\]</span></p><h3 id="predicted-keypoint-weighting">2.4. Predicted Keypoint Weighting</h3><p><img src="/paper-reading-PV-RCNN/weight.png" width="50%" height="50%" title="图 2. PKW"> 　　通过 FPS 采样得到的 Keypoint 也包含了大量的背景点，所以需要弱化背景点的特征，强化前景点特征，以便之后前景目标框属性的精细化估计。如图 2. 所示，训练阶段，对 Keypoint 进行点级别前景背景分类，标签可由目标框内点自动生成；测试阶段，直接预测点的类别，然后作点特征的权重化整合： <span class="math display">\[\tilde{f _ i} ^ {(p)} = \mathcal{A}(f _ i^{(p)})\cdot f _ i^{(p)}\tag{5}\]</span> 其中 \(\mathcal{A}(\cdot)\) 为 MLP 网络。</p><h2 id="point-to-grid-roi-feature-abstraction">3. Point-to-Grid RoI Feature Abstraction</h2><p><img src="/paper-reading-PV-RCNN/roi.png" width="50%" height="50%" title="图 3. RoI-grid Pooling"> 　　得到了 Keypoint 特征 \(\mathcal{\tilde{F}}=\{\tilde{f} _ 1^{(p)},...,\tilde{f} _ n^{(p)}\}\) 以及俯视图下的 3D proposal ROI 后，可进一步提取 ROI 特征，以作 3D 目标框属性的精细化估计。如图 3. 所示，类似 Voxel-to-Point 的 Voxel Set Abstraction 模块，本文提出了 Point-to-Grid 的 Set Abstraction，称之为 ROI-Grid Pooling。具体的，对每个 ROI Proposal，采样 \(6\times 6\times 6\) 个栅格点：\(\mathcal{G}=\{g _ 1,...,g _ {216}\}\)。Set Abstraction 操作将 Keypoint 的特征映射到栅格点处。类似 VSA，首先在 \(\tilde{r}\) 半径内查找栅格点的周围 Keypoint： <span class="math display">\[\tilde{\psi} = \left\{\left[\tilde{f} _ j^{(p)};p _ j-g _ i\right] ^ T \left\vert\begin{array}{l}\Vert p _ j-g _ i\Vert ^ 2 &lt; \tilde{r},\\\forall p _ j\in \mathcal{K},\\\forall \tilde{f} _ j ^ {(p)} \in \mathcal{\tilde{F}}\end{array}\right.\right\}\tag{6}\]</span> 类似的，再通过 PointNet 得到栅格点 \(g _ i\) 的特征： <span class="math display">\[\tilde{f} _ i ^ {(g)}=\mathrm{max}\left\{G\left(\mathcal{M}(\tilde{\psi})\right)\right\}\tag{7}\]</span> 　　由此得到所有 ROI 固定长度的特征向量，进而可在 ROI Proposal 的基础上，作最后的尺寸，角度，位置等属性的精细化估计，这里不做展开。</p><h2 id="reference">4. Reference</h2><p><a id="1" href="#1ref">[1]</a> Shi, Shaoshuai, et al. &quot;Pv-rcnn: Point-voxel feature set abstraction for 3d object detection.&quot; Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. 2020.<br><a id="2" href="#2ref">[2]</a> https://github.com/open-mmlab/OpenPCDet<br><a id="3" href="#3ref">[3]</a> https://github.com/open-mmlab/mmdetection3d</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;　　PV-RCNN&lt;a href=&quot;#1&quot; id=&quot;1ref&quot;&gt;&lt;sup&gt;[1]&lt;/sup&gt;&lt;/a&gt; 目前在 Waymo 数据集上排名第二，性能还是比较强悍的，顺便也看了下港中文多媒体实验室开源的 OpenPCDet&lt;a href=&quot;#2&quot; id=&quot;2ref&quot;&gt;&lt;sup&gt;[
       
     
     </summary>

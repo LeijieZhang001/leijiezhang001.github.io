@@ -104,6 +104,82 @@ U2FsdGVkX1+0L8PFl7dVZZE9ttrl+crlcJSRG8lHAOtuLr8L5pVTVxVB0blsE4YdKG9+eBdnnTOTSwdT
       </tags>
   </entry>
   <entry>
+    <title>A Review and Comparative Study on Probabilistic Object Detection in Autonomous Driving</title>
+    <url>/A-Review-and-Comparative-Study-on-Probabilistic-Object-Detection-in-Autonomous-Driving/</url>
+    <content><![CDATA[<p>　　概率目标检测是将不确定估计应用于目标检测任务中，不确定性估计之前已经描述很多了，包括 Epistemic Uncertainty，Aleatoric Uncertainty，以及 Uncertainty Calibration 相关技术。本文<a href="#1" id="1ref"><sup>[1]</sup></a>则详细阐述概率目标检测的进展。<br>
+　　在自动驾驶领域，不管是什么传感器，在极端天气环境或不熟悉的场景下，以及远距离或高遮挡情况下，基于深度学习的目标检测模型失效概率会比较大，或者说预测的不确定性会比较大。人类驾驶员在这方面比较擅长，比如在雨夜看不太清的场景，会先降低速度，增加观察时间，以获得观测的高确定性。所以对网络而言，不确定的估计才能为后续增加观测的确定性作准备。</p>
+<h2 id="uncertainty-estimation-in-deep-learning">1. Uncertainty Estimation in Deep Learning</h2>
+<p>　　<a href="/Perception-Uncertainty-in-Deep-Learning/" title="Perception Uncertainty in Deep Learning">Perception Uncertainty in Deep Learning</a> 中已经较为详细得阐述了 Uncertainty 的来龙去脉。贝叶斯神经网络框架下，不确定性可分解为认知不确定性(Epistemic Uncertainty)以及偶然不确定性(Aleatoric Uncertainty)。 <img src="/A-Review-and-Comparative-Study-on-Probabilistic-Object-Detection-in-Autonomous-Driving/uncert-cate.png" width="60%" height="60%" title="图 1. Uncertainty Categorization"> 　　从感知数据流角度，如图 1. 所示，会引入很多不确定性，从最原始的传感器不确定性，到标注不确定性，再到模型训练测试的不确定性，所有这些不确定性构成了最终模型输出结果的不确定性。<br>
+　　数学上，对于训练数据集 \(\mathscr{D}\) 贝叶斯神经网络的输出分布表示为: <span class="math display">\[p(\mathbf{y|x}, \mathscr{D}) = \int p(\mathbf{y|x}, \mathbf{W})p(\mathbf{W}| \mathscr{D}) \mathrm{d}\mathbf{W}\tag{1}\]</span> 其中 \(p(\mathbf{y|x,W})\) 表示观测似然，包含了偶然不确定性；\(p(\mathbf{W}|\mathscr{D})\) 表示模型后验分布，包含认知不确定性。</p>
+<h3 id="practical-methods-for-uncertainty-estimation">1.1. Practical Methods for Uncertainty Estimation</h3>
+<p>　　实际不确定性的估计需要在效率上考虑到其可行性。可分为用于估计模型认知不确定性的 MC-Dropout，Deep Ensembles 方法；用于估计偶然不确定性的 Direct Modeling 方法；以及用于估计模型认知及偶然不确定性的 Error Propagation 方法，以下作详细描述：</p>
+<ul>
+<li><p>Monte-Carlo Dropout<br>
+对网络进行 \(T\) 次前向 Inference，\(\mathbf{W} _ t\) 为网络经过 dropout 后的权重，那么网络预测的概率分布为： <span class="math display">\[p(\mathbf{y|x},\mathscr{D})\approx \frac{1}{T}\sum _ {t=1} ^ T p(\mathbf{y|x,W _ t}) \tag{2}\]</span> 对于回归问题，由此可计算其回归量的均值和方差。</p></li>
+<li><p>Deep Ensembles<br>
+用网络模型集合来估计输出的概率分布，本质上 Monte-Carlo Dropout 方法也是一种网络模型集合的方法。设 \(M\) 个网络权重为 \(\{\mathbf{W} _ m\} _ {m=1} ^ M\)，那么输出概率分布为： <span class="math display">\[p(\mathbf{y|x},\mathscr{D})\approx \frac{1}{M}\sum _ {m=1} ^ M p(\mathbf{y|x,W _ m}) \tag{3}\]</span></p></li>
+<li><p>Direct Modeling<br>
+该方法假设模型的回归输出符合多模态混合高斯分布，即 \(p(y|\mathbf{x,W}) = \mathcal{N}(y|\hat{\mu}(\mathbf{x,W}),\hat{\sigma} ^ 2(\mathbf{x,W}))\)，其中 \(\hat{\mu}(\mathbf{x,W})\) 为网络输出，\(\hat{\sigma} ^ 2(\mathbf{x,W})\) 为输出值的方差。最小化负对数似然函数，即可预测输出量的均值和方差： <span class="math display">\[L(\mathbf{x,W})=-\mathrm{log}(p(\mathbf{y|x,W})) \approx \frac{(y-\hat{\mu}(\mathbf{x,W}))^2}{2\hat{\sigma} ^ 2(\mathbf{x,W})}+\frac{\mathrm{log}\hat{\sigma} ^ 2(\mathbf{x,W})}{2}\tag{4}\]</span> 对于分类问题，假设 softmax 预测中的每个 logits 元素符合独立高斯分布，类似回归问题，网络同时预测均值 logits 以及方差 logits。训练的时候，用重采样的方法在每个高斯分布中采样出每个 logits，最后再用标准的分类误差函数计算其损失函数。<br>
+直接模型求解只需要增加额外的模型分支即可，引入的计算量并不大，但是会产生预测的方差不准的问题，需要进一步标定。</p></li>
+<li><p>Error Propagation<br>
+误差传递方法计算效率最高，直接将数据源的误差通过每个操作层进行传递，比如 <a href="/A-General-Framework-for-Uncertainty-Estimation-in-deep-learning/" title="A General Framework for Uncertainty Estimation in Deep Learning">A General Framework for Uncertainty Estimation in Deep Learning</a>。</p></li>
+</ul>
+<h3 id="evaluation-and-benchmarking">1.2. Evaluation and Benchmarking</h3>
+<p>　　评估不确定性估计的指标有：</p>
+<ul>
+<li><p>Shannon Entropy<br>
+用来描述分类任务的不确定性： <span class="math display">\[\mathcal{H}(y|\mathbf{x},\mathscr{D}) = -\sum _ {c=1} ^ C p(y=c|\mathbf{x},\mathscr{D})\mathrm{log}\left(p(y=c|\mathbf{x},\mathscr{D})\right) \tag{5}\]</span> 当 \(p(y=c|\mathbf{x},\mathscr{D}) = 0 \mathrm{or} 1\) 时，不确定性最小。个人认为，该指标只能描述不确定性的大小，无法描述不确定估计的准确性。</p></li>
+<li><p>Mutual Information<br>
+与 SE 类似，也是描述分类任务的不确定性，但是引入了模型不确定性： <span class="math display">\[\mathcal{I}(y,\mathbf{W|x},\mathscr{D})=\mathcal{H}(y|\mathbf{x},\mathscr{D})-\mathbb{E} _ {p(\mathbf{W}|\mathscr{D})}\left[\mathcal{H}(y|\mathbf{x,W})\right] \tag{6}\]</span> 其中 conditional Shannon Entropy 通过采样模型权重(MC-Dropout)计算得到： <span class="math display">\[\mathcal{H}(y|\mathbf{x,W}) = -\sum _ {c=1} ^ C p(y=c|\mathbf{x,W})\mathrm{log}\left(p(y=c|\mathbf{x,W})\right) \tag{7}\]</span></p></li>
+<li><p>Calibration Plot<br>
+<a href="/Uncertainty-Calibration/" title="Uncertainty Calibration">Uncertainty Calibration</a> 中已经较为详细的阐述了 Calibration Plot 的作用，这里不作展开。由此可用 ECE Score 来评估不确定的准确度： <span class="math display">\[\mathrm{ECE}=\sum _ {t=1} ^ T\frac{N _ t}{N _ {eval}}|p _ t-\hat{p} _ t| \tag{8}\]</span></p></li>
+<li><p>Negative Log Likelihood(NLL)<br>
+NLL 也是 Direct Modeling 方法中不确定性的预测的 Loss，其描述了预测的概率分布与真值分布的相似性，所以能评估不确定性预测的准确度： <span class="math display">\[\mathrm{NLL}=-\sum _ {n=1} ^ {N _ {test}}\mathrm{log}\left(p(\mathbf{y _ n|x _ n}, \mathscr{D})\right) \tag{9}\]</span></p></li>
+<li><p>Brier Score<br>
+用于评估分类概率的准确性: <span class="math display">\[\mathrm{BS} = \frac{1}{N _ {test}}\sum _ {n=1} ^ {N _ {test}}\sum _ {c=1} ^ C (\hat{s} _ {n,c} - y _ {n,c}) ^ 2 \tag{10}\]</span> 其中 \(\hat{s} _ {n,c}\) 表示 softmax score, \(y _ {n,c}\in\{0, 1\}\) 表示真值。越小表示估计的不确定性越好。</p></li>
+<li><p>Error Curve<br>
+不确定性越大，表示与真值的误差越大。所以逐步去掉不确定性较大的数据，剩下数据的误差会逐渐减少。</p></li>
+<li><p>Total Variance(TV)<br>
+在回归任务中，计算 Covariance matrix 的 trace，作为回归任务的总的方差。</p></li>
+</ul>
+<h2 id="probabilistic-object-detection">2. Probabilistic Object Detection</h2>
+<p>　　传统的目标检测方法都是确定性的，而 POD 目的是在目标检测的基础上，在分类及回归任务中，进一步估计可靠的不确定性。<br>
+<img src="/A-Review-and-Comparative-Study-on-Probabilistic-Object-Detection-in-Autonomous-Driving/det.png" width="90%" height="90%" title="图 2. POD Pipeline"> 　　我们要估计的不确定性包括 Epistemic Uncertainty 以及 Aleatoric Uncertainty。认知不确定性用 MC-Dropout 来估计。偶然不确定性中的回归问题在 <a href="/Heteroscedastic-Aleatoric-Uncertainty/" title="Heteroscedastic Aleatoric Uncertainty">Heteroscedastic Aleatoric Uncertainty</a> 中已经较为详细的描述，基本就是用 NLL LOSS 来优化；对于分类问题，本文采用重采样高斯分布的 softmax logits 的方法，具体的，预测输出与分类 softmax logits 长度一样的 logits variance，然后对每个高斯分布的 logit 作重采样，作为最终的输出以作 Loss 优化。<br>
+　　综上，POD 估计不确定性可归纳为： <span class="math display">\[\left\{\begin{array}{l}
+\hat{\mu}(\mathbf{x}) = \frac{1}{T}\sum _ {t=1} ^ T(\mathbf{x,W} _ t) \\
+\hat{\sigma} ^ 2(\mathbf{x}) = \hat{\sigma} _ e ^ 2(\mathbf{x}) + \hat{\sigma} _ a ^ 2(\mathbf{x}) \\
+\hat{\sigma} _ e ^ 2(\mathbf{x}) = \frac{1}{T}\sum _ {t=1} ^ T\left(\hat{\mu}(\mathbf{x,W} _ t)\right) ^ 2 - \left(\hat{\mu}(\mathbf{x})\right) ^ 2\\
+\hat{\sigma} _ a ^ 2(\mathbf{x}) = \frac{1}{T} \sum _ {t=1} ^ T \hat{\sigma} ^ 2(\mathbf{x,W} _ t)
+\end{array}\tag{11}\right.\]</span> 通过 T 次蒙特卡洛采样，得到最终总的不确定性。</p>
+<h2 id="comparative-study">3. Comparative Study</h2>
+<p><img src="/A-Review-and-Comparative-Study-on-Probabilistic-Object-Detection-in-Autonomous-Driving/pod.png" width="90%" height="90%" title="图 3. Methods"> 　　用 Droupout 估计 Epistemic Uncertainty，对于 Aleatoric Uncertainty 的估计，实现了三种方法：</p>
+<ul>
+<li><p>Loss Attenuation<br>
+网络输出分类 logits 以及回归量的均值和方差，用 Direct Modeling 中的权重 Loss 来优化；</p></li>
+<li><p>BayesOD<br>
+与 Loss Attenuation 不同的是，后处理用 Data Association + Bayesian Fusion 来代替标准的 NMS 算法；</p></li>
+<li><p>Output Redundancy<br>
+网络输出不作改变，后处理采用 Data Association + Sample Statistics 来估计不确定性；</p></li>
+</ul>
+<p><img src="/A-Review-and-Comparative-Study-on-Probabilistic-Object-Detection-in-Autonomous-Driving/res.png" width="90%" height="90%" title="图 4. Evaluation Result"> 　　这几种方法对比如图 4. 所示，不确定性估计对目标检测性能有所提升，并且能提供预测的不确定性。具体方法的实现细节可见<a href="#2" id="2ref">[2]</a>。</p>
+<h2 id="reference">4. Reference</h2>
+<p><a id="1" href="#1ref">[1]</a> Feng, Di, et al. &quot;A Review and Comparative Study on Probabilistic Object Detection in Autonomous Driving.&quot; arXiv preprint arXiv:2011.10671 (2020).<br>
+<a id="2" href="#2ref">[2]</a> https://github.com/asharakeh/pod_compare</p>
+]]></content>
+      <categories>
+        <category>Deep Learning</category>
+        <category>Review</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>3D Detection</tag>
+        <tag>Point Cloud</tag>
+        <tag>paper reading</tag>
+        <tag>Autonomous Driving</tag>
+        <tag>Multi-modal Fusion</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Deep Multi-modal Object Detection and Semantic Segmentation for Autonomous Driving - Datasets, Methods, and Challenges</title>
     <url>/Deep-Multi-modal-Object-Detection-and-Semantic-Segmentation/</url>
     <content><![CDATA[<p>　　由于相机，激光雷达，毫米波雷达等传感器各有优劣，所以深度多模态数据融合在自动驾驶感知中非常重要。本文<a href="#1" id="1ref"><sup>[1]</sup></a>以目标检测及语义分割为例，详细阐述了深度多模态数据融合的发展及挑战。<br>
@@ -1589,33 +1665,27 @@ s _ i ^ {t+1} &amp;= MLP _ g ^ t\left(MAX(\{e _ {ij}|(i,j)\in E\})\right)+ s _ i
       </tags>
   </entry>
   <entry>
-    <title>[paper_reading]-&quot;SA-SSD: Structure Aware Single-stage 3D Object Detection from Point Cloud&quot;</title>
-    <url>/SA-SSD/</url>
-    <content><![CDATA[<p>　　Voxel-based 3D Detection 相比 <a href="/Point-based-3D-Det/" title="Point-based 3D Detection">Point-based 3D Detection</a> 的缺点是特征提取不仅在 Voxel 阶段损失了一定的点云信息，而且 Voxel 化后丢失了点云之间的拓扑关系。<a href="/Point-based-3D-Det/" title="Point-based 3D Detection">Point-based 3D Detection</a> 中详细描述了几种 Point-based 方法，这种方法目前比较棘手的地方是，即使作 Inference 时，也需要作 kd-tree 搜索与采样等运算量较大的操作。那么如何榨干 Voxel-based 的性能对工业界落地就显得比较重要了，本文<a href="#1" id="1ref"><sup>[1]</sup></a>提出了一种单阶段的 Voxel-based 3D 检测方法，并借助了 Point 级别特征提取的相关策略，使得检测性能有较大提升。</p>
+    <title>[paper_reading]-&quot;Boundary-Aware Dense Feature Indicator for Single-Stage 3D Object Detection from Point Clouds&quot;</title>
+    <url>/DENFIDet/</url>
+    <content><![CDATA[<p>　　俯视图下 Voxel-based 点云 3D 目标检测一般会使用 2D 检测网络及相关策略。但是不同于图像的 2D 目标检测，俯视图下目标的点云信息基本在边缘处，所以如何准确得捕捉目标的边缘信息对特征提取的有效性非常关键。本文<a href="#1" id="1ref"><sup>[1]</sup></a> 提出了一种能捕捉目标边缘信息的网络结构，从而作更准确的目标检测。</p>
 <h2 id="framework">1. Framework</h2>
-<p><img src="/SA-SSD/framework.png" width="100%" height="100%" title="图 1. Framework of SA-SSD"> 　　如图 1. 所示，SA-SSD 由三部分组成：Backbone，Detection Head，Auxiliary Network。<br>
-　　Backbone 的输入是栅格化后的点云表示方式，文中栅格大小设定为 \(0.05m,0.05m,0.1m\)。Backbone 由一系列的 3D convolution 组成，因为需要保留空间三维位置信息，作 Voxel-to-Point 的映射。这里如果用 2D convolution 代替，那么 Auxiliary Network 估计也只能作 BridView 的分割了。<br>
-　　Detection Head 主体就是传统 Anchor-Free 结构，一个分支用于预测每个特征层像素点的 Confidence，另一个分支用于预测基于每个特征层像素点的 BBox 属性，如，以该点为 &quot;Anchor&quot; 的四个顶点坐标。此外，为了消除 One-Stage 方法中目标框与置信度不对齐的问题，本文引入 Part-sensitive Warping 来实现与 PSRoiAlign 类似的作用，实现两者的对齐。<br>
-　　Auxiliary Network 只在训练的阶段起作用，Inference 阶段不需要计算。该模块的作用是训练时通过 Voxel-to-Point 特征映射来反向传播监督 Backbone 中的 Voxel 特征学习 Point 级别的特征，包括点云的空间拓扑关系。<strong>当然 Inference 时也可以保留该分割模块，那么还可以增加点级别的特征反映射到 Voxel 的模块(Point-to-Voxel)，进一步作特征增强。</strong></p>
-<h2 id="detachable-auxiliary-network">2. Detachable Auxiliary Network</h2>
-<p><img src="/SA-SSD/sa.png" width="60%" height="60%" title="图 2. Structured Aware Feature Learning"> 　　如图 2. 所示，随着 Backbone 特征提取的感受野增大(特征分辨率下降)，背景点会接近目标的边缘，使得目标框大小不容易预测准确。本文提出的 Auxiliary Network，通过增加点级别分割及目标中心坐标预测任务，来监督 Backbone 特征层捕捉这种结构信息，从而达到更准确的目标检测的目的。<br>
-　　Auxiliary Network 的输入来自 Backbone 各个分辨率的特征层。将特征层上不为零的特征点，通过 Voxel-to-Point 反栅格化映射到三维空间，设该特征点表示为 \(\{(f _ j,p _ j):j=1,...,M\}\)，其中 \(f\) 为特征向量，\(p\) 为坐标向量。有了栅格对应的伪三维坐标点下的特征表示后，即可插值出实际点云中每个点的特征向量。设点云中点的插值特征为：\(\{(\hat{f} _ i,p _ i):i=1,...,N\}\)，采用 Inverse Distance Weighted 方法进行插值： <span class="math display">\[ \hat{f} _ i = \frac{\sum _ {j=1}^Mw _ j(p _ i)f _ j}{\sum _ {j=1}^Mw _ j(p _ i)} \tag{1}\]</span> 其中： <span class="math display">\[w _ j(p _ i)=\left\{\begin{array}{l}
-\frac{1}{\Vert p _ i-p _ j\Vert _ 2} &amp; \mathrm{if} p _ j\in\mathcal{N}(p _ i)\\
-0 &amp; \mathrm{otherwise}
-\end{array}\tag{2}\right.\]</span> \(\mathcal{N}(p _ i)\) 为球状区域，本文在四个分辨率下分别设定为：0.05m，0.1m，0.2m，0.4m。然后通过 cross-stage link 对各个分辨率下的点特征进行 concatenate 融合。最后通过感知机进行点云分割及目标中心点预测任务的构建。<br>
-　　对于点级别前景分割的任务，经过 sigmoid 函数后，应用二分类的 Focal Loss： <span class="math display">\[ \mathcal{L} _ {seg} = \frac{1}{N _ {pos}}\sum _ i^N -\alpha(1-\hat{s} _ i)^{\gamma}\mathrm{log}(\hat{s} _ i) \tag{3}\]</span> 该分割任务使得目标检测的框更加准确，如图 2.c 所示。但是还得优化其尺度与形状。<br>
-　　中心点的预测任务则能有效约束目标框的尺度与形状，具体的，预测的是每个属于目标的点云与中心点的相对位置(残差)。可用 Smooth-l1 来构建预测的中心点与实际中心点的 Loss。</p>
-<h2 id="part-sensitive-warping">3. Part-sensitive Warping</h2>
-<p><img src="/SA-SSD/psw.png" width="60%" height="60%" title="图 3. Part-sensitive Warping"> 　　One-Stage 方法都会有 Confidence 和 BBox 错位的现象，本文提出一种类似 PSROIAlign 但更有高效的 PSW 方法，具体步骤为：</p>
-<ol type="1">
-<li>对于分类分支，修改为 \(K\) 个 Part-sensitive 的 cls maps，每个 map 包含目标的部分信息，比如当 \(K=4\) 时，可以理解为将目标切分为 \(2\times 2\) 部分；</li>
-<li>对于回归分支，将每个目标框的 Feature map 划分为 \(K\) 个子区域，每个区域的中心点作为采样点；</li>
-<li>如图 3. 所示，通过采样得到最终 cls map 的平均值。</li>
-</ol>
-<h2 id="experiment">4. Experiment</h2>
-<p><img src="/SA-SSD/ablation.png" width="60%" height="60%" title="图 4. Ablation Study"> 　　如图 4. 所示，Auxiliary Network 能有效提升网络的定位精度，PSWarp 也能有效消除 Confidence 与 BBox 的错位影响。</p>
-<h2 id="reference">5. Reference</h2>
-<p><a id="1" href="#1ref">[1]</a> henhang, et al. &quot;Structure Aware Single-stage 3D Object Detection from Point Cloud.&quot;</p>
+<p><img src="/DENFIDet/framework.png" width="80%" height="80%" title="图 1. Framework of DENFIDet"> 　　如图 1. 所示，在传统的 One-Stage 2D/3D 检测框架下，嵌入了 DENFI 模块，该模块首先通过 DBPM 生成稠密的目标边缘 proposals，然后指导 DENFIConv 去提取更准确的目标特征，输出到检测头作 3D 目标框属性的分类与回归。</p>
+<h2 id="denfidense-feature-indicator">2. DENFI(Dense Feature Indicator)</h2>
+<h3 id="dbpmdense-boundary-proposal-module">2.1. DBPM(Dense Boundary Proposal Module)</h3>
+<p><img src="/DENFIDet/DBPM.png" width="60%" height="60%" title="图 2. DBPM"> 　　DBPM 的输入为 Backbone 输出的 \(H\times W\times C\) 特征图，其由分类和回归两个分支构成：</p>
+<ul>
+<li>分类分支<br>
+分类分支经过 \(1\times 1\) 卷积输出 \(H\times W\times K\) 大小的 pixel 级别的 Score Map，其中 \(K\) 为类别数；</li>
+<li>回归分支<br>
+回归分支也经过 \(1\times 1\) 卷积，输出 \(H\times W\times (4+n\times 2)\) 大小的回归量。回归量包括 \((l,t,r,b)\) 以及角度 \((\theta ^{bin}, \theta ^{res})\)(角度回归分解成了 n 个 bin 分类与 bin 内残差回归两个问题)。最终解码为描述目标边缘的信息：\((l,t,r,b,\theta)\)。</li>
+</ul>
+<p>　　Loss 的计算首先得区分正负样本。正负样本的划分思想与传统的差不多，主要思想是正负样本过渡区域引入 Ignore。如图 4. 所示，设 3D 真值框属性表示为 \((x,y,w,l,\theta)\)，正样本区域设计为 \((x,y,\sigma _ 1w,\sigma _ 1l,\theta)\)，定义另一缩小框 \((x,y,\sigma _ 2w,\sigma _ 2l,\theta)\)，其中 \(\sigma _ 1 &lt; \sigma _ 2\)。由此可得，灰色为正样本区域，黄色为 Ignore 区域，其它为负样本区域。<br>
+　　对于分类的 Loss，直接对正负样本进行 Focal Loss 计算。对于回归分支，则采用正样本的平均 Loss。回归 Loss 由目标框的 IoU Loss 以及角度 Loss 组成，角度 Loss 又由 bin 分类 Loss 加 bin 残差回归 Loss 组成。这里不做展开。<br>
+　　需要注意的是，分类分支只在训练的时候计算，Inference 时候只作回归分支的计算，从而得到每个像素感知到的目标边缘的信息。</p>
+<h3 id="denficonv">2.2. DENFIConv</h3>
+<p><img src="/DENFIDet/dconv.png" width="80%" height="80%" title="图 3. dconv"> 　　如图 3. 所示，Deformable Convolution 的思想是自动去寻找感兴趣的卷积区域。DBPM 获得每个像素点的目标边缘信息以后，自然的，接下来对像素点的卷积运算，运用可变形卷积可以捕捉更准确的目标区域信息。 <img src="/DENFIDet/DSDC.png" width="60%" height="60%" title="图 4. DSDC"> 　　如图 4. 所示，结合 Deformable Convolution 与 depth-wise separable Convolution，本文提出了 Depth-wise Separable Deformable Convolution。即将 \(3\times 3\) 的可变形卷积拆解成 \(3\times 3\) 的 Depth-wise 卷积以及 \(1\times 1\) 的可变形卷积，极大减少参数量。</p>
+<h2 id="reference">3. Reference</h2>
+<p><a id="1" href="#1ref">[1]</a> Xu, Guodong, et al. &quot;Boundary-Aware Dense Feature Indicator for Single-Stage 3D Object Detection from Point Clouds.&quot; arXiv (2020): arXiv-2004.</p>
 ]]></content>
       <categories>
         <category>3D Detection</category>
@@ -1664,27 +1734,33 @@ BBox regression Loss 为 rotated 3D IOU Loss： <span class="math display">\[ L 
       </tags>
   </entry>
   <entry>
-    <title>[paper_reading]-&quot;Boundary-Aware Dense Feature Indicator for Single-Stage 3D Object Detection from Point Clouds&quot;</title>
-    <url>/DENFIDet/</url>
-    <content><![CDATA[<p>　　俯视图下 Voxel-based 点云 3D 目标检测一般会使用 2D 检测网络及相关策略。但是不同于图像的 2D 目标检测，俯视图下目标的点云信息基本在边缘处，所以如何准确得捕捉目标的边缘信息对特征提取的有效性非常关键。本文<a href="#1" id="1ref"><sup>[1]</sup></a> 提出了一种能捕捉目标边缘信息的网络结构，从而作更准确的目标检测。</p>
+    <title>[paper_reading]-&quot;SA-SSD: Structure Aware Single-stage 3D Object Detection from Point Cloud&quot;</title>
+    <url>/SA-SSD/</url>
+    <content><![CDATA[<p>　　Voxel-based 3D Detection 相比 <a href="/Point-based-3D-Det/" title="Point-based 3D Detection">Point-based 3D Detection</a> 的缺点是特征提取不仅在 Voxel 阶段损失了一定的点云信息，而且 Voxel 化后丢失了点云之间的拓扑关系。<a href="/Point-based-3D-Det/" title="Point-based 3D Detection">Point-based 3D Detection</a> 中详细描述了几种 Point-based 方法，这种方法目前比较棘手的地方是，即使作 Inference 时，也需要作 kd-tree 搜索与采样等运算量较大的操作。那么如何榨干 Voxel-based 的性能对工业界落地就显得比较重要了，本文<a href="#1" id="1ref"><sup>[1]</sup></a>提出了一种单阶段的 Voxel-based 3D 检测方法，并借助了 Point 级别特征提取的相关策略，使得检测性能有较大提升。</p>
 <h2 id="framework">1. Framework</h2>
-<p><img src="/DENFIDet/framework.png" width="80%" height="80%" title="图 1. Framework of DENFIDet"> 　　如图 1. 所示，在传统的 One-Stage 2D/3D 检测框架下，嵌入了 DENFI 模块，该模块首先通过 DBPM 生成稠密的目标边缘 proposals，然后指导 DENFIConv 去提取更准确的目标特征，输出到检测头作 3D 目标框属性的分类与回归。</p>
-<h2 id="denfidense-feature-indicator">2. DENFI(Dense Feature Indicator)</h2>
-<h3 id="dbpmdense-boundary-proposal-module">2.1. DBPM(Dense Boundary Proposal Module)</h3>
-<p><img src="/DENFIDet/DBPM.png" width="60%" height="60%" title="图 2. DBPM"> 　　DBPM 的输入为 Backbone 输出的 \(H\times W\times C\) 特征图，其由分类和回归两个分支构成：</p>
-<ul>
-<li>分类分支<br>
-分类分支经过 \(1\times 1\) 卷积输出 \(H\times W\times K\) 大小的 pixel 级别的 Score Map，其中 \(K\) 为类别数；</li>
-<li>回归分支<br>
-回归分支也经过 \(1\times 1\) 卷积，输出 \(H\times W\times (4+n\times 2)\) 大小的回归量。回归量包括 \((l,t,r,b)\) 以及角度 \((\theta ^{bin}, \theta ^{res})\)(角度回归分解成了 n 个 bin 分类与 bin 内残差回归两个问题)。最终解码为描述目标边缘的信息：\((l,t,r,b,\theta)\)。</li>
-</ul>
-<p>　　Loss 的计算首先得区分正负样本。正负样本的划分思想与传统的差不多，主要思想是正负样本过渡区域引入 Ignore。如图 4. 所示，设 3D 真值框属性表示为 \((x,y,w,l,\theta)\)，正样本区域设计为 \((x,y,\sigma _ 1w,\sigma _ 1l,\theta)\)，定义另一缩小框 \((x,y,\sigma _ 2w,\sigma _ 2l,\theta)\)，其中 \(\sigma _ 1 &lt; \sigma _ 2\)。由此可得，灰色为正样本区域，黄色为 Ignore 区域，其它为负样本区域。<br>
-　　对于分类的 Loss，直接对正负样本进行 Focal Loss 计算。对于回归分支，则采用正样本的平均 Loss。回归 Loss 由目标框的 IoU Loss 以及角度 Loss 组成，角度 Loss 又由 bin 分类 Loss 加 bin 残差回归 Loss 组成。这里不做展开。<br>
-　　需要注意的是，分类分支只在训练的时候计算，Inference 时候只作回归分支的计算，从而得到每个像素感知到的目标边缘的信息。</p>
-<h3 id="denficonv">2.2. DENFIConv</h3>
-<p><img src="/DENFIDet/dconv.png" width="80%" height="80%" title="图 3. dconv"> 　　如图 3. 所示，Deformable Convolution 的思想是自动去寻找感兴趣的卷积区域。DBPM 获得每个像素点的目标边缘信息以后，自然的，接下来对像素点的卷积运算，运用可变形卷积可以捕捉更准确的目标区域信息。 <img src="/DENFIDet/DSDC.png" width="60%" height="60%" title="图 4. DSDC"> 　　如图 4. 所示，结合 Deformable Convolution 与 depth-wise separable Convolution，本文提出了 Depth-wise Separable Deformable Convolution。即将 \(3\times 3\) 的可变形卷积拆解成 \(3\times 3\) 的 Depth-wise 卷积以及 \(1\times 1\) 的可变形卷积，极大减少参数量。</p>
-<h2 id="reference">3. Reference</h2>
-<p><a id="1" href="#1ref">[1]</a> Xu, Guodong, et al. &quot;Boundary-Aware Dense Feature Indicator for Single-Stage 3D Object Detection from Point Clouds.&quot; arXiv (2020): arXiv-2004.</p>
+<p><img src="/SA-SSD/framework.png" width="100%" height="100%" title="图 1. Framework of SA-SSD"> 　　如图 1. 所示，SA-SSD 由三部分组成：Backbone，Detection Head，Auxiliary Network。<br>
+　　Backbone 的输入是栅格化后的点云表示方式，文中栅格大小设定为 \(0.05m,0.05m,0.1m\)。Backbone 由一系列的 3D convolution 组成，因为需要保留空间三维位置信息，作 Voxel-to-Point 的映射。这里如果用 2D convolution 代替，那么 Auxiliary Network 估计也只能作 BridView 的分割了。<br>
+　　Detection Head 主体就是传统 Anchor-Free 结构，一个分支用于预测每个特征层像素点的 Confidence，另一个分支用于预测基于每个特征层像素点的 BBox 属性，如，以该点为 &quot;Anchor&quot; 的四个顶点坐标。此外，为了消除 One-Stage 方法中目标框与置信度不对齐的问题，本文引入 Part-sensitive Warping 来实现与 PSRoiAlign 类似的作用，实现两者的对齐。<br>
+　　Auxiliary Network 只在训练的阶段起作用，Inference 阶段不需要计算。该模块的作用是训练时通过 Voxel-to-Point 特征映射来反向传播监督 Backbone 中的 Voxel 特征学习 Point 级别的特征，包括点云的空间拓扑关系。<strong>当然 Inference 时也可以保留该分割模块，那么还可以增加点级别的特征反映射到 Voxel 的模块(Point-to-Voxel)，进一步作特征增强。</strong></p>
+<h2 id="detachable-auxiliary-network">2. Detachable Auxiliary Network</h2>
+<p><img src="/SA-SSD/sa.png" width="60%" height="60%" title="图 2. Structured Aware Feature Learning"> 　　如图 2. 所示，随着 Backbone 特征提取的感受野增大(特征分辨率下降)，背景点会接近目标的边缘，使得目标框大小不容易预测准确。本文提出的 Auxiliary Network，通过增加点级别分割及目标中心坐标预测任务，来监督 Backbone 特征层捕捉这种结构信息，从而达到更准确的目标检测的目的。<br>
+　　Auxiliary Network 的输入来自 Backbone 各个分辨率的特征层。将特征层上不为零的特征点，通过 Voxel-to-Point 反栅格化映射到三维空间，设该特征点表示为 \(\{(f _ j,p _ j):j=1,...,M\}\)，其中 \(f\) 为特征向量，\(p\) 为坐标向量。有了栅格对应的伪三维坐标点下的特征表示后，即可插值出实际点云中每个点的特征向量。设点云中点的插值特征为：\(\{(\hat{f} _ i,p _ i):i=1,...,N\}\)，采用 Inverse Distance Weighted 方法进行插值： <span class="math display">\[ \hat{f} _ i = \frac{\sum _ {j=1}^Mw _ j(p _ i)f _ j}{\sum _ {j=1}^Mw _ j(p _ i)} \tag{1}\]</span> 其中： <span class="math display">\[w _ j(p _ i)=\left\{\begin{array}{l}
+\frac{1}{\Vert p _ i-p _ j\Vert _ 2} &amp; \mathrm{if} p _ j\in\mathcal{N}(p _ i)\\
+0 &amp; \mathrm{otherwise}
+\end{array}\tag{2}\right.\]</span> \(\mathcal{N}(p _ i)\) 为球状区域，本文在四个分辨率下分别设定为：0.05m，0.1m，0.2m，0.4m。然后通过 cross-stage link 对各个分辨率下的点特征进行 concatenate 融合。最后通过感知机进行点云分割及目标中心点预测任务的构建。<br>
+　　对于点级别前景分割的任务，经过 sigmoid 函数后，应用二分类的 Focal Loss： <span class="math display">\[ \mathcal{L} _ {seg} = \frac{1}{N _ {pos}}\sum _ i^N -\alpha(1-\hat{s} _ i)^{\gamma}\mathrm{log}(\hat{s} _ i) \tag{3}\]</span> 该分割任务使得目标检测的框更加准确，如图 2.c 所示。但是还得优化其尺度与形状。<br>
+　　中心点的预测任务则能有效约束目标框的尺度与形状，具体的，预测的是每个属于目标的点云与中心点的相对位置(残差)。可用 Smooth-l1 来构建预测的中心点与实际中心点的 Loss。</p>
+<h2 id="part-sensitive-warping">3. Part-sensitive Warping</h2>
+<p><img src="/SA-SSD/psw.png" width="60%" height="60%" title="图 3. Part-sensitive Warping"> 　　One-Stage 方法都会有 Confidence 和 BBox 错位的现象，本文提出一种类似 PSROIAlign 但更有高效的 PSW 方法，具体步骤为：</p>
+<ol type="1">
+<li>对于分类分支，修改为 \(K\) 个 Part-sensitive 的 cls maps，每个 map 包含目标的部分信息，比如当 \(K=4\) 时，可以理解为将目标切分为 \(2\times 2\) 部分；</li>
+<li>对于回归分支，将每个目标框的 Feature map 划分为 \(K\) 个子区域，每个区域的中心点作为采样点；</li>
+<li>如图 3. 所示，通过采样得到最终 cls map 的平均值。</li>
+</ol>
+<h2 id="experiment">4. Experiment</h2>
+<p><img src="/SA-SSD/ablation.png" width="60%" height="60%" title="图 4. Ablation Study"> 　　如图 4. 所示，Auxiliary Network 能有效提升网络的定位精度，PSWarp 也能有效消除 Confidence 与 BBox 的错位影响。</p>
+<h2 id="reference">5. Reference</h2>
+<p><a id="1" href="#1ref">[1]</a> henhang, et al. &quot;Structure Aware Single-stage 3D Object Detection from Point Cloud.&quot;</p>
 ]]></content>
       <categories>
         <category>3D Detection</category>
