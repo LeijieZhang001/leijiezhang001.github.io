@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://leijiezhang001.github.io/"/>
-  <updated>2021-02-09T01:34:12.000Z</updated>
+  <updated>2021-03-05T01:34:12.000Z</updated>
   <id>https://leijiezhang001.github.io/</id>
   
   <author>
@@ -15,6 +15,80 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>4D Panoptic LiDAR Segmentation</title>
+    <link href="https://leijiezhang001.github.io/4D-Panoptic-LiDAR-Segmentation/"/>
+    <id>https://leijiezhang001.github.io/4D-Panoptic-LiDAR-Segmentation/</id>
+    <published>2021-03-02T01:51:00.000Z</published>
+    <updated>2021-03-05T01:34:12.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>　　4D 激光点云的全景分割任务是在 3D 基础上，引入时间维度，同时在时间和空间下作点云的语义分割以及实例分割，输出的是每个点的语义类别信息，以及时序实例 ID。本文<a href="#1" id="1ref"><sup>[1]</sup></a> 提出了一种简单 4D 全景分割框架。</p><h2 id="framework">1. Framework</h2><p><img src="/4D-Panoptic-LiDAR-Segmentation/framework.png" width="70%" height="70%" title="图 1. Framework"> 　　如图 1. 所示，将时序点云作累积，然后用 Encoder-Decoder 网络，输出量有：</p><ul><li>Semantic Map，每个点的类别；</li><li>Objectness Map，目标中心点，或者靠近中心的某点；</li><li>Point Embeddings，每个点的特征；</li><li>Point Variance Map，每个点的位置方差；</li></ul><p>有了这些信息后，就可以聚类出目标实例，方法类似 <a href="/paper-reading-Instance-Segmentation-by-Jointly-Optimizing-Spatial-Embeddings-and-Clustering-Bandwidth/" title="Instance Segmentation by Jointly Optimizing Spatial Embeddings and Clustering Bandwidth">Instance Segmentation by Jointly Optimizing Spatial Embeddings and Clustering Bandwidth</a>，将 variance map 拓展到 Embedding 任意空间，应该是目前比较先进的策略了。<br>　　假设目标实例的点云符合高斯分布，那么在已知中心点，或者属于该实例的某点的情况下(不用必须是中心点，这样能处理遮挡等情况)，就可以判断其它点属于该实例的概率。具体的，已知实例中心点 \(\mathbf{p} _ i\)，以及对应的 Embedding 特征 \(e _ i\)，可以计算其它点 \(p _ j\) 是否属于该实例的概率： <span class="math display">\[\hat{p} _ {ij}=\frac{1}{(2\pi) ^ {D/2}|\Sigma _ i| ^ {\frac{1}{2}}}\mathrm{exp}\left(-\frac{1}{2}(e _ i-e _ j)^T\Sigma _ i^ {-1}(e _ i-e _ j)\right) \tag{1}\]</span> 其中 \(\Sigma _ i\) 是通过点 \(p _ i\) 预测的 \(\sigma _ i\) 所构建的对角矩阵。值得注意的是，Embedding 特征串联了空间和时序量，这样更有利于聚类，同时预测对应的 variance map。<br>　　ID 则是通过时序下作实例的数据关联得到的。</p><h2 id="loss">2. Loss</h2><p>　　网络输出都是点级别的。总的 Loss 为： <span class="math display">\[L=L _ {class}+L _ {obj}+L _ {ins}+L _ {var} \tag{2}\]</span> 具体的：</p><ul><li>Semantic Segmentation<br>用 Cross-entropy 分类损失函数，并且通过采样的方法来解决类别不平衡问题。</li><li>Point Centerness<br>计算每个点与其实例中心点，或者实例点云重心点的距离，归一化后作为中心点得分损失函数： <span class="math display">\[L _ {obj} = \sum _ {i=1} ^ N(\hat{o} _ i-o _ i) ^ 2,\;\;\;\hat{o} _ i,o _ i\in[0,1]\tag{3}\]</span></li><li>Instance Probability<br>计算每个实例中每个点属于该实例的概率，回归其值到 1: <span class="math display">\[L _ {ins}=\sum _ {j=1} ^ K\sum _ {i=1} ^ N(\hat{p} _ {ij}-p _ {ij}) ^ 2,\;\;\;p _ {ij} = 1,\;\mathrm{if}\; p _ i\in I _ j,\;\mathrm{else}\; 0\tag{4}\]</span></li><li>Variance Smooth<br>类似 <a href="/paper-reading-Instance-Segmentation-by-Jointly-Optimizing-Spatial-Embeddings-and-Clustering-Bandwidth/" title="Instance Segmentation by Jointly Optimizing Spatial Embeddings and Clustering Bandwidth">Instance Segmentation by Jointly Optimizing Spatial Embeddings and Clustering Bandwidth</a>，作实例内每个点 Variance 的一致性约束： <span class="math display">\[L _ {var} = \frac{1}{|I _ j|}\sum _ {i\in I _ j}\Vert \sigma _ i-\sigma _ j\Vert ^ 2\tag{5}\]</span></li></ul><h2 id="measuring-performance">3. Measuring Performance</h2><p>To be continued...</p><h2 id="reference">4. Reference</h2><p><a id="1" href="#1ref">[1]</a> Aygün, Mehmet, et al. &quot;4D Panoptic LiDAR Segmentation.&quot; arXiv preprint arXiv:2102.12472 (2021).</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;　　4D 激光点云的全景分割任务是在 3D 基础上，引入时间维度，同时在时间和空间下作点云的语义分割以及实例分割，输出的是每个点的语义类别信息，以及时序实例 ID。本文&lt;a href=&quot;#1&quot; id=&quot;1ref&quot;&gt;&lt;sup&gt;[1]&lt;/sup&gt;&lt;/a&gt; 提出了一种简单 4D 
+      
+    
+    </summary>
+    
+      <category term="Segmentation" scheme="https://leijiezhang001.github.io/categories/Segmentation/"/>
+    
+      <category term="Instance Segmentation" scheme="https://leijiezhang001.github.io/categories/Segmentation/Instance-Segmentation/"/>
+    
+    
+      <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
+    
+      <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
+    
+      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
+    
+      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
+    
+      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
+    
+      <category term="Instance Segmentation" scheme="https://leijiezhang001.github.io/tags/Instance-Segmentation/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>SPVConv &amp; 3D-NAS</title>
+    <link href="https://leijiezhang001.github.io/SPVConv-3D-NAS/"/>
+    <id>https://leijiezhang001.github.io/SPVConv-3D-NAS/</id>
+    <published>2021-02-19T01:19:47.000Z</published>
+    <updated>2021-02-28T01:34:12.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>　　基于点云的神经网络学习方法在 <a href="/Deep-Learning-for-3D-Point-Clouds/" title="Deep Learning for 3D Point Clouds">Deep Learning for 3D Point Clouds</a> 中已经有较为详细的描述，从网络结构上看，可分为 Multi-view-based(Projection-based)，Volumetric-based，Point-based 等三种方法。其中 Point-based 方法对点云的信息提取分辨率最高，但是前两种将点云空间离散化的方法更容易学到特征信息。所以如何结合这两种网络结构来更有效得学习点云特征就显得非常重要。<br>　　此外，<a href="/Rethinking-of-Sparse-3D-Convolution/" title="Rethinking of Sparse 3D Convolution">Rethinking of Sparse 3D Convolution</a> 中阐述了 Sparse Convolution 相比传统卷积在点云特征学习中的优势，其能更有效学习点云特征信息。<br>　　本文<a href="#1" id="1ref"><sup>[1]</sup></a> 提出了一种 Sparse Point-Voxel 的基本网络结构，并采用 NAS 网络搜索方法来搜索最优的卷积通道数量及深度。</p><h2 id="sparse-point-voxel-convolutionspvconv">1. Sparse Point-Voxel Convolution(SPVConv)</h2><p>　　Voxel-based 特征提取会损失信息源，但是提取效率较高；Point-based 能保留信息分辨率，但是提取效率较低。本文设计的 SPVConv 则融合了二者的优势。 <img src="/SPVConv-3D-NAS/spvconv.png" width="90%" height="90%" title="图 1. SPVconv"> 　　如图 1. 所示，网络模块由两个分支组成，Point-Based 分支对点云进行点级别的 MLP 运算；Sparse Voxel-Based 分支将点云进行体素化，然后用稀疏卷积进行特征提取，然后反体素化得到点级别的特征。最后将二者提取的特征融合到一起。<br>　　数学描述上，首先是数据表示：</p><ul><li>稀疏体素化张量(Sparse Voxelized Tensor)表示为 \(\mathbf{S}=\{(\mathbf{p} _ m ^ s,\mathbf{f} _ m ^ s),v\}\)，其中 \(\mathbf{p} _ m ^ s=(\mathbf{x} _ m ^ s,\mathbf{y} _ m ^ s, \mathbf{z} _ m ^ s)\) 表示第 \(m\) 个体素的 3D 坐标，\(\mathbf{f} _ m ^ s\) 表示其特征向量；\(v\) 是该层级下的体素尺寸；</li><li>点云张量(Point Cloud Tensor)表示为 \(\mathbf{T} = \{(\mathbf{p} _ k ^ t,\mathbf{f} _ k ^ t)\}\)，其中 \(\mathbf{p} _ k=(\mathbf{x} _ k, \mathbf{y} _ k,\mathbf{z} _ k)\) 表示第 \(k\) 个点的 3D 坐标，\(\mathbf{f} _ k\) 为其特征向量。</li></ul><p>然后将点云进行稀疏体素化映射，计算每个体素的特征向量：</p><p><span class="math display">\[\hat{\mathbf{p}} _ k ^ t=(\hat{\mathbf{x}} _ k ^ t,\hat{\mathbf{y}} _ k ^ t,\hat{\mathbf{z}} _ k ^ t) = \left(\mathrm{floor}(\mathbf{x} _ k ^ t/v),\mathrm{floor}(\mathbf{y} _ k ^ t/v),\mathrm{floor}(\mathbf{z} _ k ^ t/v)\right) \tag{1}\]</span> <span class="math display">\[\mathbf{f} _ m ^ s=\frac{1}{N _ m}\sum _ {k=1} ^ n\mathbb{1}[\hat{\mathbf{x}} _ k ^ t=\mathbf{x} _ m ^ s,\hat{\mathbf{y}} _ k ^ t=\mathbf{y} _ m ^ s,\hat{\mathbf{z}} _ k ^ t=\mathbf{z} _ m ^ s]\cdot\mathbf{f} _ k ^ t\tag{2}\]</span> 直接计算的复杂度为 \(\mathcal{O}(mn)\)，为了实时计算，需要对体素化和反体素化进行哈希索引。哈希表的 key 为 3D 坐标，value 为稀疏张量的 index，所以最终的建立哈希表和查询复杂度为 \(\mathcal{O}(m+n)\)。<br>　　对于反体素化，采用 trilinear interpolation，在稀疏体素中采样得到点级别的特征。该特征与点级别 MLP 得到的特征作特征维度的串联操作，即得到提取的点特征向量。</p><h2 id="d-nas">2. 3D-NAS</h2><p>　　以 SPVConv 模块为基础结构，搜索最优的网络 channel 数，以及网络深度。卷积核固定为 3x3。<br>　　搜索策略为：首先训练一个最大的网络，那么搜索的子网络权重可以从大网络中继承，具体搜索策略可参考代码。</p><p><img src="/SPVConv-3D-NAS/3dnas.png" width="90%" height="90%" title="图 2. 3D-NAS"></p><h2 id="reference">3. Reference</h2><p><a id="1" href="#1ref">[1]</a> Tang, Haotian, et al. &quot;Searching efficient 3d architectures with sparse point-voxel convolution.&quot; European Conference on Computer Vision. Springer, Cham, 2020.</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;　　基于点云的神经网络学习方法在 &lt;a href=&quot;/Deep-Learning-for-3D-Point-Clouds/&quot; title=&quot;Deep Learning for 3D Point Clouds&quot;&gt;Deep Learning for 3D Point Cloud
+      
+    
+    </summary>
+    
+      <category term="Deep Learning" scheme="https://leijiezhang001.github.io/categories/Deep-Learning/"/>
+    
+      <category term="Segmentation" scheme="https://leijiezhang001.github.io/categories/Deep-Learning/Segmentation/"/>
+    
+    
+      <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
+    
+      <category term="3D Detection" scheme="https://leijiezhang001.github.io/tags/3D-Detection/"/>
+    
+      <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
+    
+      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
+    
+      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
+    
+      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
+    
+  </entry>
   
   <entry>
     <title>Depth Prediction/Completion</title>
@@ -629,66 +703,6 @@
     
     
       <category term="SLAM" scheme="https://leijiezhang001.github.io/tags/SLAM/"/>
-    
-      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>A General Framework for Uncertainty Estimation in Deep Learning</title>
-    <link href="https://leijiezhang001.github.io/A-General-Framework-for-Uncertainty-Estimation-in-deep-learning/"/>
-    <id>https://leijiezhang001.github.io/A-General-Framework-for-Uncertainty-Estimation-in-deep-learning/</id>
-    <published>2020-09-04T01:16:44.000Z</published>
-    <updated>2020-09-27T01:19:12.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>　　Uncertainty 估计在深度学习网络预测中同样非常重要，因为我们不仅需要知道预测结果，还想知道该结果的不确定性。Uncertainty 可分为偶然不确定性(Aleatoric Uncertainty，详见 <a href="/Heteroscedastic-Aleatoric-Uncertainty/" title="Heteroscedastic Aleatoric Uncertainty">Heteroscedastic Aleatoric Uncertainty</a>) 以及认知不确定性(Epistemic Uncertainty，详见 <a href="/Epistemic-Uncertainty-for-Active-Learning/" title="Epistemic Uncertainty for Active Learning">Epistemic Uncertainty for Active Learning</a>)。<br>　　本文<a href="#1" id="1ref"><sup>[1]</sup></a>提出了一种同时估计偶然不确定性与认知不确定性的方法。对于网络输入 \(\mathbf{x}\)，输出的后验概率为 \(p(\mathbf{y}|\mathbf{x})\)，那么由 Aleatoric Uncertainty 和 Epistemic Uncertainty 构成的总的不确定性为 \(\sigma _ {tot} = \mathbf{Var} _ {p(\mathbf{y}|\mathbf{x})}(\mathbf{y})\)。</p><h2 id="aleatoric-uncertaintydata-uncertainty">1. Aleatoric Uncertainty(Data Uncertainty)</h2><p>　　假设传感器得到的数据符合噪音水平 \(\mathbf{v}\) 的高斯分布，那么输入网络的数据 \(\mathbf{z}\) 与其真实数据 \(\mathbf{x}\) 的关系为： <span class="math display">\[q(\mathbf{z}|\mathbf{x})\sim \mathcal{N}(\mathbf{z};\mathbf{x},\mathbf{v})\tag{1}\]</span> 为了计算网络输出的 Data Uncertainty，通过 Assumed Density Filtering(ADF) 来传递输入数据的噪音。网络的联合概率分布为： <span class="math display">\[p(\mathbf{z}^{(0:l)})=p(\mathbf{z}^{(0)})\prod _ {i=1} ^ l p(\mathbf{z}^{(i)}|\mathbf{z} ^ {(i-1)}) \tag{2}\]</span> 其中： <span class="math display">\[p(\mathbf{z}^{(i)}|\mathbf{z}^{(i-1)})=\sigma[\mathbf{z} ^ {(i)}-\mathbf{f} ^ {(i)}(\mathbf{z}^{(i-1)})]\tag{3}\]</span> ADF 将其近似为： <span class="math display">\[p(\mathbf{z}^{(0:l)})\approx q(\mathbf{z}^{(0:l)})=q(\mathbf{z}^{(0)})\prod _ {i=1} ^ l q(\mathbf{z}^{(i)}) \tag{4}\]</span> 其中 \(q(\mathbf{z})\) 符合独立高斯分布： <span class="math display">\[q(\mathbf{z}^{(i)})\sim \mathcal{N}\left(\mathbf{z}^{(i)};\mathbf{\mu}^{(i)},\mathbf{v}^{(i)}\right)=\prod _ j\left(\mathbf{z} _ j ^ {(i)};\mathbf{\mu} _ j ^ {(i)}, \mathbf{v} _ j ^ {(i)}\right)\tag{5}\]</span> 特征 \(\mathbf{z}^{(i-1)}\) 通过第 \(i\) 层映射方程 \(\mathbf{f} ^{(i)}\)，得到： <span class="math display">\[\hat{p}(\mathbf{z}^{(0:i)})=p(\mathbf{z}^{(i)}|\mathbf{z}^{(i-1)})q(\mathbf{z}^{(0:i-1)}) \tag{6}\]</span> ADF 的目标是找到 \(\hat{p}(\mathbf{z}^{(0:i)})\) 的近似分布 \(q(\mathbf{z}^{(0:i)})\)，比如 KL divergence： <span class="math display">\[q(\mathbf{z}^{(0:i)})=\mathop{\arg\min}\limits _ {\hat{q}(\mathbf{z}^{(0:i)})}\mathbf{KL}\left(\hat{q}(\mathbf{z}^{(0:i)})\;\Vert\;\hat{p}(\mathbf{z}^{(0:i)})\right)\tag{7}\]</span> 基于高斯分布的假设，以上解为： <span class="math display">\[\begin{align}\mathbf{\mu}^{(i)}=\mathbb{E} _ {q(\mathbf{z}^{(i-1)})}[\mathbf{f}^{(i)}(z^{(i-1)})]\\\mathbf{v}^{(i)}=\mathbb{V} _ {q(\mathbf{z}^{(i-1)})}[\mathbf{f}^{(i)}(z^{(i-1)})]\\\end{align}\tag{8}\]</span></p><h2 id="epistemic-uncertaintymodel-uncertainty">2. Epistemic Uncertainty(Model Uncertainty)</h2><p>　　Model Uncertainty 表征的是模型的不确定性，对于训练集 \(\mathrm{D}=\{\mathbf{X},\mathbf{Y}\}\)，模型的不确定性即为权重参数的分布 \(p(\mathbf{\omega} | \mathbf{X},\mathbf{Y})\)。可采用 Monte-Carlo 采样方法来近似估计模型权重分布，具体的采样通过 Dropout 实现： <span class="math display">\[p(\omega|\mathbf{X},\mathbf{Y})\approx q(\mathbf{\omega};\mathbf{\Phi})=Bern(\mathbf{\omega};\mathbf{\Phi}) \tag{9}\]</span> 其中 \(\mathbf{\Phi}\) 是 Bernolli(dropout) rates，由此模型的不确定性即为 T 次采样的方差： <span class="math display">\[\mathbf{Var} _ {p(\mathbf{y}|\mathbf{x})} ^ {model}(\mathbf{y})=\sigma _ {model} = \frac{1}{T}\sum _ {t=1} ^ T(\mathbf{y} _ t-\bar{\mathbf{y}}) ^ 2\tag{10}\]</span> 其中 \(\{\mathbf{y} _ t\} _ {t=1} ^ T\) 是不同权重 \(\omega ^ t\sim q(\omega;\mathbf{\Phi})\) 采样下的输出。<br>　　这种模型不确定性的计算方式，直观的理解为：当模型对某些数据预测比较好，误差比较小的时候，那么模型对这些数据的冗余度肯定是较高的，所以去掉模型的一部分网络，模型对这些数据的预测与原模型应该会有较高的一致性。</p><h2 id="total-uncertainty">3. Total Uncertainty</h2><p><img src="/A-General-Framework-for-Uncertainty-Estimation-in-deep-learning/framework.png" width="95%" height="95%" title="图 1. Framework"> 　　如图 2.2 所示，结合蒙特卡洛采样与 ADF 方法，网络预测的结果与对应的总的 Uncertainty 可计算为： <span class="math display">\[\left\{\begin{array}{l}\mu = \frac{1}{T}\sum _ {t=1} ^ T \mathbf{\mu} _ t ^ {(l)}\\\sigma _ {tot} = \frac{1}{T}\sum _ {t=1} ^ {T} \mathbf{v} _ t ^ {(l)} + \frac{1}{T}\sum _ {t=1} ^ T\left(\mathbf{\mu} _ t ^ {(l)}-\bar{\mathbf{\mu}}\right) ^ 2\end{array}\tag{11}\right.\]</span> 其中 \(\{\mathbf{\mu} _ t ^ {(l)},\mathbf{v} _ t ^ {(l)}\} _ {t=1} ^ T\) 是 ADF 网络 \(T\) 次蒙特卡洛采样结果。<strong>由此可见，不同于以往将 Model Uncertainty 和 Data Uncertainty 完全作独立假设的方式，本文方法是将二者联合来估计的。这也比较好理解，如果数据噪音很大，那么模型的不确定性也会很大，所以二者不可能是完全独立的</strong>。<br>　　该方法可归纳为：</p><ol type="1"><li>将现有的网络转换为 ADF 网络形式；</li><li>手机 \(T\) 次蒙特卡洛采样的网络输出；</li><li>计算网络输出的 Mean 和 Variance；</li></ol><p>其中步骤一不用作任何额外训练的操作，神经网络中的每个操作都有对应的 ADF 操作，详见<a href="#2" id="2ref">[2]</a>，代码可参考<a href="#3" id="3ref">[3]</a>。比如基于 Pytorch的 2D 卷积： <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">class Conv2d(_ConvNd):</span><br><span class="line">    def __init__(self, in_channels, out_channels, kernel_size, stride=1,</span><br><span class="line">        padding=0, dilation=1, groups=1, bias=True,</span><br><span class="line">        keep_variance_fn=None, padding_mode=&apos;zeros&apos;):</span><br><span class="line">        self._keep_variance_fn = keep_variance_fn</span><br><span class="line">        kernel_size = _pair(kernel_size)</span><br><span class="line">        stride = _pair(stride)</span><br><span class="line">        padding = _pair(padding)</span><br><span class="line">        dilation = _pair(dilation)</span><br><span class="line">        super(Conv2d, self).__init__(</span><br><span class="line">            in_channels, out_channels, kernel_size, stride, padding, dilation,</span><br><span class="line">            False, _pair(0), groups, bias, padding_mode)</span><br><span class="line"></span><br><span class="line">        def forward(self, inputs_mean, inputs_variance):</span><br><span class="line">            outputs_mean = F.conv2d(inputs_mean, self.weight, self.bias, self.stride, self.padding, self.dilation, self.groups)</span><br><span class="line">            outputs_variance = F.conv2d(inputs_variance, self.weight ** 2, None, self.stride, self.padding, self.dilation, self.groups)</span><br><span class="line">            if self._keep_variance_fn is not None:</span><br><span class="line">                outputs_variance = self._keep_variance_fn(outputs_variance)</span><br><span class="line">                return outputs_mean, outputs_variance</span><br></pre></td></tr></table></figure></p><p>Softmax: <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">class Softmax(nn.Module):</span><br><span class="line">    def __init__(self, dim=1, keep_variance_fn=None):</span><br><span class="line">        super(Softmax, self).__init__()</span><br><span class="line">        self.dim = dim</span><br><span class="line">        self._keep_variance_fn = keep_variance_fn</span><br><span class="line"></span><br><span class="line">        def forward(self, features_mean, features_variance, eps=1e-5):</span><br><span class="line">            &quot;&quot;&quot;Softmax function applied to a multivariate Gaussian distribution.</span><br><span class="line">            It works under the assumption that features_mean and features_variance </span><br><span class="line">            are the parameters of a the indepent gaussians that contribute to the </span><br><span class="line">            multivariate gaussian. </span><br><span class="line">            Mean and variance of the log-normal distribution are computed following</span><br><span class="line">            https://en.wikipedia.org/wiki/Log-normal_distribution.&quot;&quot;&quot;&quot;&quot;</span><br><span class="line">                    </span><br><span class="line">            log_gaussian_mean = features_mean + 0.5 * features_variance</span><br><span class="line">            log_gaussian_variance = 2 * log_gaussian_mean</span><br><span class="line">                    </span><br><span class="line">            log_gaussian_mean = torch.exp(log_gaussian_mean)</span><br><span class="line">            log_gaussian_variance = torch.exp(log_gaussian_variance)</span><br><span class="line">            log_gaussian_variance = log_gaussian_variance*(torch.exp(features_variance)-1)</span><br><span class="line">                    </span><br><span class="line">            constant = torch.sum(log_gaussian_mean, dim=self.dim) + eps</span><br><span class="line">            constant = constant.unsqueeze(self.dim)</span><br><span class="line">            outputs_mean = log_gaussian_mean/constant</span><br><span class="line">            outputs_variance = log_gaussian_variance/(constant**2)</span><br><span class="line">                    </span><br><span class="line">            if self._keep_variance_fn is not None:</span><br><span class="line">                outputs_variance = self._keep_variance_fn(outputs_variance)</span><br><span class="line">                return outputs_mean, outputs_variance</span><br></pre></td></tr></table></figure></p><h2 id="experiments">4. Experiments</h2><p>　　本文在 Steering Angle Prediction，Object Future Motion Prediction，Object Recognition，Closed-Loop Control of a Quadrotor 等任务上作了 Uncertainty 的估计，用 KL，NLL 来评估预测好坏。KL 本质上用于描述两个分布的距离。NLL(Negative Log-likelihood) 数学形式为 \(\frac{1}{2}\mathrm{log}(\sigma _ {tot})+\frac{1}{2\sigma _ {tot}}(y _ {gt}-y _ {pred}) ^ 2\)，即为 <a href="/Heteroscedastic-Aleatoric-Uncertainty/" title="Heteroscedastic Aleatoric Uncertainty">Heteroscedastic Aleatoric Uncertainty</a> 中预测 Uncertainty 方法中的 Loss 项。</p><h2 id="reference">5. Reference</h2><p><a id="1" href="#1ref">[1]</a> Loquercio, Antonio , Segù, Mattia, and D. Scaramuzza . &quot;A General Framework for Uncertainty Estimation in Deep Learning.&quot; (2019).<br><a id="2" href="#2ref">[2]</a> Gast, Jochen , and S. Roth . &quot;Lightweight Probabilistic Deep Networks.&quot; (2018).<br><a id="3" href="#3ref">[3]</a> https://github.com/mattiasegu/uncertainty_estimation_deep_learning/blob/master/contrib/adf.py</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;　　Uncertainty 估计在深度学习网络预测中同样非常重要，因为我们不仅需要知道预测结果，还想知道该结果的不确定性。Uncertainty 可分为偶然不确定性(Aleatoric Uncertainty，详见 &lt;a href=&quot;/Heteroscedastic-Ale
-      
-    
-    </summary>
-    
-      <category term="Uncertainty" scheme="https://leijiezhang001.github.io/categories/Uncertainty/"/>
-    
-    
-      <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
-    
-      <category term="Uncertainty" scheme="https://leijiezhang001.github.io/tags/Uncertainty/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>[paper_reading]-&quot;AFDet&quot;</title>
-    <link href="https://leijiezhang001.github.io/paper-reading-AFDet/"/>
-    <id>https://leijiezhang001.github.io/paper-reading-AFDet/</id>
-    <published>2020-08-28T01:45:09.000Z</published>
-    <updated>2020-09-02T01:19:12.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>　　点云目标检测方法已趋于完善，为了能在嵌入式系统上高效运行点云目标检测算法，地平线提出了 AFDet <a href="#1" id="1ref"><sup>[1]</sup></a>，该文章发表在 CVPR2020 Workshop 上，算是很工程化的一个工作了，对工程产品落地有很好的参考价值。AFDet 应用了很多 Anchor-Free 2D 目标检测思想，可参考 <a href="/Anchor-Free-Detection/" title="Anchor-Free Detection">Anchor-Free Detection</a>。</p><h2 id="framework">1. Framework</h2><p><img src="/paper-reading-AFDet/framework.png" width="90%" height="90%" title="图 1. Framework"> 　　AFDet 是一种 Anchor-Free，NMS-Free 的检测方法，所以后处理非常简单，高效。如图 1. 所示，AFDet 采用了传统的 Birdview 下的 Point Cloud Encoder，Backbone &amp; Necks，Anchor-Free Detector 三种网络结构。Point Cloud Encoder 可采用 <a href="/paperreading-PointPillars/" title="PointPillars">PointPillars</a> 结构，Backbone &amp; Necks 这里也不作展开。这里最重要的设计是 Anchor-Free 的检测头，由 Keypoint Heatmap，Local Offset Head，z-axis Location Head，3D Object Size Head，Orientation Head 等五个分支构成。</p><h3 id="keypoint-heatmap-local-offset-head">1.1. Keypoint Heatmap &amp; Local Offset Head</h3><p>　　BEV 下目标定位由 Heatmap \(M\in\mathbb{R} ^ {W\times H\times C}\) 和 Offset Regression Map \(O\in\mathbb{R} ^ {W\times H\times 2}\) 组成，其中 \(C\) 为 Keypoint 类型。Offset Head 是为了消除 Voxel 后的量化误差以预测更准确的目标位置。<br>　　对于第 \(k\) 个类别为 \(c _ k\) 的目标，其 3D 属性为：\((x ^ {(k)},y ^ {(k)},z ^ {(k)},w ^ {(k)},l ^ {(k)},h ^ {(k)},\theta ^ {(k)})\)。设 Pillar 边长为 \(b\)，那么在 BEV 栅格图上，目标中心点作为关键点的坐标为 \(\bar{p}=\left(\left\lfloor\frac{x ^ {(k)}-back}{b}\right\rfloor,\left\lfloor\frac{y ^ {(k)}-left}{b}\right\rfloor\right)\in\mathbb{R} ^ 2\)，其中 \([(back,front),(left,right)]\) 为 \(x-y\) 平面检测范围。由此，目标在 BEV 下的 2D 属性框表示为 \(\left(\left\lfloor\frac{x ^ {(k)}-back}{b}\right\rfloor,\left\lfloor\frac{y ^ {(k)}-left}{b}\right\rfloor,\left\lfloor\frac{w ^ {(k)}}{b}\right\rfloor,\left\lfloor\frac{l ^ {(k)}}{b}\right\rfloor,\theta ^ {(k)}\right)\)。<br>　　对于 BEV Heatmap 分支的真值，需要根据目标框真值来生成。对于 Heatmap 中的像素点 \((x,y)\)，设计其值为： <span class="math display">\[M _ {x,y,z} =\left\{\begin{array}{l}1, &amp;\mathrm{if}\;d=0\\0.8, &amp;\mathrm{if}\; d=1\\\frac{1}{d}, &amp;\mathrm{else}\end{array}\tag{1}\right.\]</span> 其中 \(d\) 表示目标框中心点与对应像素点的距离，Heatmap 中预测量 \(\hat{M} _ {x,y,c}=1\) 表示其为目标框中心点，\(\hat{M} _ {x,y,c}=0\) 则表示是背景。Heatmap 中 \(\bar{p}\) 位置定义为正样本点，其余 Pillars 为负样本点，使用 Focal Loss： <span class="math display">\[\mathcal{L} _ {heat} = -\frac{1}{N}\sum _ {x,y,c}\left\{\begin{array}{l}\left(1-\hat{M} _ {x,y,c}\right) ^ {\alpha}\;\mathrm{log}\left(\hat{M} _ {x,y,c}\right), \;\mathrm{if}\; M _ {x,y,c} = 1 \\\left(1-M _ {x,y,c}\right) ^ {\beta}\; \left(\hat{M} _ {x,y,c}\right) ^ {\alpha}\mathrm{log}\left(1-\hat{M} _ {x,y,c}\right), \;\mathrm{else} \\\end{array}\tag{2}\right.\]</span> 　　另一方面，Offset Regression 分支可以解决量化误差，以及当 Heatmap 中心点分类错误的时候，补救预测准确的中心点位置。选择中心点周围半径 \(r\) 区域作 Offset 预测： <span class="math display">\[\mathcal{L} _ {off} = \frac{1}{N}\sum _ p\sum ^ r _ {\sigma =-r}\sum ^ r _ {\epsilon = -r}\left\vert\hat{O} _ {\bar{p}}-b(p-\bar{p}+(\sigma,\epsilon))\right\vert\tag{3}\]</span> 只对 \(2r+1\) 的矩形区域作 Offset 预测。</p><h3 id="z-axis-location-head">1.2. z-axis Location Head</h3><p>　　高度预测值 \(\hat{Z}\in\mathbb{R} ^ {W\times H\times 1}\)，其 Loss 为： <span class="math display">\[\mathcal{L _ z} = \frac{1}{N}\sum _ {k=1} ^ N\left\vert\hat{Z} _ {p ^ {(k)}}-z ^ {(k)}\right\vert\tag{4}\]</span></p><h3 id="d-object-size-head">1.3. 3D Object Size Head</h3><p>　　尺寸预测值 \(\hat{S}\in\mathbb{R} ^ {W\times H\times 3}\)，其 Loss 为： <span class="math display">\[\mathcal{L} _ {size} = \frac{1}{N}\sum _ {k=1} ^ N\left\vert\hat{S} _ {p ^ {(k)}}-s ^ {(k)}\right\vert\tag{5}\]</span> 其中 \(s ^ {(k)} = (w ^ {(k)},l ^ {(k)}, h ^ {(k)})\)。</p><h3 id="orientation-head">1.4. Orientation Head</h3><p>　　与传统的一样，将角度预测分解为 bin 分类＋ offset 回归两个任务。具体的，分成两个 bin：\(\Psi _ 1 =[-\frac{7\pi}{6}, \frac{\pi}{6}]\)；\(\Psi _ 2 =[-\frac{\pi}{6}, \frac{7\pi}{6}]\)。对于每个 bin，softmax 分类 \(\hat{\mu} _ i ^ {(k)}\in\mathbb{R} ^ 2\)，与 bin 中心夹角 \(\gamma _ i\) 的 sin/cos 值 \(\hat{v} _ i ^ {(k)}\)。Loss 为： <span class="math display">\[\mathcal{L} _ {ori} = \frac{1}{N}\sum _ {k=1}^N\sum _ {i=1}^2\left(\mathrm{softmax}\left(\hat{\mu} _ i ^ {(k)},\eta _ i ^ {(k)}\right)+\eta _ i ^ {(k)}\left\vert\hat{v} _ i ^ {(k)}-v _ i ^ {(k)}\right\vert\right)\tag{6}\]</span> 其中当 \(\theta ^ {(k)}\in\Psi _ i\) 时，\(\eta _ i ^ {(k)} = \mathbb{1}\)，\(v _ i^ {(k)}=\left(\mathrm{sin}(\theta ^ {(k)}-\gamma _ i), \mathrm{cos}(\theta ^ {(k)}-\gamma _ i)\right)\)。由此，预测的角度可通过如下方式解码： <span class="math display">\[\hat{\theta} ^ {(k)}=\mathrm{arctan2}\left(\hat{v} _ {j,1} ^ {(k)},\hat{v} _ {j,2} ^ {(k)}\right)+\gamma _ j\tag{7}\]</span> 　　<strong>因为是 Anchor Free 的方式，所以如果按照传统的方式， bin 数量较大，那么最后输出的 map 所占的内存也会相当大，所以这里只采用了两个 bin</strong>。这么做有很大好处，比如量化时数值的稳定性，所以在工程应用中非常值得借鉴思考。</p><h2 id="experiments">2. Experiments</h2><p><img src="/paper-reading-AFDet/res1.png" width="70%" height="70%" title="图 2. res1"> <img src="/paper-reading-AFDet/res2.png" width="70%" height="70%" title="图 3. res2"> 　　如图 2. 所示，AFDet 在同等计算量下，基本能达到 <a href="/paperreading-PointPillars/" title="PointPillars">PointPillars</a> 水平。图 3. 则对比了几种 Anchor-Based 方法，效果也较好。</p><h2 id="reference">3. Reference</h2><p><a id="1" href="#1ref">[1]</a> Ge, Runzhou, et al. &quot;Afdet: Anchor free one stage 3d object detection.&quot; arXiv preprint arXiv:2006.12671 (2020).</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;　　点云目标检测方法已趋于完善，为了能在嵌入式系统上高效运行点云目标检测算法，地平线提出了 AFDet &lt;a href=&quot;#1&quot; id=&quot;1ref&quot;&gt;&lt;sup&gt;[1]&lt;/sup&gt;&lt;/a&gt;，该文章发表在 CVPR2020 Workshop 上，算是很工程化的一个工作了，对工程
-      
-    
-    </summary>
-    
-      <category term="3D Detection" scheme="https://leijiezhang001.github.io/categories/3D-Detection/"/>
-    
-    
-      <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
-    
-      <category term="3D Detection" scheme="https://leijiezhang001.github.io/tags/3D-Detection/"/>
-    
-      <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
-    
-      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
     
       <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
     

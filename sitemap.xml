@@ -2,6 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://leijiezhang001.github.io/4D-Panoptic-LiDAR-Segmentation/</loc>
+    
+    <lastmod>2021-03-05T01:34:12.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://leijiezhang001.github.io/SPVConv-3D-NAS/</loc>
+    
+    <lastmod>2021-02-28T01:34:12.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://leijiezhang001.github.io/Depth-Prediction-Completion/</loc>
     
     <lastmod>2021-02-09T01:34:12.000Z</lastmod>
@@ -121,14 +135,14 @@
   </url>
   
   <url>
-    <loc>https://leijiezhang001.github.io/Self-Driving-Sensing/</loc>
+    <loc>https://leijiezhang001.github.io/Self-Driving-Localization/</loc>
     
     <lastmod>2020-09-10T03:19:12.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://leijiezhang001.github.io/Self-Driving-Localization/</loc>
+    <loc>https://leijiezhang001.github.io/Self-Driving-Sensing/</loc>
     
     <lastmod>2020-09-10T03:19:12.000Z</lastmod>
     
@@ -226,14 +240,14 @@
   </url>
   
   <url>
-    <loc>https://leijiezhang001.github.io/Rethinking-of-Sparse-3D-Convolution/</loc>
+    <loc>https://leijiezhang001.github.io/End-to-End-Pseudo-LiDAR-for-3D-Det/</loc>
     
     <lastmod>2020-06-25T01:19:12.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://leijiezhang001.github.io/End-to-End-Pseudo-LiDAR-for-3D-Det/</loc>
+    <loc>https://leijiezhang001.github.io/Rethinking-of-Sparse-3D-Convolution/</loc>
     
     <lastmod>2020-06-25T01:19:12.000Z</lastmod>
     
