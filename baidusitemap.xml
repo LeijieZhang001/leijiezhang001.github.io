@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://leijiezhang001.github.io/A-Comprehensive-Survey-on-Point-Cloud-Registration/</loc>
+    <lastmod>2021-03-25</lastmod>
+  </url>  <url>
+    <loc>https://leijiezhang001.github.io/Offboard-3D-Object-Detection-from-Point-Cloud-Sequences/</loc>
+    <lastmod>2021-03-18</lastmod>
+  </url>  <url>
     <loc>https://leijiezhang001.github.io/4D-Panoptic-LiDAR-Segmentation/</loc>
     <lastmod>2021-03-05</lastmod>
   </url>  <url>
