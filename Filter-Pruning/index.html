@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Deep Learning,Model Compression,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="LeijieZhang" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="文章 pruning 中详细阐述了模型压缩中 Pruning 的基本方法与理论。Pruning 可分为 Structured Pruning 与 Unstructured Pruning 两种，由于 Structured Pruning 不需要特定的芯片支持，可直接在现有 CPU/GPU 架构下进行加速，所以值得作研究及应用。而 Structured Pruning 主要指 Filter Pr">
+<meta name="keywords" content="Deep Learning,Model Compression">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Filter Pruning">
+<meta property="og:url" content="https://leijiezhang001.github.io/Filter-Pruning/index.html">
+<meta property="og:site_name" content="LeijieZhang">
+<meta property="og:description" content="文章 pruning 中详细阐述了模型压缩中 Pruning 的基本方法与理论。Pruning 可分为 Structured Pruning 与 Unstructured Pruning 两种，由于 Structured Pruning 不需要特定的芯片支持，可直接在现有 CPU/GPU 架构下进行加速，所以值得作研究及应用。而 Structured Pruning 主要指 Filter Pr">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://leijiezhang001.github.io/Filter-Pruning/soft_filter_pruning.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Filter-Pruning/sketch.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Filter-Pruning/filter_sketch.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Filter-Pruning/pruning.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Filter-Pruning/norm_dist.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Filter-Pruning/criterion.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Filter-Pruning/ABCPruner.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Filter-Pruning/metapruning.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Filter-Pruning/GAL.png">
+<meta property="og:updated_time" content="2020-08-16T04:52:19.369Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Filter Pruning">
+<meta name="twitter:description" content="文章 pruning 中详细阐述了模型压缩中 Pruning 的基本方法与理论。Pruning 可分为 Structured Pruning 与 Unstructured Pruning 两种，由于 Structured Pruning 不需要特定的芯片支持，可直接在现有 CPU/GPU 架构下进行加速，所以值得作研究及应用。而 Structured Pruning 主要指 Filter Pr">
+<meta name="twitter:image" content="https://leijiezhang001.github.io/Filter-Pruning/soft_filter_pruning.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://leijiezhang001.github.io/Filter-Pruning/">
+
+
+
+
+
+  <title>Filter Pruning | LeijieZhang</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2129cd61363d382d1734d5e8c0ead722";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2129cd61363d382d1734d5e8c0ead722";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+      var _vds = _vds || [];
+      window._vds = _vds;
+      (function(){
+        _vds.push(['setAccountId', '87fe382bdb2695f2']);
+        (function() {
+          var vds = document.createElement('script');
+          vds.type='text/javascript';
+          vds.async = true;
+          vds.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'dn-growing.qbox.me/vds.js';
+          var s = document.getElementsByTagName('script')[0];
+          s.parentNode.insertBefore(vds, s);
+        })();
+      })();
+  </script>
+
+
+
+  <script type="text/javascript">
+      window.heap=window.heap||[],heap.load=function(e,t){window.heap.appid=e,window.heap.config=t=t||{};var r=t.forceSSL||"https:"===document.location.protocol,a=document.createElement("script");a.type="text/javascript",a.async=!0,a.src=(r?"https:":"http:")+"//cdn.heapanalytics.com/js/heap-"+e+".js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(a,n);for(var o=function(e){return function(){heap.push([e].concat(Array.prototype.slice.call(arguments,0)))}},p=["addEventProperties","addUserProperties","clearEventProperties","identify","removeEventProperty","setEventProperties","track","unsetEventProperty"],c=0;c<p.length;c++)heap[p[c]]=o(p[c])};
+      heap.load("256127732");
+  </script>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+<a href="https://github.com/LeijieZhang001" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewbox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+
+	  <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LeijieZhang</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://leijiezhang001.github.io/Filter-Pruning/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Leijie">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LeijieZhang">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Filter Pruning</h1>
+        
+
+        <div class="post-meta">
+          
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-02-03T14:56:14+08:00">
+                2020-02-03
+              </time>
+            
+            
+              <span class="post-updated">
+                &nbsp; | &nbsp; Updated on
+                <time itemprop="dateUpdated" datetime="2020-08-16T12:52:19+08:00" content="2020-08-16">
+                  2020-08-16
+                </time>
+              </span>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Model-Compression/" itemprop="url" rel="index">
+                    <span itemprop="name">Model Compression</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i> 本文总阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>次
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Words count in article&#58;</span>
+                
+                <span title="Words count in article">
+                  2.2k 字
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Reading time &asymp;</span>
+                
+                <span title="Reading time">
+                  9 分钟
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>　　文章 <a href="/pruning/" title="pruning">pruning</a> 中详细阐述了模型压缩中 Pruning 的基本方法与理论。Pruning 可分为 Structured Pruning 与 Unstructured Pruning 两种，由于 Structured Pruning 不需要特定的芯片支持，可直接在现有 CPU/GPU 架构下进行加速，所以值得作研究及应用。而 Structured Pruning 主要指 Filter Pruning，以及伴随的 Channel Pruning。本文对近期 Filter Pruning 的进展作一个阐述及思考。<br>
+　　<a href="#1" id="1ref">[1]</a> 得出结论：<strong>Pruning 的本质并不应该是选择重要的 filter/channel，而应该是确定 filter/channel 的数量，在此基础上，从零开始训练也能达到原来的性能</strong>。所以 Pruning 其实只是 AutoML/NAS 领域的一个子任务，即用 AutoML/NAS 是能解决 Pruning 问题的，但是 AutoML/NAS 方法又相对复杂且耗时，所以短期内可能传统的预定义剪枝方法更容易得到应用。本文从预定义剪枝方法和自动学习剪枝方法两大块来作归纳思考。</p>
+<h2 id="问题描述">1. 问题描述</h2>
+<p>　　假设预训练好的网络 \(F\)，其有 \(L\) 层卷积，所有卷积层的 Filter 表示为： <span class="math display">\[ W=\{W^i\} _ {i=1}^L= \left\{\{W^i_j\} _ {j=1}^{c_i}\in\mathbb{R}^{d_i\times c_i}\right\} _ {i=1}^L \tag{1} \]</span> 其中 \(d_i=c_{i-1}\times h_i\times w_i\)；\(c_i,h_i,w_i\) 分别是第 \(i\) 层卷积的 filter 数量，高，宽；\(W_j^i\) 是第 \(i\) 层卷积第 \(j\) 个 filter。<br>
+　　目标是搜索被剪枝的网络 \(\mathcal{F}\)，剪枝后的 Filter 表示为： <span class="math display">\[ \mathcal{W}=\{\mathcal{W}^i\} _ {i=1}^L= \left\{\{\mathcal{W}^i_j\} _ {j=1}^{\tilde{c}_i}\in\mathbb{R}^{d_i\times \tilde{c} _ i}\right\} _ {i=1}^L \tag{2} \]</span> 其中 \(\tilde{c} _ i=\lfloor p_i\cdot c_i\rceil\)，\(p_i\) 为 Pruning Rate。<br>
+　　Filter Pruning 会导致输出的特征 Channel 数减少，对应的下一层的每个 Filter 参数需要相应的裁剪，如 <a href="/pruning/" title="pruning">pruning</a> 中提到的三种结构下的 Pruning，尤其需要注意后两种有交点的结构，剪枝时需要作一定的约束(为了简单，交点对应的 Filter 可以选择不剪枝)。</p>
+<h2 id="预定义剪枝方法">2. 预定义剪枝方法</h2>
+<p>　　预定义剪枝网络方法通常预定义的是 \(P=\{p_i\} _ {i=1}^L\)，其剪枝步骤为：</p>
+<ol type="1">
+<li>Training<br>
+根据任务训练网络；</li>
+<li>Pruning<br>
+设计 Filter 重要性度量准则，然后根据预定义的剪枝率，进行 Filter 剪枝；</li>
+<li>Fine-tuning<br>
+对剪枝好的网络，进行再训练；</li>
+</ol>
+<h3 id="soft-filter-pruning212">2.1. Soft Filter Pruning<a href="#2" id="2ref"><sup>[2]</sup></a><a href="#12" id="12ref"><sup>[12]</sup></a></h3>
+<p><img src="/Filter-Pruning/soft_filter_pruning.png" width="50%" height="50%" title="图 1. Soft Filter Pruning"> 　　如图 1. 所示，其核心思想就是剪枝后的 Filter 在 Fine-tuning 阶段还是保持更新，由此 Pruning，Fine-tuning 迭代获得较优剪枝结果。Filter 重要性度量准则为： <span class="math display">\[\left\Vert W_j^i\right\Vert _ p = \sqrt[p]{\sum_{cc=0}^{c_{i-1}-1}\sum_{k_1=0}^{h_i-1}\sum_{k_2=0}^{w_i-1}\left\vert W_j^i(cc,k_1,k_2)\right\vert ^p} \tag{3}\]</span></p>
+<h3 id="filter-sketch313">2.2. Filter Sketch<a href="#3" id="3ref"><sup>[3]</sup></a><a href="#13" id="13ref"><sup>[13]</sup></a></h3>
+<p>　　选择 Filter 进行剪枝，另一种思路是，如何选择一部分 Filter，使得该 Filter 集合的信息量与原 Filter 集合信息量近似: <span class="math display">\[\Sigma_{W^i}\approx \Sigma_{\mathcal{W}^i} \tag{4}\]</span> 这里的信息量表达方式采用了协方差矩阵: <span class="math display">\[\begin{align}
+\Sigma_{W^i} &amp;= \left(W^i-\bar{W}^i \right)\left(W^i-\bar{W}^i \right)^T \\
+\Sigma_{\mathcal{W}^i} &amp;= \left(\mathcal{W}^i-\mathcal{\bar{W}}^i \right)\left(\mathcal{W}^i-\mathcal{\bar{W}}^i \right)^T \\
+\end{align} \tag{5}\]</span> 其中 Filter 权重符合高斯分布，即 \(\bar{W}^i=\frac{1}{c_i}\sum _ {j=1}^{c _ i}W _ j ^ i\approx 0\)，\(\mathcal{\bar{W}} ^ i=\frac{1}{\tilde{c} _ i}\sum _ {j=1}^{\tilde{c} _ i}\mathcal{W} _ j^i\approx 0\)。由式(4)(5)，构建最小化目标函数： <span class="math display">\[\mathop{\arg\min}\limits_{\mathcal{W}^i}\left\Vert W^i(W^i)^T-\mathcal{W}^i(\mathcal{W}^i)^T \right\Vert \tag{6}\]</span> 将该问题转换为求取 \(W^i\) 矩阵的 Sketch 问题，则： <span class="math display">\[\left\Vert W^i(W^i)^T-\mathcal{W}^i(\mathcal{W}^i)^T \right\Vert _F \leq \epsilon\left\Vert W^i\right\Vert^2_F \tag{7}\]</span> <img src="/Filter-Pruning/sketch.png" width="50%" height="50%" title="图 2. Frequent Direction"> <img src="/Filter-Pruning/filter_sketch.png" width="50%" height="50%" title="图 3. FilterSketch"> 　　式(7)可用图 2. 所示的算法求解，最终的 Pruning 算法过程如图 3. 所示，改进的地方主要是 Filter 选择的部分，采用了 Matrix Sketch 算法。 <img src="/Filter-Pruning/pruning.png" width="60%" height="60%" title="图 4. 网络裁剪示意图"> 　　<a href="/pruning/" title="pruning">pruning</a> 中提到有分支结构的裁剪会比较麻烦，所以如图 4. 所示，本方法对分支节点的 Filter 不做裁剪处理，简化了问题。</p>
+<h3 id="filter-pruning-via-geometric-median414">2.3. Filter Pruning via Geometric Median<a href="#4" id="4ref"><sup>[4]</sup></a><a href="#14" id="14ref"><sup>[14]</sup></a></h3>
+<p>　　在预定义剪枝网络方法的三个步骤中，大家普遍研究步骤二中 Filter 的重要性度量设计。Filter 重要性度量基本是 Smaller-norm-less-informative 思想，<a href="#5" id="5ref">[5]</a> 中则验证了该思想并不一定正确。<strong>Smaller-norm-less-informative 假设成立的条件是</strong>：</p>
+<ol type="1">
+<li>Filter 权重的规范偏差(norm deviation)要大；</li>
+<li>Filter 权重的最小规范要小；</li>
+</ol>
+<p>只有满足这两个条件，该假设才成立，即可以裁剪掉规范数较小的 Filter。 <img src="/Filter-Pruning/norm_dist.png" width="60%" height="60%" title="图 5. Filter Norm Distribution"> 　　但是，如图 5. 所示，实际 Filter 的权重分布和理想的并不一致，当 Filter 分布是绿色区域时，采用 Smaller-norm-less-informative 就不合理了，而这种情况还比较多。一般性的，前几层网络的权重规范数偏差会比较大，后几层则比较小。<br>
+<img src="/Filter-Pruning/criterion.png" width="50%" height="50%" title="图 6. Criterion for Filter Pruning"> 　　由此，本方法提出一种基于 Geometric Median 的 Filter 选择方法，如图 6. 所示，基于 Smaller-norm-less-informative 的裁剪后留下的均是规范数较大的 Filter，这还存在一定的冗余性，本方法则通过物理距离测算，剪掉冗余的 Filter。<strong>另一个角度可理解为最大程度的保留 Filter 集合的大概及具体信息，其思想与 FilterSketch 类似</strong>。<br>
+　　根据 Geometric Median 思想，第 \(i\) 层卷积要裁剪掉的 Filter 为： <span class="math display">\[W^i_{j^\ast}=\mathop{\arg\min}\limits_{W^i_{j^\ast}\,|\,j^\ast\in[0,c_i-1]}\sum_{j&#39;=0}^{c_i-1}\left\Vert W^i_{j^\ast}-W^i_{j&#39;}\right\Vert_2 \tag{8}\]</span> 由此裁剪掉满足条件的 \(W _ {j^*}^i\)，直至符合裁剪比率。<strong>本方法的思想非常类似于 Farthest Point Sampling 采样，留下的 Filter 即为原 Filter 集合采样的结果，且最大程度的保留了集合的信息</strong>。</p>
+<h2 id="自动学习剪枝方法">3. 自动学习剪枝方法</h2>
+<h3 id="abcpruner616">3.1. ABCPruner<a href="#6" id="6ref"><sup>[6]</sup></a><a href="#16" id="16ref"><sup>[16]</sup></a></h3>
+<p><img src="/Filter-Pruning/ABCPruner.png" width="60%" height="60%" title="图 7. ABCPruner"> 　　出于<a href="#1" id="1ref">[1]</a>的结论：<strong>剪枝的本质应该是直接找到每层卷积最优的 Filter 数量，在此基础上从零开始训练也能达到原来的性能</strong>。ABCPruner 的目标就是搜索每层最优的 Filter 数量，如图 7. 所示，ABCPruner 步骤为：</p>
+<ol type="1">
+<li>初始化一系列不同 Filter 数量的网络结构；</li>
+<li>每个网络结构从 pre-trained 网络中继承权重值，fine-tune 获得每个网络的 fitness(即 accuracy)；</li>
+<li>用 ABC 算法更新网络结构；</li>
+<li>重复迭代 2,3 步骤，获取最高的 fitness 网络作为最终网络结构；</li>
+</ol>
+<h3 id="metapruning717">3.2. MetaPruning<a href="#7" id="7ref"><sup>[7]</sup></a><a href="#17" id="17ref"><sup>[17]</sup></a></h3>
+<p><img src="/Filter-Pruning/metapruning.png" width="50%" height="50%" title="图 8. MetaPruning"> 　　同样，本方法也是基于<a href="#1" id="1ref">[1]</a>的结论。这里设计 PruningNet 来控制裁剪，步骤为：</p>
+<ol type="1">
+<li>Training PruningNet<br>
+PruningNet 输入为网络编码向量，即每层卷积的 Filter 数量，输出为产生网络权重的编码量，如 size reshape，crop。每次训练时随机生成网络编码量，网络编码量与 PruningNet 输出共同决定了 PrunedNet 权重，两个网络联合训练；</li>
+<li>Searching for the Best Pruned Net<br>
+即 Inference 过程，寻找最优的网络编码量，使得 PrunedNet 精度最高；得到最优网络后，不需要 fine-tuning。</li>
+</ol>
+<h3 id="generative-adversarial-learning8">3.3. Generative Adversarial Learning<a href="#8" id="8ref"><sup>[8]</sup></a></h3>
+<p><img src="/Filter-Pruning/GAL.png" width="90%" height="90%" title="图 9. Generative Adversarial Learning"> 　　本方法主要思想来自知识蒸馏(Knowledge Distillation)和生成对抗网络(Generative Adversarial Network)，如图 9. 所示，Baseline 为完整的原始网络，PrunedNet 是为了学习一个 soft mask 来动态选择 block，branch，channel，最终裁剪后的网络由 soft mask 决定。<br>
+　　从知识蒸馏的角度：Baseline 就是一个大容量的教师网络，Pruned Net 就是个小容量的学生网络，用大容量网络来监督小容量网络学习。从生成对抗学习的角度：Baseline 是原始网络，PrunedNet 是生成的对抗网络，用一个 Discriminator 网络来区分原始网络与生成的对抗网络的区别，使生成的对抗网络输出逼近于原始网络。</p>
+<h2 id="reference">4. Reference</h2>
+<p><a id="1" href="#1ref">[1]</a> Liu, Zhuang, et al. "Rethinking the Value of Network Pruning." International Conference on Learning Representations. 2018.<br>
+<a id="2" href="#2ref">[2]</a> He, Yang, et al. "Soft filter pruning for accelerating deep convolutional neural networks." arXiv preprint arXiv:1808.06866 (2018).<br>
+<a id="3" href="#3ref">[3]</a> Lin, Mingbao, et al. "Filter Sketch for Network Pruning." arXiv preprint arXiv:2001.08514 (2020).<br>
+<a id="4" href="#4ref">[4]</a> He, Yang, et al. "Filter pruning via geometric median for deep convolutional neural networks acceleration." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.<br>
+<a id="5" href="#5ref">[5]</a> Ye, Jianbo, et al. "Rethinking the smaller-norm-less-informative assumption in channel pruning of convolution layers." arXiv preprint arXiv:1802.00124 (2018).<br>
+<a id="6" href="#6ref">[6]</a> Lin, Mingbao, et al. "Channel Pruning via Automatic Structure Search." arXiv preprint arXiv:2001.08565 (2020).<br>
+<a id="7" href="#7ref">[7]</a> Liu, Zechun, et al. "Metapruning: Meta learning for automatic neural network channel pruning." Proceedings of the IEEE International Conference on Computer Vision. 2019.<br>
+<a id="8" href="#8ref">[8]</a> Lin, Shaohui, et al. "Towards optimal structured cnn pruning via generative adversarial learning." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.<br>
+<a id="9" href="#9ref">[9]</a> Singh, Pravendra, et al. "Play and prune: Adaptive filter pruning for deep model compression." arXiv preprint arXiv:1905.04446 (2019).<br>
+<a id="11" href="#11ref">[11]</a> https://github.com/Eric-mingjie/rethinking-network-pruning<br>
+<a id="12" href="#12ref">[12]</a> https://github.com/he-y/softfilter-pruning<br>
+<a id="13" href="#13ref">[13]</a> https://github.com/lmbxmu/FilterSketch<br>
+<a id="14" href="#14ref">[14]</a> https://github.com/he-y/filter-pruning-geometric-median<br>
+<a id="16" href="#16ref">[16]</a> https://github.com/lmbxmu/ABCPruner<br>
+<a id="17" href="#17ref">[17]</a> https://github.com/liuzechun/MetaPruning</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+      <div>
+	    
+<div style="text-align:center;color: #ccc;font-size:14px;">
+----------------- END -----------------</div>
+      </div>
+    
+		
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>赞赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="Leijie WeChat Pay">
+        <p>WeChat Pay</p>
+      </div>
+    
+
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+	
+	
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:</strong>
+    Leijie
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link:</strong>
+    <a href="https://leijiezhang001.github.io/Filter-Pruning/" title="Filter Pruning">https://leijiezhang001.github.io/Filter-Pruning/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice: </strong>
+    All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> unless stating additionally.
+  </li>
+</ul>
+
+      </div>
+    
+
+	
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Deep-Learning/" rel="tag"><i class="fa fa-tag"></i> Deep Learning</a>
+          
+            <a href="/tags/Model-Compression/" rel="tag"><i class="fa fa-tag"></i> Model Compression</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/Ground-Segmentation-with-Gaussian-Process/" rel="next" title="Ground Segmentation with Gaussian Process">
+                <i class="fa fa-chevron-left"></i> Ground Segmentation with Gaussian Process
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/LOAM/" rel="prev" title="LOAM(Lidar Odometry and Mapping)">
+                LOAM(Lidar Odometry and Mapping) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+
+
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC81MDYxNC8yNzA5Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+       
+        
+          <ul class="sidebar-nav motion-element">
+            <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+              Table of Contents
+            </li>
+            <li class="sidebar-nav-overview" data-target="site-overview">
+              Overview
+            </li>
+          </ul>
+        
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="Leijie">
+            
+              <p class="site-author-name" itemprop="name">Leijie</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">90</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">38</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/LeijieZhang001" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/yue-ti/activities" target="_blank" title="知乎">
+                      
+                        <i class="fa fa-fw fa-heartbeat"></i>知乎</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:ljzhang0220@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+
+        
+        <!--noindex-->
+          <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+            <div class="post-toc">
+
+              
+                
+              
+
+              
+                <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题描述"><span class="nav-text">1. 问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#预定义剪枝方法"><span class="nav-text">2. 预定义剪枝方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#soft-filter-pruning212"><span class="nav-text">2.1. Soft Filter Pruning[2][12]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#filter-sketch313"><span class="nav-text">2.2. Filter Sketch[3][13]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#filter-pruning-via-geometric-median414"><span class="nav-text">2.3. Filter Pruning via Geometric Median[4][14]</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自动学习剪枝方法"><span class="nav-text">3. 自动学习剪枝方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#abcpruner616"><span class="nav-text">3.1. ABCPruner[6][16]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#metapruning717"><span class="nav-text">3.2. MetaPruning[7][17]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#generative-adversarial-learning8"><span class="nav-text">3.3. Generative Adversarial Learning[8]</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#reference"><span class="nav-text">4. Reference</span></a></li></ol></div>
+              
+
+            </div>
+          </section>
+        <!--/noindex-->
+        
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart" aria-hidden="true"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leijie</span>
+
+  
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">146.9k</span>
+  
+</div>
+<!--
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+-->
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<span>本站已运行<span id="showDays"></span></span>
+<script>
+  var seconds = 1000;
+  var minutes = seconds * 60;
+  var hours = minutes * 60;
+  var days = hours * 24;
+  var years = days * 365;
+  var birthDay = Date.UTC(2019,05,20,12,00,00); // 这里设置建站时间
+  setInterval(function() {
+    var today = new Date();
+    var todayYear = today.getFullYear();
+    var todayMonth = today.getMonth()+1;
+    var todayDate = today.getDate();
+    var todayHour = today.getHours();
+    var todayMinute = today.getMinutes();
+    var todaySecond = today.getSeconds();
+    var now = Date.UTC(todayYear,todayMonth,todayDate,todayHour,todayMinute,todaySecond);
+    var diff = now - birthDay;
+    var diffYears = Math.floor(diff/years);
+    var diffDays = Math.floor((diff/days)-diffYears*365);
+    var diffHours = Math.floor((diff-(diffYears*365+diffDays)*days)/hours);
+    var diffMinutes = Math.floor((diff-(diffYears*365+diffDays)*days-diffHours*hours)/minutes);
+    var diffSeconds = Math.floor((diff-(diffYears*365+diffDays)*days-diffHours*hours-diffMinutes*minutes)/seconds);
+      document.getElementById('showDays').innerHTML=" "+diffYears+" 年 "+diffDays+" 天 "+diffHours+" 小时 "+diffMinutes+" 分钟 "+diffSeconds+" 秒";
+  }, 1000);
+</script>
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i> 访问用户：
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i> 访问次数：
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+    window.livereOptions = {
+        refer: 'https://leijiezhang001.github.io' + location.pathname
+    };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "vertical";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

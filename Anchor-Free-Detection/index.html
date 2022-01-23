@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Deep Learning,paper reading,2D Detection,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="LeijieZhang" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="3D 目标检测的技术思路大多数源自 2D 目标检测，所以图像 2D 检测的技术更迭极有可能在将来影响 3D 检测的发展。目前 3D 检测基本还是 Anchor-Based 方法(也称为 Top-Down 方法)，而今年以来，Anchor-Free(也称为 bottom-Up 法) 的 2D 检测已经达到了 SOTA，所以本文来探讨下 Anchor-Free 的目标检测方法发展历程。  　　如图">
+<meta name="keywords" content="Deep Learning,paper reading,2D Detection">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Anchor-Free Detection">
+<meta property="og:url" content="https://leijiezhang001.github.io/Anchor-Free-Detection/index.html">
+<meta property="og:site_name" content="LeijieZhang">
+<meta property="og:description" content="3D 目标检测的技术思路大多数源自 2D 目标检测，所以图像 2D 检测的技术更迭极有可能在将来影响 3D 检测的发展。目前 3D 检测基本还是 Anchor-Based 方法(也称为 Top-Down 方法)，而今年以来，Anchor-Free(也称为 bottom-Up 法) 的 2D 检测已经达到了 SOTA，所以本文来探讨下 Anchor-Free 的目标检测方法发展历程。  　　如图">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://leijiezhang001.github.io/Anchor-Free-Detection/history.jpg">
+<meta property="og:image" content="https://leijiezhang001.github.io/Anchor-Free-Detection/CornerNet-arch.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Anchor-Free-Detection/CornerNet-arch2.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Anchor-Free-Detection/CornerNet-block.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Anchor-Free-Detection/CenterNetKey-arch.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Anchor-Free-Detection/CenterNetKey-pool2.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Anchor-Free-Detection/CenterNetKey-pool.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Anchor-Free-Detection/ExtremeNet-arch.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Anchor-Free-Detection/ExtremeNet-post.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Anchor-Free-Detection/CenterNetObj-arch.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Anchor-Free-Detection/CenterNetObj-tasks.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Anchor-Free-Detection/FCOS-res.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Anchor-Free-Detection/FCOS-arch.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Anchor-Free-Detection/Fovea-arch.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Anchor-Free-Detection/Fovea-assign.png">
+<meta property="og:updated_time" content="2020-08-16T04:52:19.306Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Anchor-Free Detection">
+<meta name="twitter:description" content="3D 目标检测的技术思路大多数源自 2D 目标检测，所以图像 2D 检测的技术更迭极有可能在将来影响 3D 检测的发展。目前 3D 检测基本还是 Anchor-Based 方法(也称为 Top-Down 方法)，而今年以来，Anchor-Free(也称为 bottom-Up 法) 的 2D 检测已经达到了 SOTA，所以本文来探讨下 Anchor-Free 的目标检测方法发展历程。  　　如图">
+<meta name="twitter:image" content="https://leijiezhang001.github.io/Anchor-Free-Detection/history.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://leijiezhang001.github.io/Anchor-Free-Detection/">
+
+
+
+
+
+  <title>Anchor-Free Detection | LeijieZhang</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2129cd61363d382d1734d5e8c0ead722";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2129cd61363d382d1734d5e8c0ead722";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+      var _vds = _vds || [];
+      window._vds = _vds;
+      (function(){
+        _vds.push(['setAccountId', '87fe382bdb2695f2']);
+        (function() {
+          var vds = document.createElement('script');
+          vds.type='text/javascript';
+          vds.async = true;
+          vds.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'dn-growing.qbox.me/vds.js';
+          var s = document.getElementsByTagName('script')[0];
+          s.parentNode.insertBefore(vds, s);
+        })();
+      })();
+  </script>
+
+
+
+  <script type="text/javascript">
+      window.heap=window.heap||[],heap.load=function(e,t){window.heap.appid=e,window.heap.config=t=t||{};var r=t.forceSSL||"https:"===document.location.protocol,a=document.createElement("script");a.type="text/javascript",a.async=!0,a.src=(r?"https:":"http:")+"//cdn.heapanalytics.com/js/heap-"+e+".js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(a,n);for(var o=function(e){return function(){heap.push([e].concat(Array.prototype.slice.call(arguments,0)))}},p=["addEventProperties","addUserProperties","clearEventProperties","identify","removeEventProperty","setEventProperties","track","unsetEventProperty"],c=0;c<p.length;c++)heap[p[c]]=o(p[c])};
+      heap.load("256127732");
+  </script>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+<a href="https://github.com/LeijieZhang001" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewbox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+
+	  <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LeijieZhang</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://leijiezhang001.github.io/Anchor-Free-Detection/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Leijie">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LeijieZhang">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Anchor-Free Detection</h1>
+        
+
+        <div class="post-meta">
+          
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-11-04T12:38:25+08:00">
+                2019-11-04
+              </time>
+            
+            
+              <span class="post-updated">
+                &nbsp; | &nbsp; Updated on
+                <time itemprop="dateUpdated" datetime="2020-08-16T12:52:19+08:00" content="2020-08-16">
+                  2020-08-16
+                </time>
+              </span>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/2D-Detection/" itemprop="url" rel="index">
+                    <span itemprop="name">2D Detection</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i> 本文总阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>次
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Words count in article&#58;</span>
+                
+                <span title="Words count in article">
+                  4.5k 字
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Reading time &asymp;</span>
+                
+                <span title="Reading time">
+                  19 分钟
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>　　3D 目标检测的技术思路大多数源自 2D 目标检测，所以图像 2D 检测的技术更迭极有可能在将来影响 3D 检测的发展。目前 3D 检测基本还是 Anchor-Based 方法(也称为 Top-Down 方法)，而今年以来，Anchor-Free(也称为 bottom-Up 法) 的 2D 检测已经达到了 SOTA，所以本文来探讨下 Anchor-Free 的目标检测方法发展历程。<br>
+<img src="/Anchor-Free-Detection/history.jpg" width="90%" height="90%" title="图 1. 目标检测发展历程"> 　　如图 1. 所示(图片出自<a href="https://zhuanlan.zhihu.com/p/82491218" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/82491218</a>)，每种技术思路的发展都是为了解决目标检测中的一些痛点，这些技术思路又交相互用，才推动目标检测往更简单、更高性能方向发展。列举一些主要的痛点：</p>
+<ul>
+<li><strong>正负样本不均衡及无法区分困难样本导致网络学习困难</strong>，two-stage;</li>
+<li><strong>网络及后处理复杂</strong>，one-stage，包含 Anchor-Free 方法；</li>
+<li><strong>尺度问题很难同时检测大小目标</strong>，pyramid-scale；</li>
+<li><strong>框与特征的对齐问题导致提取出的目标特征有偏差</strong>，deformable；</li>
+</ul>
+<p>　　本文包含两大块，一块是 Anchor-Free 方法的概括总结，另一块是代表算法的详细分析。</p>
+<h2 id="归纳总结">1. 归纳总结</h2>
+<p>　　首先推荐下乃爷写的文章——<a href="https://zhuanlan.zhihu.com/p/68291859" target="_blank" rel="noopener">聊聊 Anchor 的“前世今生”</a>，高屋建瓴。本节也是打算聊聊 Anchor-Free 方法的来龙去脉，以及归纳总结下各算法的思路。<br>
+　　由之前讨论的，其中一个比较大的问题是，目标检测中正负样本严重不平衡。这会导致网络学习时很难针对性的学习困难样本，而 two-stage 相比 one-stage 多了一级正样本的删选，所以在没有额外困难样本选择策略的情况下，two-stage 普遍比 one-stage 效果好。可以想象的是，更多 stage 这种级联结构效果会更好，但是网络会变得相当复杂。这个痛点极大地阻碍了 one-stage 以及 Anchor-Free(负样本更多) 方法的发展，OHEM 困难样本学习当然是种有效的方法，但是还不够，直到 RetinaNet 中 Focal Loss 的提出，有效解决了正负样本严重不均衡所导致的学习困难问题。由此不仅 Anchor-based one-stage 方法性能达到了 two-stage 高度，甚至 Anchor-Free 方法性能也达到了 SOTA。<br>
+　　回顾 Anchor-Free 检测，最早的应该是 YOLO-v1<a href="#1" id="1ref"><sup>[1]</sup></a>，DenseBox<a href="#2" id="2ref"><sup>[2]</sup></a>，而 RetinaNet<a href="#3" id="3ref"><sup>[3]</sup></a> 中 Focal Loss 的提出，使得 Anchor-Free 方法引来爆发式发展。大体上可分为两种：</p>
+<ol type="1">
+<li><strong>回归目标角点，后处理需要匹配角点以生成目标框</strong>，以 CornerNet<a href="#4" id="4ref"><sup>[4]</sup></a> 为代表的一系列改进方法 CornerNet-Lite<a href="#5" id="5ref"><sup>[5]</sup></a>，CenterNet(KeyPoint Triplets)<a href="#6" id="6ref"><sup>[6]</sup></a>，ExtremeNet<a href="#7" id="7ref"><sup>[7]</sup></a>等；</li>
+<li><strong>像素级别预测目标框的不同编码量</strong>，后处理很容易生成目标框，有 CenterNet(Objects as Points)<a href="#8" id="8ref"><sup>[8]</sup></a>，FCOS<a href="#9" id="9ref"><sup>[9]</sup></a>，FoveaBox<a href="#10" id="10ref"><sup>[10]</sup></a>，FSAF<a href="#11" id="11ref"><sup>[11]</sup></a>等；</li>
+</ol>
+<p>回归角点的方法继承了人体姿态估计的很多策略，backbone 都使用 Hourglass<a href="#14" id="14ref"><sup>[14]</sup></a> 网络，在单尺度上能提取有效的特征；而像素级别预测目标框的不同编码量，引入了 FPN<a href="#15" id="15ref"><sup>[15]</sup></a> 网络进行多尺度检测，解决大小框在同一中心点或有相同角点的情况(CenterNet 还是使用了 Hourglass 网络，因为单尺度能很容易融合 3D 检测，人体姿态估计等任务)。此外，RepPoints<a href="#12" id="12ref"><sup>[12]</sup></a> 延续了 Deformable Conv 的工作，去掉了角点的框约束，使得角点一定贴合目标的边缘，本质上基本解决了以上所列的问题，其思想很值得借鉴。</p>
+<h2 id="cornernet4-cornernet-lite5">2. CornerNet<a href="#4" id="4ref"><sup>[4]</sup></a>, CornerNet-Lite<a href="#5" id="5ref"><sup>[5]</sup></a></h2>
+<h3 id="网络结构">2.1. 网络结构</h3>
+<p><img src="/Anchor-Free-Detection/CornerNet-arch.png" width="80%" height="80%" title="图 2.1. CornerNet 框架"> <img src="/Anchor-Free-Detection/CornerNet-arch2.png" width="80%" height="80%" title="图 2.2. CornerNet 网络结构"> 　　如图 2.1 与 2.2 所示，CornerNet 的 backbone 采用了人体关键点检测中常用的 Hourglass 网络，这种沙漏网络类似多层 FPN，能有效提取细节信息；网络最终输出的是 Top-Left Corners Heatmaps，Bottom-Right Corners Heatmaps，以及对应的 Embeddings，Offsets。这里以 Top-Left Corners 分支为例，说明其网络计算过程。 <img src="/Anchor-Free-Detection/CornerNet-block.png" width="80%" height="80%" title="图 2.3. CornerNet"> 　　如图 2.3. 所示，这里引入 Corner Pooling Module，该模块能提取角点的上下文信息，其计算过程是行最大值与列最大值的叠加。网络输出的:</p>
+<ul>
+<li>Score Heatmaps \(\in\mathbb{R}^{C\times H\times W}\)，每个 Channel 的监督项是个二值图，代表了是否是该类别下的角点；</li>
+<li>Embeddings \(\in\mathbb{R}^{C\times H\times W}\)，每个角点都会预测一个 Embedding 值(度量空间下的值)，用来对 top-left 与 bottom-right 角点的配对；</li>
+<li>Offsets \(\in\mathbb{R}^{2\times H\times W}\)，由于 \(H\times W\) 可能是原图的下采样，所以变换到原图的角点坐标会有离散偏差，需要预测 Offsets 修正，类别无关或者类别有关都可以；</li>
+</ul>
+<p>Inference 阶段，得到这三个输出后，还需要进行后处理才能得到目标检测框。后处理过程为：</p>
+<ol type="1">
+<li>对 Heatmaps 采用点 NMS 处理(可通过 \(3\times 3\) max-pooling 实现)得到分数最高的前 100 个 top-left 角点以及前 100 个 bottom-right 角点；</li>
+<li>类内计算 top-left 角点与 bottom-right 角点的 Embedding L1 距离，删除大于 0.5 的配对；</li>
+<li>通过 Offsets 调整配对的角点值；</li>
+<li>计算配对的角点值的平均分数，作为该目标框的分数；</li>
+</ol>
+<p>相比 Anchor-based 方法，整个后处理还是相对较为简单，没有框之间的 IoU 计算。</p>
+<h3 id="loss">2.2. Loss</h3>
+<p>　　网络训练的 Loss 表示为： <span class="math display">\[ L= L_{det} + \alpha L_{pull} + \beta L_{push} + \gamma L_{off} \tag{2.1}\]</span> 其中 \(L_{det}\) 是角点检测的 Loss 项，\(L_{pull}, L_{push}\)是 Embedding 距离监督项，\(L_{off}\)是 Offsets 的 Loss 项；\(\alpha,\beta,\gamma\)是权重。</p>
+<ul>
+<li>\(L_{det}\)<br>
+角点检测是 pixel-level 的检测，每个角点虽然只有一个真值，但是靠近角点的像素点作为角点而构成的目标框与真值框重合度也会较高，所以在真值角点处设计高斯函数 \(e^ {-\frac{x^ 2+y^ 2}{2(r/3) ^ 2}}\) 作为标签衰减函数，\(r\) 值等于真值角点周围定义的圆的半径。圆半径由以下准则确定：四个角点为中心构成四个圆，在这区域内构成的目标框与真值框的 IoU 要小于 \(t\)(文中设为 0.3)。所以这里引入超参数 \(t\)。由此得到检测的 Loss 项： <span class="math display">\[ L_{det} = -\frac{1}{N}\sum_{c=1}^C\sum_{i=1}^H\sum_{j=1}^W
+\left\{\begin{array}{l}
+(1-p_{cij})^{\alpha} \mathrm{log}(p_{cij}) &amp; \mathrm{if} \; y_{cij}=1\\
+(1-y_{cij})^{\beta} (p_{cij})^{\alpha} \mathrm{log}(1-p_{cij}) &amp; \mathrm{otherwise}
+\end{array}\tag{2.2}\right.\]</span> 其中 \(p_{cij}\) 代表 Heatmaps 中 \(c\) 类别的 \((i,j)\) 位置预测的角点分数，\(y_{cij}\) 表示经过高斯衰减后的真值标签值。可以看出这是 Focal Loss 的变种，对平衡正负样本及学习困难样本有重要作用。</li>
+<li>\(L_{off}\)<br>
+原图点 \((x,y)\) 经过网络下采样后变换到 \((\lfloor\frac{x}{n}\rfloor,\lfloor\frac{y}{n}\rfloor)\)，与真值的 Offset 可表示为 \(\mathbf{o}_k=(\frac{x_k}{n}-\lfloor\frac{x_k}{n}\rfloor\, \frac{y_k}{n}-\lfloor\frac{y_k}{n}\rfloor)\)，由此可得 Offsets 的 Loss 项： <span class="math display">\[ L_{off}=\frac{1}{N}\sum_{k=1}^N\mathrm{SmoothL1Loss}(\mathbf{o}_k,\mathbf{\hat{o}}_k) \tag{2.3}\]</span></li>
+<li>\(L_{pull}, L_{push}\)<br>
+每个角点都会预测一个 Embedding 值，期望的是，同一个目标框的 top-left 角点与 bottom-right 角点的 Embedding 值要相近，不同框的角点的 Embedding 值差异要大，由此设计： <span class="math display">\[\left\{\begin{array}{l}
+L_{pull} = \frac{1}{N}\sum_{k=1}^N\left[(e_{t_k}-e_k)^2+(e_{b_k}-e_k)^2\right] \\
+L_{push} = \frac{1}{N(N-1)}\sum_{k=1}^N\sum_{j=1, j\not=k}^N\mathrm{max}(0,\Delta-|e_k-e_j|)
+\end{array}\tag{2.4}\right.\]</span> 其中 \(e_{t_k}, e_{b_k}\) 分别表示 top-left 角点与 bottom-right 角点的 Embedding 值，\(e_k\) 是二者的平均值，\(\Delta\) 设定为 1。与 Offsets 一样，该 Loss 项也只作用于真值角点。</li>
+</ul>
+<h2 id="centernet-keypoint-triplets6">3. CenterNet: KeyPoint Triplets<a href="#6" id="6ref"><sup>[6]</sup></a></h2>
+<h3 id="网络结构-1">3.1. 网络结构</h3>
+<p><img src="/Anchor-Free-Detection/CenterNetKey-arch.png" width="80%" height="80%" title="图 3.1. CenterNet 框架"> 　　CenterNet 的 Motivation是：<strong>CornerNet 的 corner pooling 对目标框内的特征提取能力有限，以及角点匹配得到的目标框在没有其它约束下有时候检测结果会出错。</strong>由此，如图 3.1 所示，CenterNet 在 CornerNet 基础上增加了 Center 的预测分支，并引入 center pooling 以及 cascade corner pooling 模块。<br>
+　　Inference 处理时，预测的 Center 点用于删除不合理的框。具体的，取 top-left 角点与 bottom-right 角点匹配后得到的目标框中心点，在中心点附近检测是否有 Center 点，如没有，则删除该匹配；否则，保留该目标框，并用这三个点的平均分数代表该目标框的分数。 <img src="/Anchor-Free-Detection/CenterNetKey-pool2.png" width="60%" height="60%" title="图 3.2. CenterNet pooling Module"> 　　如图 3.2 所示，CenterNet 引入 center pooling 并升级了 cascade corner pooling，这两个模块极大的提升了目标框内的特征提取融合能力，类似 ROI-pooling 的作用。具体的：</p>
+<ul>
+<li><strong>Center Pooling</strong>，叠加了水平和垂直方向上的最大值；</li>
+<li><strong>Cascade Corner Pooling</strong>，不同于 Corner Pooling 只在角点所在的目标框边缘处取最大值，它还在目标框的内部取得最大值；</li>
+</ul>
+<p><img src="/Anchor-Free-Detection/CenterNetKey-pool.png" width="60%" height="60%" title="图 3.3. CenterNet pooling Module"> 　　如图 3.3 所示，这两个模块可通过不同方向的 corner pooling 组合而成，实现也较为简单。</p>
+<h3 id="loss-1">3.2. Loss</h3>
+<p>　　相比 CornerNet，增加了 center Heatmaps 的 Loss 项，其它都一样： <span class="math display">\[ L= L_{det}^{co} + L_{det}^{ce} + \alpha L_{pull}^{co} + \beta L_{push}^{co} + \gamma \left(L_{off}^{co}+L_{off}^{ce}\right) \tag{3.1}\]</span></p>
+<h2 id="extremenet7">4. ExtremeNet<a href="#7" id="7ref"><sup>[7]</sup></a></h2>
+<p><img src="/Anchor-Free-Detection/ExtremeNet-arch.png" width="80%" height="80%" title="图 4.1. ExtremeNet 框架"> 　　如图 4.1 所示，ExtremeNet 继承了 CornerNet(CenterNet) 主干，所不同的是，ExtremeNet 预测了目标的上下左右四个点，这四个点都是在目标上的，而传统的目标框上的左上及右下点则离目标有一定距离。所以输出上，角点的 Heatmaps \(\in\mathbb{I}^{4\times C\times H\times W}\)，Center 点 Heatmaps \(\in\mathbb{I}^{C\times H\times W}\)，只对角点预测 Offsets \(\in\mathbb{R}^{4\times 2\times H\times W}\)，去掉了 Embedding 的预测。</p>
+<p><img src="/Anchor-Free-Detection/ExtremeNet-post.png" width="40%" height="40%" title="图 4.2. ExtremeNet 后处理"> 　　CornerNet 与 CenterNet 因为预测的角点是目标框的左上及右下点，所以 Embedding 能较好的用于角点配对，而 ExtremeNet 预测的角点可能在目标框的任意位置，所以作者采用暴力穷举匹配的方法，实验表面效果也更好。如图 4.2 所示，最后判断是否是一个匹配到的角点，与 CenterNet 类似，也是判断待匹配角点的中心角点上是否有较强的 Center 响应。</p>
+<h2 id="centernet-objects-as-points8">5. CenterNet: Objects as Points<a href="#8" id="8ref"><sup>[8]</sup></a></h2>
+<p><img src="/Anchor-Free-Detection/CenterNetObj-arch.png" width="80%" height="80%" title="图 5.1. CenterNet 网络结构"> 　　如图 5.1 所示，CenterNet 网络大体上还是继承了 CornerNet，在 2D 检测上，CenterNet 预测目标框的中心点 Center \(\in\mathbb{I}^{C\times H\times W}\)，中心点 Offsets \(\in\mathbb{R}^{2\times H\times W}\)，以及目标框的尺寸 size \(\in\mathbb{R}^{2\times C\times H\times W}\)。其 Loss 为： <span class="math display">\[ L_{det}=L_k + \lambda_{size}L_{size}+\lambda_{off}L_{off} \tag{5.1} \]</span> 　　Inference 的后处理只需要对 Center Heatmaps 作 3x3 的 max-pooling，<strong>不需要对目标框作 NMS</strong>！</p>
+<p><img src="/Anchor-Free-Detection/CenterNetObj-tasks.png" width="40%" height="40%" title="图 5.2. CenterNet 多任务输出"> 　　此外，这种 pixel-level 的预测容易将其它任务也包含进来，如图 5.2 所示，作者还融入了 3D 检测，人体姿态估计。<br>
+　　3D 检测任务中，预测项为:</p>
+<ul>
+<li>目标距离编码量 \(\sigma(\hat{d}_k)\in\mathrm{(0,1)}^{3\times C\times H\times W}\)，由于直接回归距离比较困难，实际距离的回归量为 \(\frac{1}{\sigma(\hat{d}_k)}-1\);</li>
+<li>三围尺寸 \(\hat{\gamma}_k\in\mathbb{R}^{3\times C\times H\times W}\)，包括长，宽，高；</li>
+<li>角度 \(\hat{\theta}_k\in\mathrm{[-\pi/2,\pi/2]}^{C\times H\times W}\)，直接回归比较困难，借鉴目前用的比较多的分类+回归的思想，设计编码量 \(\hat{\alpha}_k\in\mathbb{R}^{8\times C\times H\times W}\)，将角度划分为两个 bin，\(B_1=\left[-\frac{7\pi}{6},\frac{\pi}{6}\right]\)，\(B_2=\left[-\frac{\pi}{6},\frac{7\pi}{6}\right]\)，每个 bin 有四个预测量，其中两个预测量用来作 softmax 分类，另外两个预测量作相对于 bin 中心点 \(m_i\) 的 sin，cos 的 Offsets 量；</li>
+</ul>
+<p>综上，3D 检测的 Loss 为： <span class="math display">\[\left\{\begin{array}{l}
+L_{dep} = \frac{1}{N}\sum_{k=1}^N\left\vert\frac{1}{\sigma(\hat{d}_k)}-1-d_k\right\vert \\
+L_{dim} = \frac{1}{N}\sum_{k=1}^N\left\vert\hat{\gamma}_k-\gamma_k\right\vert \\
+L_{ori} = \frac{1}{N}\sum_{k=1}^N\sum_{i=1}^2\left(softmax\left(\hat{b}_i,c_i\right)+c_i\left\vert \hat{a}_i-a_i\right\vert\right)
+\end{array}\tag{5.2}\right.\]</span> 其中 \(c_i=\mathbb{1}(\theta\in B_i)\)，\(a_i=\left(\mathrm{sin}(\theta-m_i),\mathrm{cos}(\theta-m_i)\right)\)，预测的角度可解码为 \(\hat{\theta}=arctan2\left(\hat{a}_{i1},\hat{a}_{i2}\right)+m_i\)。</p>
+<h2 id="fcos9">6. FCOS<a href="#9" id="9ref"><sup>[9]</sup></a></h2>
+<h3 id="网络结构-2">6.1. 网络结构</h3>
+<p><img src="/Anchor-Free-Detection/FCOS-res.png" width="40%" height="40%" title="图 6.1. FCOS 目标框定义方式"> 　　如图 6.1 所示，FCOS 提出了另一种目标框的表示方式，“参考点”+\((l,t,r,b)\)，当“参考点”是中心点时，就退化为中心点+尺寸的方式了。这种方式弱化了中心点的重要性，一定程度上“更有可能”回归出准确的目标框。 <img src="/Anchor-Free-Detection/FCOS-arch.png" width="80%" height="80%" title="图 6.2. FCOS 网络结构"> 　　如图 6.2 所示，FCOS 继承了 RetinaNet 主体网络，采用 FPN 形式，在不同尺度的特征层上进行目标检测。HourGlass 设计之初就是用于 pixel-level 的预测的，而 FPN 多尺度检测一定程度上更有利于框检测，<strong>不同尺度上检测不同大小的框能有效解决两个大小框中心点重合的情况</strong>，HourGlass 则无法解决，虽然这种情况很少。网络预测量有：</p>
+<ul>
+<li>Score Heatmaps \(\in\mathbb{R}^{C\times H\times W}\)，每个 Channel 的监督项是个二值图，代表了是否是该类别下的角点；</li>
+<li>Regression \(\in\mathbb{R}^{4\times H\times W}\)，“参考点” 上的 \((l,t,r,b)\)；</li>
+<li>Center-ness \(\in\mathbb{R}^{1\times H\times W}\)，监督“参考点”趋向于中心点，因为接近目标框边缘的“参考点”效果会比较差；</li>
+</ul>
+<h3 id="多尺度检测">6.2. 多尺度检测</h3>
+<p>　　不同于 Hourglass 网络只在一个尺度上进行预测，FPN 在多尺度上对真值框的划分会比较复杂，基本准则是：<strong>不同尺度要检测不同尺寸的目标框，尺度越大(特征层越小)要检测的目标框尺寸越大</strong>。所以在真值框监督的划分上，具体的，如图 6.2 所示，多尺度特征表示为 \(\{P_i|i=3,4,5,6,7\}\)，对应每个特征层能回归的最大像素距离设定为 \(\{m_i|i=2,3,4,5,6,7\} = \{0,64,128,256,512,\infty\}\)。监督第 \(i\) 特征层学习的正样本真值框需满足： <span class="math display">\[ m_{i-1}&lt;\mathrm{max}(l^{gt},t^{gt},r^{gt},b^{gt})\le m_i \tag{6.1}\]</span></p>
+<h3 id="loss-2">6.3. Loss</h3>
+<p>　　Loss 由三部分组成：</p>
+<ul>
+<li><p>类别分类<br>
+目标框内的所有点都作为正样本，所以直接采用 Focal Loss 中的 Loss 定义方式： <span class="math display">\[ L_{det} = -\alpha(1-p_k)^\gamma\mathrm{log}(p_k) \tag{6.2}\]</span></p></li>
+<li><p>目标框回归<br>
+传统的 L2 Loss 用于目标框的直接回归有两个问题：</p>
+<ol type="1">
+<li>目标框参数只是作独立的优化；</li>
+<li>较大的目标框有较大的 Loss；</li>
+</ol></li>
+</ul>
+<p>这里采用 UnitBox 中提出的 IoU Loss<a href="#13" id="13ref"><sup>[13]</sup></a>： <span class="math display">\[ L_{box} = -\mathrm{ln}(IoU_k) \tag{6.3} \]</span></p>
+<ul>
+<li>参考点中心化监督<br>
+不像 CornerNet 之流，这里的参考点全作为正样本，并没有向负样本方向的权重衰减，所以为了参考点趋向于中心点，作者提出了 Center-ness，其真值监督项为： <span class="math display">\[ centerness^{gt} = \sqrt{\frac{\mathrm{min}(l^{gt},r^{gt})}{\mathrm{max}(l^{gt},r^{gt})} \times \frac{\mathrm{min}(t^{gt},b^{gt})}{\mathrm{max}(t^{gt},b^{gt})}} \tag{6.4} \]</span> 从而可用 L1 Loss 来计算该项的 Loss。</li>
+</ul>
+<h2 id="foveabox10">7. FoveaBox<a href="#10" id="10ref"><sup>[10]</sup></a></h2>
+<p><img src="/Anchor-Free-Detection/Fovea-arch.png" width="60%" height="60%" title="图 7.1. FoveaBox 框架"> 　　如图所示，FoveaBox 完全继承了 RetinaNet 的主体网络，采用 FPN 形式。多尺度检测中的真值分配方式基本与 FCOS 一致，这里不做展开。 <img src="/Anchor-Free-Detection/Fovea-assign.png" width="60%" height="60%" title="图 7.2. FoveaBox 正负样本区域"> 　　正负样本的分配上，作者提出了 Fovea 区域，如图 7.2 所示，目标框收缩一定比例后的区域定义为正样本，收缩一定比例后的区域外定义为负样本。<br>
+　　目标框的回归上，作者提出了另一种回归量，在 \((x,y)\) 像素点上，回归量定义为： <span class="math display">\[\left\{\begin{array}{l}
+t_{x_1^{gt}} = \mathrm{log}\frac{2^l(x+0.5)-x_1^{gt}}{\sqrt{S_l}} \\
+t_{y_1^{gt}} = \mathrm{log}\frac{2^l(y+0.5)-y_1^{gt}}{\sqrt{S_l}} \\
+t_{x_2^{gt}} = \mathrm{log}\frac{x_2^{gt}-2^l(x+0.5)}{\sqrt{S_l}} \\
+t_{y_2^{gt}} = \mathrm{log}\frac{y_1^{gt}-2^l(y+0.5)}{\sqrt{S_l}} \\
+\end{array}\tag{7.1}\right.\]</span> 其中 \(S_l\) 为第 \(l\) 特征层设计的最大检测像素长度的平方。</p>
+<h2 id="fsaf11">8. FSAF<a href="#11" id="11ref"><sup>[11]</sup></a></h2>
+<p>　　网络结构及多尺度检测设置上与 FCOS，FoveaBox 并无新意。FSAF 新的东西是提出了多尺度特征层自动选择对应大小的真值目标框，用作本特征层的训练，具体选择的过程就是看每层特征层对该目标框输出的 Loss 大小，思想与 OHEM 或是 Focal Loss 差不多。该模块可与 Anchor-Based 方法一起嵌入到网络中。</p>
+<h2 id="参考文献">9.参考文献</h2>
+<p><a id="1" href="#1ref">[1]</a> Redmon, Joseph, et al. "You only look once: Unified, real-time object detection." Proceedings of the IEEE conference on computer vision and pattern recognition. 2016.<br>
+<a id="2" href="#2ref">[2]</a> Huang, Lichao, et al. "Densebox: Unifying landmark localization with end to end object detection." arXiv preprint arXiv:1509.04874 (2015).<br>
+<a id="3" href="#3ref">[3]</a> Lin, Tsung-Yi, et al. "Focal loss for dense object detection." Proceedings of the IEEE international conference on computer vision. 2017.<br>
+<a id="4" href="#4ref">[4]</a> Law, Hei, and Jia Deng. "Cornernet: Detecting objects as paired keypoints." Proceedings of the European Conference on Computer Vision (ECCV). 2018.<br>
+<a id="5" href="#5ref">[5]</a> Law, Hei, et al. "CornerNet-Lite: Efficient Keypoint Based Object Detection." arXiv preprint arXiv:1904.08900 (2019).<br>
+<a id="6" href="#6ref">[6]</a> Duan, Kaiwen, et al. "Centernet: Keypoint triplets for object detection." Proceedings of the IEEE International Conference on Computer Vision. 2019.<br>
+<a id="7" href="#7ref">[7]</a> Zhou, Xingyi, Jiacheng Zhuo, and Philipp Krahenbuhl. "Bottom-up object detection by grouping extreme and center points." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.<br>
+<a id="8" href="#8ref">[8]</a> Zhou, X., Wang, D., &amp; Krähenbühl, P. (2019). Objects as Points arXiv preprint arXiv:1904.07850<br>
+<a id="9" href="#9ref">[9]</a> Tian, Zhi, et al. "FCOS: Fully Convolutional One-Stage Object Detection." arXiv preprint arXiv:1904.01355 (2019).<br>
+<a id="10" href="#10ref">[10]</a> Kong, Tao, et al. "FoveaBox: Beyond Anchor-based Object Detector." arXiv preprint arXiv:1904.03797 (2019).<br>
+<a id="11" href="#11ref">[11]</a> Zhu, Chenchen, Yihui He, and Marios Savvides. "Feature selective anchor-free module for single-shot object detection." arXiv preprint arXiv:1903.00621 (2019).<br>
+<a id="12" href="#12ref">[12]</a> Yang, Ze, et al. "RepPoints: Point Set Representation for Object Detection." arXiv preprint arXiv:1904.11490 (2019).<br>
+<a id="13" href="#13ref">[13]</a> Yu, Jiahui, et al. "Unitbox: An advanced object detection network." Proceedings of the 24th ACM international conference on Multimedia. ACM, 2016.<br>
+<a id="14" href="#14ref">[14]</a> Newell, Alejandro, Kaiyu Yang, and Jia Deng. "Stacked hourglass networks for human pose estimation." European conference on computer vision. Springer, Cham, 2016.<br>
+<a id="15" href="#15ref">[15]</a> Lin, Tsung-Yi, et al. "Feature pyramid networks for object detection." Proceedings of the IEEE conference on computer vision and pattern recognition. 2017.</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+      <div>
+	    
+<div style="text-align:center;color: #ccc;font-size:14px;">
+----------------- END -----------------</div>
+      </div>
+    
+		
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>赞赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="Leijie WeChat Pay">
+        <p>WeChat Pay</p>
+      </div>
+    
+
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+	
+	
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:</strong>
+    Leijie
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link:</strong>
+    <a href="https://leijiezhang001.github.io/Anchor-Free-Detection/" title="Anchor-Free Detection">https://leijiezhang001.github.io/Anchor-Free-Detection/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice: </strong>
+    All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> unless stating additionally.
+  </li>
+</ul>
+
+      </div>
+    
+
+	
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Deep-Learning/" rel="tag"><i class="fa fa-tag"></i> Deep Learning</a>
+          
+            <a href="/tags/paper-reading/" rel="tag"><i class="fa fa-tag"></i> paper reading</a>
+          
+            <a href="/tags/2D-Detection/" rel="tag"><i class="fa fa-tag"></i> 2D Detection</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/paperreading-FlowNet3D/" rel="next" title="[paper_reading]-" flownet3d"">
+                <i class="fa fa-chevron-left"></i> [paper_reading]-"FlowNet3D"
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/paper-reading-Deep-Multi-Sensor-Lane-Detection/" rel="prev" title="[paper_reading]-" deep multi-sensor lane detection"">
+                [paper_reading]-"Deep Multi-Sensor Lane Detection" <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+
+
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC81MDYxNC8yNzA5Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+       
+        
+          <ul class="sidebar-nav motion-element">
+            <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+              Table of Contents
+            </li>
+            <li class="sidebar-nav-overview" data-target="site-overview">
+              Overview
+            </li>
+          </ul>
+        
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="Leijie">
+            
+              <p class="site-author-name" itemprop="name">Leijie</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">90</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">38</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/LeijieZhang001" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/yue-ti/activities" target="_blank" title="知乎">
+                      
+                        <i class="fa fa-fw fa-heartbeat"></i>知乎</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:ljzhang0220@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+
+        
+        <!--noindex-->
+          <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+            <div class="post-toc">
+
+              
+                
+              
+
+              
+                <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#归纳总结"><span class="nav-text">1. 归纳总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cornernet4-cornernet-lite5"><span class="nav-text">2. CornerNet[4], CornerNet-Lite[5]</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#网络结构"><span class="nav-text">2.1. 网络结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#loss"><span class="nav-text">2.2. Loss</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#centernet-keypoint-triplets6"><span class="nav-text">3. CenterNet: KeyPoint Triplets[6]</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#网络结构-1"><span class="nav-text">3.1. 网络结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#loss-1"><span class="nav-text">3.2. Loss</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#extremenet7"><span class="nav-text">4. ExtremeNet[7]</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#centernet-objects-as-points8"><span class="nav-text">5. CenterNet: Objects as Points[8]</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#fcos9"><span class="nav-text">6. FCOS[9]</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#网络结构-2"><span class="nav-text">6.1. 网络结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多尺度检测"><span class="nav-text">6.2. 多尺度检测</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#loss-2"><span class="nav-text">6.3. Loss</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#foveabox10"><span class="nav-text">7. FoveaBox[10]</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#fsaf11"><span class="nav-text">8. FSAF[11]</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考文献"><span class="nav-text">9.参考文献</span></a></li></ol></div>
+              
+
+            </div>
+          </section>
+        <!--/noindex-->
+        
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart" aria-hidden="true"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leijie</span>
+
+  
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">146.9k</span>
+  
+</div>
+<!--
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+-->
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<span>本站已运行<span id="showDays"></span></span>
+<script>
+  var seconds = 1000;
+  var minutes = seconds * 60;
+  var hours = minutes * 60;
+  var days = hours * 24;
+  var years = days * 365;
+  var birthDay = Date.UTC(2019,05,20,12,00,00); // 这里设置建站时间
+  setInterval(function() {
+    var today = new Date();
+    var todayYear = today.getFullYear();
+    var todayMonth = today.getMonth()+1;
+    var todayDate = today.getDate();
+    var todayHour = today.getHours();
+    var todayMinute = today.getMinutes();
+    var todaySecond = today.getSeconds();
+    var now = Date.UTC(todayYear,todayMonth,todayDate,todayHour,todayMinute,todaySecond);
+    var diff = now - birthDay;
+    var diffYears = Math.floor(diff/years);
+    var diffDays = Math.floor((diff/days)-diffYears*365);
+    var diffHours = Math.floor((diff-(diffYears*365+diffDays)*days)/hours);
+    var diffMinutes = Math.floor((diff-(diffYears*365+diffDays)*days-diffHours*hours)/minutes);
+    var diffSeconds = Math.floor((diff-(diffYears*365+diffDays)*days-diffHours*hours-diffMinutes*minutes)/seconds);
+      document.getElementById('showDays').innerHTML=" "+diffYears+" 年 "+diffDays+" 天 "+diffHours+" 小时 "+diffMinutes+" 分钟 "+diffSeconds+" 秒";
+  }, 1000);
+</script>
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i> 访问用户：
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i> 访问次数：
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+    window.livereOptions = {
+        refer: 'https://leijiezhang001.github.io' + location.pathname
+    };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "vertical";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

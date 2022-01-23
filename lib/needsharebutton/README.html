@@ -1,0 +1,33 @@
+<h1 align="center">
+<a href="https://github.com/revir/need-more-share2">NeedMoreShare2</a> for <a href="https://github.com/theme-next">NexT</a>
+</h1>
+<h1 align="center">
+Installation
+</h1>
+<h2 align="center">
+Step 1 → Go to NexT dir
+</h2>
+<p>Change dir to <strong>NexT</strong> directory. There must be <code>layout</code>, <code>source</code>, <code>languages</code> and other directories:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a>$ <span class="bu">cd</span> themes/next</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a>$ <span class="fu">ls</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true"></a><span class="ex">bower.json</span>  _config.yml  docs  gulpfile.coffee  languages  layout  LICENSE.md  package.json  README.md  scripts  source  test</span></code></pre></div>
+<h2 align="center">
+Step 2 → Get module
+</h2>
+<p>Install module to <code>source/lib</code> directory:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a>$ <span class="fu">git</span> clone https://github.com/theme-next/theme-next-needmoreshare2 source/lib/needsharebutton</span></code></pre></div>
+<h2 align="center">
+Step 3 → Set it up
+</h2>
+<p>Enable module in <strong>NexT</strong> <code>_config.yml</code> file:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode yml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a><span class="fu">needmoreshare2</span><span class="kw">:</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a><span class="at">  </span><span class="fu">enable</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a><span class="at">  </span><span class="fu">postbottom</span><span class="kw">:</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true"></a><span class="at">    </span><span class="fu">enable</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true"></a><span class="at">  </span><span class="fu">float</span><span class="kw">:</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true"></a><span class="at">    </span><span class="fu">enable</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span></code></pre></div>
+<h1 align="center">
+Update
+</h1>
+<div class="sourceCode" id="cb4"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a>$ <span class="bu">cd</span> themes/next/source/lib/needsharebutton</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true"></a>$ <span class="fu">git</span> pull</span></code></pre></div>

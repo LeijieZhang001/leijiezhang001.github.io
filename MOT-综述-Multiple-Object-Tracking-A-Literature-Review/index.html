@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="paper reading,MOT,tracking,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="LeijieZhang" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="之前做 MOT 还是沿着 SOT 的思路，这篇文章对 MOT 有一个很深入且很有框架性的综述，以下对这篇文章做一个提炼，并加入一些自己的想法。 　　MOT 作为一个中层任务，是一些高层任务的基础，比如行人的 pose estimation，action recognition，behavior analysis，车辆的 state estimation。单目标跟踪(SOT)主要关注 appea">
+<meta name="keywords" content="paper reading,MOT,tracking">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MOT 综述-&#39;Multiple Object Tracking: A Literature Review&#39;">
+<meta property="og:url" content="https://leijiezhang001.github.io/MOT-综述-Multiple-Object-Tracking-A-Literature-Review/index.html">
+<meta property="og:site_name" content="LeijieZhang">
+<meta property="og:description" content="之前做 MOT 还是沿着 SOT 的思路，这篇文章对 MOT 有一个很深入且很有框架性的综述，以下对这篇文章做一个提炼，并加入一些自己的想法。 　　MOT 作为一个中层任务，是一些高层任务的基础，比如行人的 pose estimation，action recognition，behavior analysis，车辆的 state estimation。单目标跟踪(SOT)主要关注 appea">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://leijiezhang001.github.io/MOT-综述-Multiple-Object-Tracking-A-Literature-Review/metrics.png">
+<meta property="og:updated_time" content="2020-08-16T04:52:19.406Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MOT 综述-&#39;Multiple Object Tracking: A Literature Review&#39;">
+<meta name="twitter:description" content="之前做 MOT 还是沿着 SOT 的思路，这篇文章对 MOT 有一个很深入且很有框架性的综述，以下对这篇文章做一个提炼，并加入一些自己的想法。 　　MOT 作为一个中层任务，是一些高层任务的基础，比如行人的 pose estimation，action recognition，behavior analysis，车辆的 state estimation。单目标跟踪(SOT)主要关注 appea">
+<meta name="twitter:image" content="https://leijiezhang001.github.io/MOT-综述-Multiple-Object-Tracking-A-Literature-Review/metrics.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://leijiezhang001.github.io/MOT-综述-Multiple-Object-Tracking-A-Literature-Review/">
+
+
+
+
+
+  <title>MOT 综述-'Multiple Object Tracking: A Literature Review' | LeijieZhang</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2129cd61363d382d1734d5e8c0ead722";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2129cd61363d382d1734d5e8c0ead722";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+      var _vds = _vds || [];
+      window._vds = _vds;
+      (function(){
+        _vds.push(['setAccountId', '87fe382bdb2695f2']);
+        (function() {
+          var vds = document.createElement('script');
+          vds.type='text/javascript';
+          vds.async = true;
+          vds.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'dn-growing.qbox.me/vds.js';
+          var s = document.getElementsByTagName('script')[0];
+          s.parentNode.insertBefore(vds, s);
+        })();
+      })();
+  </script>
+
+
+
+  <script type="text/javascript">
+      window.heap=window.heap||[],heap.load=function(e,t){window.heap.appid=e,window.heap.config=t=t||{};var r=t.forceSSL||"https:"===document.location.protocol,a=document.createElement("script");a.type="text/javascript",a.async=!0,a.src=(r?"https:":"http:")+"//cdn.heapanalytics.com/js/heap-"+e+".js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(a,n);for(var o=function(e){return function(){heap.push([e].concat(Array.prototype.slice.call(arguments,0)))}},p=["addEventProperties","addUserProperties","clearEventProperties","identify","removeEventProperty","setEventProperties","track","unsetEventProperty"],c=0;c<p.length;c++)heap[p[c]]=o(p[c])};
+      heap.load("256127732");
+  </script>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+<a href="https://github.com/LeijieZhang001" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewbox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+
+	  <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LeijieZhang</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://leijiezhang001.github.io/MOT-综述-Multiple-Object-Tracking-A-Literature-Review/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Leijie">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LeijieZhang">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">MOT 综述-'Multiple Object Tracking: A Literature Review'</h1>
+        
+
+        <div class="post-meta">
+          
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-05-28T16:22:58+08:00">
+                2019-05-28
+              </time>
+            
+            
+              <span class="post-updated">
+                &nbsp; | &nbsp; Updated on
+                <time itemprop="dateUpdated" datetime="2020-08-16T12:52:19+08:00" content="2020-08-16">
+                  2020-08-16
+                </time>
+              </span>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/MOT/" itemprop="url" rel="index">
+                    <span itemprop="name">MOT</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i> 本文总阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>次
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Words count in article&#58;</span>
+                
+                <span title="Words count in article">
+                  2.6k 字
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Reading time &asymp;</span>
+                
+                <span title="Reading time">
+                  10 分钟
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>　　之前做 MOT 还是沿着 SOT 的思路，这篇文章对 MOT 有一个很深入且很有框架性的综述，以下对这篇文章做一个提炼，并加入一些自己的想法。<br>
+　　MOT 作为一个中层任务，是一些高层任务的基础，比如行人的 pose estimation，action recognition，behavior analysis，车辆的 state estimation。单目标跟踪(SOT)主要关注 appearance model 以及 motion model 的设计，解决尺度、旋转、光照等影响因素。而 MOT 包含两个任务：目标数量以及目标ID，这就要求 MOT 还需要解决其它问题：</p>
+<ul>
+<li>frequent occlusions</li>
+<li>initialization and termination of tracks</li>
+<li>similar appearance</li>
+<li>interactions among multiple objects</li>
+</ul>
+<h2 id="问题描述">1. 问题描述</h2>
+<p>　　多目标跟踪实际上是多参数估计问题。给定图像序列\(\{I_1,I_2,...,I_t,...\}\)，第\(t\)帧中目标个数为\(M_t\)，第\(t\)帧中所有目标的状态表示为\(S_t=\{s_t^ 1,s_t^ 2,...,s_t^ {M_t}\}\)，第\(i\)个目标的轨迹表示为\(s_{1:t}^ i=\{s_1^ i,s_2^ i,...,s_t^ i\}\)，所有图像中所有目标的状态序列为\(S_{1:t}=\{S_1,S_2,...,S_t\}\)。相应的，所有图像中所有目标观测到的状态序列为\(O_{1:t}=\{O_1,O_2,...,O_t\}\)。多目标跟踪的优化目标是求解最优的各目标状态，即求解一个后验概率问题，<span class="math display">\[ \widehat{S}_{1:t}=\mathop{\arg\max}_{S_{1:t}}P(S_{1:t}|O_{1:t})\]</span> 这种形式有两种实现方法：</p>
+<ul>
+<li><p><strong>probabilistic inference</strong><br>
+适合用于 online tracking 任务，Dynamic Model 为 \(P(S_t|S_{t-1})\)，Observation Model 为 \(P(O_t|S_t)\)，两步求解过程：<br>
+　\(\circ\)　Predict: \(P(S_t|O_{1:t-1})=\int P(S_t|S_{t-1})dS_{t-1}\)<br>
+　\(\circ\)　Update: \(P(S_t|O_{1:t}) \propto P(O_t|S_t)P(S_t|O_{1:t-1})\)</p></li>
+<li><p><strong>deterministic optimization</strong><br>
+适合用于 offline tracking 任务，直接利用多帧信息进行最优化求解。</p></li>
+</ul>
+<h2 id="分类方法">2. 分类方法</h2>
+<ul>
+<li><p><strong>initialization method</strong><br>
+初始化方式分为：<br>
+　\(\circ\)　Detection-Based Tracking，优势明显，除了只能处理特定的目标类型；<br>
+　\(\circ\)　Detection-Free Tracking，能处理任何目标类型；</p></li>
+<li><p><strong>processing mode</strong><br>
+根据是否使用未来的观测，处理方式可分为：<br>
+　\(\circ\)　online tracking，适合在线任务，缺点是观测量会比较少；<br>
+　\(\circ\)　offline tracking，输出结果存在时延，理论上能获得全局最优解；</p></li>
+<li><p><strong>type of output</strong><br>
+根据问题求解方式输出是否存在随机性：<br>
+　\(\circ\)　probabilistic inference，概率性推断；<br>
+　\(\circ\)　deterministic inference，求解最大后验概率；</p>
+<p><strong>自动驾驶等在线任务主要关注 Detection-Based，online tracking。</strong></p></li>
+</ul>
+<h2 id="框架">3. 框架</h2>
+<p>　　MOT 主要考虑两个问题：</p>
+<ul>
+<li>目标在不同帧之间的相似性度量，即对appearance, motion, interaction, exclusion, occlusion的建模；</li>
+<li>恢复出目标的ID，即 inference 过程；</li>
+</ul>
+<h3 id="appearance-model">3.1. Appearance Model</h3>
+<h4 id="visual-representation">3.1.1. Visual Representation</h4>
+<p>　　视觉表达即目标的特征表示方式：</p>
+<ol type="1">
+<li><strong>local features</strong><br>
+本质上是点特征，点特征由 corner+descriptor(角点+描述子) 组成。KLT(good features to track)在 SOT 中应用广泛，用它可以生成短轨迹，估计相机运动位姿，运动聚类等；Optical Flow也是一种局部特征，在数据关联之前也可用于将检测目标连接到短轨迹中去。</li>
+<li><strong>region features</strong><br>
+在一个块区域内提取特征，根据像素间作差的次数，可分为：
+<ul>
+<li>zero-order, color histogram &amp; raw pixel template</li>
+<li>first-order, HOG &amp; level-set formulation(?)</li>
+<li>up-to-second-order, Region covariance matrix</li>
+</ul></li>
+<li><strong>others</strong><br>
+其它特征本质上也需要 local 或 region 的方式提取，只是原始信息并不是灰度或彩图。如 depth,probabilistic occupancy map, gait feature.</li>
+</ol>
+<p>　　Local features，比如颜色特征，在计算上比较高效，但是对遮挡，旋转比较敏感；Region features 里，HOG 对光照有一定的鲁棒性，但是对遮挡及形变效果较差；Region covariance matrix 更加鲁棒，但是需要更高的计算量；深度特征也比较有效，但是需要额外的获取深度信息的代价。</p>
+<h4 id="statistical-measuring">3.1.2. Statistical Measuring</h4>
+<p>　　有了目标的特征表示方式之后，就可以评价两个观察的目标的相似性。特征表示的线索(cue)可分为：</p>
+<ol type="1">
+<li><strong>single cue</strong><br>
+因为只有一个线索，相似性(similarity)可以直接通过两个向量的距离转换得到。可以将距离指数化，高斯化。也可以将不相似度转为可能性，用协方差矩阵表示。</li>
+<li><strong>multiple cues</strong><br>
+多线索，即多种特征的融合，能极大提高鲁棒性，融合的策略有：
+<ul>
+<li>Boosting, 选取一系列的特征，用 boost 算法选取表达能力最强的特征；</li>
+<li>Concatenation, 各个特征直接在空间维度上串起来，形成一个 cue 的表达方式；</li>
+<li>Summation, 加权融合各个特征，形成一个 cue 的表达方式；</li>
+<li>Product, 各个特征相乘的方式，比如目标 \(s_0\) 的某个潜在匹配 \(s_1\) 的颜色，形状特征为 \(color\), \(shape\) 的概率为 \(p(color|s_0)\), \(p(shape|s_0)\), 假设特征独立，那么， 　　　　　　　<span class="math display">\[p(s_1|s_0)=p(color, shape|s_0)=p(color|s_0)\cdot p(shape|s_0)\]</span></li>
+<li>Cascading, coarse-to-fine 的方式，逐步精细化搜索；</li>
+</ul></li>
+</ol>
+<h3 id="motion-model">3.2. Motion Model</h3>
+<p>　　运动模型对关联两个 tracklets 比较管用，而 online tracking 任务，对输出的时延要求较高，所以其中一个 tracklet 可以任务就是当前帧与上一帧形成的轨迹，所以这里很难去计算两个 tracklets 的相似度。能看到的一个应用点就是，通过 motion model 模型，预测下一时刻目标的位置，作为一个线索项目。以下讨论的各模型主要是为了度量 tracklets 的相似性，从而做 tracklets 的匹配。</p>
+<h4 id="linear">3.2.1. Linear</h4>
+<ul>
+<li>Velocity Smoothness. N 帧 M 个目标轨迹: \(C_{dyn}=\sum_{t=1}^ {N-2}\sum_{i=1}^ {M}\parallel v_i^ t-v_i^ {t+1}\parallel^ 2\)</li>
+<li>Position Smoothness. \(G(p^ {tail}+v^ {tail}\Delta t-p^ {head}, \sum_p)\cdot G(p^ {head}-v^ {head}\Delta t-p^ {tail}, \sum_p)\)</li>
+<li>Acceleration Smoothness.</li>
+</ul>
+<h4 id="non-linear">3.2.2. Non-linear</h4>
+<p>　　运动模型假设是非线性的，相似度计算还是按照以上高斯形式。引为中提到，非线性运动模型并不作为目标的惩罚因子，因为目标并不需要满足该模型，但是只要有目标满足，就降低惩罚系数。</p>
+<h3 id="interaction-model">3.3. Interaction Model</h3>
+<h4 id="social-force-models">3.3.1. Social Force Models</h4>
+<ol type="1">
+<li><strong>Individual Force</strong>
+<ul>
+<li>fidelity, 目标不会改变它的目的地方向；</li>
+<li>constancy, 目标不会突然改变速度和方向；</li>
+</ul></li>
+<li><strong>Group Force</strong>
+<ul>
+<li>attraction, 目标间应该尽量靠近；</li>
+<li>repulsion, 目标间也得保留适当的距离；</li>
+<li>coherence, 同一个 group 里面的目标速度应该差不多；</li>
+</ul></li>
+</ol>
+<h4 id="crowd-motion-pattern-models">3.3.2. Crowd Motion Pattern Models</h4>
+<p>　　当一个 group 比较密集的时候，单个目标的运动模型不太显著了，这时候群体的运动模型更加有效，可以用一些方法来构建群体运动模型。</p>
+<h3 id="exclusion-model">3.4. Exclusion Model</h3>
+<h4 id="detection-level">3.4.1. Detection-level</h4>
+<p>　　同一帧两个检测量不能指向同一个目标。匹配 tracklets 时，可以将这一项作为惩罚项。不过目前的检测技术都做了 NMS，基本可以消除这种情况。</p>
+<h4 id="trajectory-level">3.4.2. Trajectory-level</h4>
+<p>　　两个轨迹不能非常靠近。对于 online tracking 来说，就是 tracking 结果的两个量不能挨在一起，如果挨在一起，就说明有问题，比如遮挡，或跟丢。</p>
+<h3 id="occlusion-handling">3.5. Occlusion Handling</h3>
+<ul>
+<li>Part-to-whole, 将目标分成栅格来处理；</li>
+<li>Hypothesize-and-test,</li>
+<li>Buffer-and-recover, 在遮挡产生前，记录一定量的观测，遮挡后恢复；</li>
+<li>Others</li>
+</ul>
+<h3 id="inference">3.6. Inference</h3>
+<h4 id="probabilistic-inference">3.6.1. Probabilistic Inference</h4>
+<p>　　概率法只需要用到当前时刻之前的信息，所以适合用于 online tracking 任务。首先，如果假设一阶马尔科夫，当前目标的状态之依赖于前一时刻目标的状态，即 <em>dynamic model</em>： <span class="math display">\[P(S_t|S_{1:t-1})=P(S_t|S_{t-1})\]</span> 其次，观测是独立的，即当前目标的观测只由当前目标的状态决定，<em>observation model</em>： <span class="math display">\[P(O_{1:t}|S_{1:t})=\prod_{i=1}^t P(O_t|S_t)\]</span> dynamic model 对应的就是跟踪算法策略，observation model 是状态观测手段，包括检测方法。目标状态估计的迭代过程为：</p>
+<ul>
+<li><strong>predict step</strong><br>
+根据 dynamic model，由目标的上一状态预测当前状态的后验概率分布；</li>
+<li><strong>update step</strong><br>
+根据 observation model，更新当前目标状态的后验概率分布；</li>
+</ul>
+<p>　　状态估计的过程伴随着噪音等因素的影响，常用的概率推断模型有：</p>
+<ul>
+<li>Kalman filter</li>
+<li>Extended Kalman filter</li>
+<li>Particle filter</li>
+</ul>
+<h4 id="deterministic-optimization">3.6.2. Deterministic Optimization</h4>
+<p>　确定性优化法需要至少一个时间窗口的观测量，所以适合 offline tracking 任务。优化方法有：</p>
+<ul>
+<li>Bipartite graph matching</li>
+<li>Dynamic Programming</li>
+<li>Min-cost max-flow network flow</li>
+<li>Conditional random field</li>
+<li>MWIS(Maximum-weight independent set)</li>
+</ul>
+<h2 id="评价方法">4. 评价方法</h2>
+<p>　　评价方法是非常重要的，一方面对算法系统进行调参优化，另一方面比较各个不同算法的优劣。评价方法 (evaluation) 包括评价指标 (metrics) 以及数据集 (datasets)，多类别的数据集主要有：</p>
+<ul>
+<li><a href="https://motchallenge.net/results/MOT17/" target="_blank" rel="noopener">MOT Challenge</a></li>
+<li><a href="http://www.cvlibs.net/datasets/kitti/eval_tracking.php" target="_blank" rel="noopener">KITTI</a>　　</li>
+</ul>
+<p>评价指标可分为：</p>
+<p>A. <strong>检测指标</strong><br>
+　\(\lozenge\)　准确性(Accuracy)</p>
+<ul>
+<li>Recall &amp; Precision</li>
+<li>False Alarme per Frame(FAF) rate, from <a href="https://www.google.com/search?q=Learning+affinities+and+dependencies+for+multi-target+tracking+using+a+CRF+model&amp;oq=Learning+affinities+and+dependencies+for+multi-target+tracking+using+a+CRF+model&amp;aqs=chrome..69i57.1077j0j9&amp;sourceid=chrome&amp;ie=UTF-8" target="_blank" rel="noopener">paper</a></li>
+<li>False Positive Per Image(FPPI), from <a href="https://www.google.com/search?q=Multiple+target+tracking+in+world+coordinate+with+single%2C+minimally+calibrated+camera&amp;oq=Multiple+target+tracking+in+world+coordinate+with+single%2C+minimally+calibrated+camera&amp;aqs=chrome..69i57j0.1134j0j9&amp;sourceid=chrome&amp;ie=UTF-8" target="_blank" rel="noopener">paper</a></li>
+<li>MODA(Multiple Object Detection Accuracy), 包含了 false positive &amp; miss dets. from <a href="https://www.google.com/search?q=Framework+for+performance+evaluation+of+face%2C+text%2C+and+vehicle+detection+and+tracking+in+video%3A+Data%2C+metrics%2C+and+protocol&amp;oq=Framework+for+performance+evaluation+of+face%2C+text%2C+and+vehicle+detection+and+tracking+in+video%3A+Data%2C+metrics%2C+and+protocol&amp;aqs=chrome..69i57j69i61.973j0j9&amp;sourceid=chrome&amp;ie=UTF-8" target="_blank" rel="noopener">paper</a></li>
+</ul>
+<p>　\(\lozenge\)　精确性(Precision)</p>
+<ul>
+<li>MODP(Multiple Object Detection Precision), 衡量检测框与真值框的位置对齐程度；from <a href="https://www.google.com/search?q=Framework+for+performance+evaluation+of+face%2C+text%2C+and+vehicle+detection+and+tracking+in+video%3A+Data%2C+metrics%2C+and+protocol&amp;oq=Framework+for+performance+evaluation+of+face%2C+text%2C+and+vehicle+detection+and+tracking+in+video%3A+Data%2C+metrics%2C+and+protocol&amp;aqs=chrome..69i57j69i61.973j0j9&amp;sourceid=chrome&amp;ie=UTF-8" target="_blank" rel="noopener">paper</a></li>
+</ul>
+<p>B. <strong>跟踪指标</strong><br>
+　\(\lozenge\)　准确性(Accuracy)</p>
+<ul>
+<li>ID switches(IDs), from <a href="https://www.google.com/search?safe=strict&amp;ei=agXyXMaQEKyl_Qa4zJrQCg&amp;q=who+are+you+with+and+where+are+you+going&amp;oq=Who+are+you+with+and+where+are+you+going&amp;gs_l=psy-ab.1.0.0i203.53050.53050..55771...0.0..0.559.559.5-1......0....2j1..gws-wiz.nigYYAJc4jQ" target="_blank" rel="noopener">paper</a></li>
+<li>MOTA(Multiple Object Tracking Accuracy), 包含了FP，FN，mismatch；from <a href="https://www.google.com/search?safe=strict&amp;ei=0ATyXP6lPIO6ggfIk6GAAQ&amp;q=evaluating+multiple+object+tracking+performance+the+clear+mot+metrics&amp;oq=Evaluating+Multiple+Object+Tracking+Performance&amp;gs_l=psy-ab.1.1.35i39j0j0i30j0i67.46576.46576..50024...0.0..0.436.436.4-1......0....2j1..gws-wiz.KAREeooiDMo" target="_blank" rel="noopener">paper</a></li>
+</ul>
+<p>　\(\lozenge\)　精确性(Precision)</p>
+<ul>
+<li>MOTP(Multiple Object Tracking Precision), from <a href="https://www.google.com/search?safe=strict&amp;ei=0ATyXP6lPIO6ggfIk6GAAQ&amp;q=evaluating+multiple+object+tracking+performance+the+clear+mot+metrics&amp;oq=Evaluating+Multiple+Object+Tracking+Performance&amp;gs_l=psy-ab.1.1.35i39j0j0i30j0i67.46576.46576..50024...0.0..0.436.436.4-1......0....2j1..gws-wiz.KAREeooiDMo" target="_blank" rel="noopener">paper</a></li>
+<li>TDE(Tracking Distance Error), from <a href="https://www.google.com/search?safe=strict&amp;ei=fATyXNnwEvCH_QaG17fwDA&amp;q=%E2%80%9CTracking+with+local+spatio-temporal+motion+patterns+in+extremely+crowded+scenes&amp;oq=%E2%80%9CTracking+with+local+spatio-temporal+motion+patterns+in+extremely+crowded+scenes&amp;gs_l=psy-ab.12..0i30.82181.82181..83291...0.0..0.292.292.2-1......0....2j1..gws-wiz.hs0Je90zzHU" target="_blank" rel="noopener">paper</a></li>
+<li>OSPA(optimal subpattern assignment), from <a href="https://www.google.com/search?safe=strict&amp;ei=_gDyXPKINY21ggeKtb2oDg&amp;q=a+metric+for+performance+evaluation+of+multi-target+tracking+algorithms&amp;oq=A_Metric_for_Performance_Evaluation_of_Multi-Targe&amp;gs_l=psy-ab.1.0.0i30.106502.106502..109413...0.0..0.303.303.3-1......0....2j1..gws-wiz.vrzc0MG18OM" target="_blank" rel="noopener">paper</a></li>
+</ul>
+<p>　\(\lozenge\)　完整性(Completeness)</p>
+<ul>
+<li>MT, the numbers of Mostly Tracked, from <a href="https://www.google.com/search?q=Learning+to+associate%3A+Hybridboosted+multi-target+tracker+for+crowded+scene&amp;oq=Learning+to+associate%3A+Hybridboosted+multi-target+tracker+for+crowded+scene&amp;aqs=chrome..69i57.1261j0j9&amp;sourceid=chrome&amp;ie=UTF-8" target="_blank" rel="noopener">paper</a></li>
+<li>PT, the numbers of Partly Tracked</li>
+<li>ML, the numbers of Mostly Lost</li>
+<li>FM, the numbers of Fragmentation</li>
+</ul>
+<p>　\(\lozenge\)　鲁棒性(Robustness)</p>
+<ul>
+<li>RS(Recover from Short-term occlusion), from <a href="https://www.google.com/search?safe=strict&amp;ei=_gDyXPKINY21ggeKtb2oDg&amp;q=A+stochastic+graph+evolution+framework+for+robust+multi-target+tracking&amp;oq=A+stochastic+graph+evolution+framework+for+robust+multi-target+tracking&amp;gs_l=psy-ab.12..0i30.453442.453442..454691...0.0..0.315.315.3-1......0....2j1..gws-wiz.OPYJ8mRFgYg" target="_blank" rel="noopener">paper</a></li>
+<li>RL(Recover from Long-term occlusion)</li>
+</ul>
+<p>评价指标汇总： <img src="/MOT-综述-Multiple-Object-Tracking-A-Literature-Review/metrics.png" width="50%" height="50%"></p>
+<h2 id="总结">5. 总结</h2>
+<h3 id="还存在的问题">5.1. 还存在的问题</h3>
+<p>　　MOT 算法模块较多，参数也较复杂，但是最依赖于检测模块的性能，所以算法间比较性能时，需要注意按模块进行变量控制。</p>
+<h3 id="未来研究方向">5.2. 未来研究方向</h3>
+<ul>
+<li><strong>MOT with video adaptation</strong>，检测模块式预先训练的，需要在线更新学习；</li>
+<li><strong>MOT under multiple camera</strong>: \(\circ\)　multiple views，不同视野相同场景信息的记录， \(\circ\)　non-overlapping multi-camera，不同视野不同场景的 reidentification；</li>
+<li><strong>Multiple 3D object tracking</strong>，能更准确预测位置，大小，更有效处理遮挡；</li>
+<li><strong>MOT with scene understanding</strong>，拥挤场景，用场景理解来有效跟踪；</li>
+<li><strong>MOT with deep learning</strong></li>
+<li><strong>MOT with other cv tasks</strong>，和其他任务融合，比如目标分割等；</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+      <div>
+	    
+<div style="text-align:center;color: #ccc;font-size:14px;">
+----------------- END -----------------</div>
+      </div>
+    
+		
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>赞赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="Leijie WeChat Pay">
+        <p>WeChat Pay</p>
+      </div>
+    
+
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+	
+	
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:</strong>
+    Leijie
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link:</strong>
+    <a href="https://leijiezhang001.github.io/MOT-综述-Multiple-Object-Tracking-A-Literature-Review/" title="MOT 综述-'Multiple Object Tracking: A Literature Review'">https://leijiezhang001.github.io/MOT-综述-Multiple-Object-Tracking-A-Literature-Review/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice: </strong>
+    All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> unless stating additionally.
+  </li>
+</ul>
+
+      </div>
+    
+
+	
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/paper-reading/" rel="tag"><i class="fa fa-tag"></i> paper reading</a>
+          
+            <a href="/tags/MOT/" rel="tag"><i class="fa fa-tag"></i> MOT</a>
+          
+            <a href="/tags/tracking/" rel="tag"><i class="fa fa-tag"></i> tracking</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/3D-Detection-paper-list/" rel="next" title="3D Detection Paper List">
+                <i class="fa fa-chevron-left"></i> 3D Detection Paper List
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/MOT-评价指标-Evaluating-Multiple-Object-Tracking-Performance-the-CLEAR-MOT-Metrics/" rel="prev" title="MOT 评价指标-" evaluating multiple object tracking performance, the clear mot metrics"">
+                MOT 评价指标-"Evaluating Multiple Object Tracking Performance, the CLEAR MOT Metrics" <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+
+
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC81MDYxNC8yNzA5Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+       
+        
+          <ul class="sidebar-nav motion-element">
+            <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+              Table of Contents
+            </li>
+            <li class="sidebar-nav-overview" data-target="site-overview">
+              Overview
+            </li>
+          </ul>
+        
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="Leijie">
+            
+              <p class="site-author-name" itemprop="name">Leijie</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">90</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">38</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/LeijieZhang001" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/yue-ti/activities" target="_blank" title="知乎">
+                      
+                        <i class="fa fa-fw fa-heartbeat"></i>知乎</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:ljzhang0220@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+
+        
+        <!--noindex-->
+          <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+            <div class="post-toc">
+
+              
+                
+              
+
+              
+                <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题描述"><span class="nav-text">1. 问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分类方法"><span class="nav-text">2. 分类方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#框架"><span class="nav-text">3. 框架</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#appearance-model"><span class="nav-text">3.1. Appearance Model</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#visual-representation"><span class="nav-text">3.1.1. Visual Representation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#statistical-measuring"><span class="nav-text">3.1.2. Statistical Measuring</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#motion-model"><span class="nav-text">3.2. Motion Model</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#linear"><span class="nav-text">3.2.1. Linear</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#non-linear"><span class="nav-text">3.2.2. Non-linear</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#interaction-model"><span class="nav-text">3.3. Interaction Model</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#social-force-models"><span class="nav-text">3.3.1. Social Force Models</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#crowd-motion-pattern-models"><span class="nav-text">3.3.2. Crowd Motion Pattern Models</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exclusion-model"><span class="nav-text">3.4. Exclusion Model</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#detection-level"><span class="nav-text">3.4.1. Detection-level</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#trajectory-level"><span class="nav-text">3.4.2. Trajectory-level</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#occlusion-handling"><span class="nav-text">3.5. Occlusion Handling</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#inference"><span class="nav-text">3.6. Inference</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#probabilistic-inference"><span class="nav-text">3.6.1. Probabilistic Inference</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#deterministic-optimization"><span class="nav-text">3.6.2. Deterministic Optimization</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#评价方法"><span class="nav-text">4. 评价方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-text">5. 总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#还存在的问题"><span class="nav-text">5.1. 还存在的问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#未来研究方向"><span class="nav-text">5.2. 未来研究方向</span></a></li></ol></li></ol></div>
+              
+
+            </div>
+          </section>
+        <!--/noindex-->
+        
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart" aria-hidden="true"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leijie</span>
+
+  
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">146.9k</span>
+  
+</div>
+<!--
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+-->
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<span>本站已运行<span id="showDays"></span></span>
+<script>
+  var seconds = 1000;
+  var minutes = seconds * 60;
+  var hours = minutes * 60;
+  var days = hours * 24;
+  var years = days * 365;
+  var birthDay = Date.UTC(2019,05,20,12,00,00); // 这里设置建站时间
+  setInterval(function() {
+    var today = new Date();
+    var todayYear = today.getFullYear();
+    var todayMonth = today.getMonth()+1;
+    var todayDate = today.getDate();
+    var todayHour = today.getHours();
+    var todayMinute = today.getMinutes();
+    var todaySecond = today.getSeconds();
+    var now = Date.UTC(todayYear,todayMonth,todayDate,todayHour,todayMinute,todaySecond);
+    var diff = now - birthDay;
+    var diffYears = Math.floor(diff/years);
+    var diffDays = Math.floor((diff/days)-diffYears*365);
+    var diffHours = Math.floor((diff-(diffYears*365+diffDays)*days)/hours);
+    var diffMinutes = Math.floor((diff-(diffYears*365+diffDays)*days-diffHours*hours)/minutes);
+    var diffSeconds = Math.floor((diff-(diffYears*365+diffDays)*days-diffHours*hours-diffMinutes*minutes)/seconds);
+      document.getElementById('showDays').innerHTML=" "+diffYears+" 年 "+diffDays+" 天 "+diffHours+" 小时 "+diffMinutes+" 分钟 "+diffSeconds+" 秒";
+  }, 1000);
+</script>
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i> 访问用户：
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i> 访问次数：
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+    window.livereOptions = {
+        refer: 'https://leijiezhang001.github.io' + location.pathname
+    };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "vertical";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

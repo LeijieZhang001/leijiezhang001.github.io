@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Deep Learning,3D Detection,paper reading,autonomous driving,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="LeijieZhang" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="Learning 方法有什么致命缺点吗？我认为目前 Learning 方法还存在的较为棘手的问题是，有时候结果会出现非常低级的错误，或是说不可思议不合常理的 cornercases。所以我认为一个工程系统或是一个鲁棒的算法系统，在 Learning 之后做一个基于常理（如 geometry 约束或专家系统）的验证，能有效抑制这个问题。本文就是一个比较好的 learning+geometry 想">
+<meta name="keywords" content="Deep Learning,3D Detection,paper reading,autonomous driving">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[paper_reading]-&quot;Stereo R-CNN based 3D Object Detection for Autonomous Driving&quot;">
+<meta property="og:url" content="https://leijiezhang001.github.io/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/index.html">
+<meta property="og:site_name" content="LeijieZhang">
+<meta property="og:description" content="Learning 方法有什么致命缺点吗？我认为目前 Learning 方法还存在的较为棘手的问题是，有时候结果会出现非常低级的错误，或是说不可思议不合常理的 cornercases。所以我认为一个工程系统或是一个鲁棒的算法系统，在 Learning 之后做一个基于常理（如 geometry 约束或专家系统）的验证，能有效抑制这个问题。本文就是一个比较好的 learning+geometry 想">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://leijiezhang001.github.io/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/net_arch.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/target.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/viewpoint.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/keypoints.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/projection.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/r1.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/r2.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/r3.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/r4.png">
+<meta property="og:updated_time" content="2020-08-16T04:52:19.474Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[paper_reading]-&quot;Stereo R-CNN based 3D Object Detection for Autonomous Driving&quot;">
+<meta name="twitter:description" content="Learning 方法有什么致命缺点吗？我认为目前 Learning 方法还存在的较为棘手的问题是，有时候结果会出现非常低级的错误，或是说不可思议不合常理的 cornercases。所以我认为一个工程系统或是一个鲁棒的算法系统，在 Learning 之后做一个基于常理（如 geometry 约束或专家系统）的验证，能有效抑制这个问题。本文就是一个比较好的 learning+geometry 想">
+<meta name="twitter:image" content="https://leijiezhang001.github.io/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/net_arch.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://leijiezhang001.github.io/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/">
+
+
+
+
+
+  <title>[paper_reading]-"Stereo R-CNN based 3D Object Detection for Autonomous Driving" | LeijieZhang</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2129cd61363d382d1734d5e8c0ead722";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2129cd61363d382d1734d5e8c0ead722";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+      var _vds = _vds || [];
+      window._vds = _vds;
+      (function(){
+        _vds.push(['setAccountId', '87fe382bdb2695f2']);
+        (function() {
+          var vds = document.createElement('script');
+          vds.type='text/javascript';
+          vds.async = true;
+          vds.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'dn-growing.qbox.me/vds.js';
+          var s = document.getElementsByTagName('script')[0];
+          s.parentNode.insertBefore(vds, s);
+        })();
+      })();
+  </script>
+
+
+
+  <script type="text/javascript">
+      window.heap=window.heap||[],heap.load=function(e,t){window.heap.appid=e,window.heap.config=t=t||{};var r=t.forceSSL||"https:"===document.location.protocol,a=document.createElement("script");a.type="text/javascript",a.async=!0,a.src=(r?"https:":"http:")+"//cdn.heapanalytics.com/js/heap-"+e+".js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(a,n);for(var o=function(e){return function(){heap.push([e].concat(Array.prototype.slice.call(arguments,0)))}},p=["addEventProperties","addUserProperties","clearEventProperties","identify","removeEventProperty","setEventProperties","track","unsetEventProperty"],c=0;c<p.length;c++)heap[p[c]]=o(p[c])};
+      heap.load("256127732");
+  </script>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+<a href="https://github.com/LeijieZhang001" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewbox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+
+	  <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LeijieZhang</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://leijiezhang001.github.io/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Leijie">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LeijieZhang">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">[paper_reading]-"Stereo R-CNN based 3D Object Detection for Autonomous Driving"</h1>
+        
+
+        <div class="post-meta">
+          
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-06-08T14:21:14+08:00">
+                2019-06-08
+              </time>
+            
+            
+              <span class="post-updated">
+                &nbsp; | &nbsp; Updated on
+                <time itemprop="dateUpdated" datetime="2020-08-16T12:52:19+08:00" content="2020-08-16">
+                  2020-08-16
+                </time>
+              </span>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/3D-Detection/" itemprop="url" rel="index">
+                    <span itemprop="name">3D Detection</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i> 本文总阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>次
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Words count in article&#58;</span>
+                
+                <span title="Words count in article">
+                  2.3k 字
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Reading time &asymp;</span>
+                
+                <span title="Reading time">
+                  9 分钟
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>　　Learning 方法有什么致命缺点吗？我认为目前 Learning 方法还存在的较为棘手的问题是，有时候结果会出现非常低级的错误，或是说不可思议不合常理的 cornercases。所以我认为一个工程系统或是一个鲁棒的算法系统，在 Learning 之后做一个基于常理（如 geometry 约束或专家系统）的验证，能有效抑制这个问题。本文就是一个比较好的 learning+geometry 想结合的方法。<br>
+　　本文<a href="#1" id="1ref"><sup>[1]</sup></a>基于图像语义及几何信息，通过 3D 目标的稀疏与密集约束，提出了一种准确的 3D 目标检测方法。根据输入数据的类型，作者将 3D 检测分为三大类：</p>
+<ul>
+<li>LiDAR-based，近期被研究的较多，基本是自动驾驶所必须的；</li>
+<li>Monocular-based，低成本方案；</li>
+<li>Stereo-based，相比 Monocular-based，有优势，但是研究较少；</li>
+</ul>
+<p>本文就是 Stereo-based 3D 检测方案。不同于一般的 rgb+depth 作为输入的方案，本文直接将左右目 rgb 作为输入，没有显示地 depth 生成过程。工程上来说，这也极大地缩短了 3D Detection 的时延(latency)。<br>
+　　本文方法如图 1 所示，主要有三部分组成：</p>
+<ol type="1">
+<li> Network，又有三部分构成：
+<ul>
+<li>Stereo RPN Module，输出左右图的 RoI；</li>
+<li>Classification and Regression branches，输出目标类别，朝向，尺寸；</li>
+<li>Keypoint branch，输出左目目标的关键点；</li>
+</ul></li>
+<li> Sparse constraints，3D 框-2D 框的稀疏约束；</li>
+<li> Dense constraints，准确定位的关键模块；</li>
+</ol>
+<p><img src="/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/net_arch.png" width="100%" height="100%" title="图 1. 网络结构"></p>
+<h2 id="stereo-r-cnn-network">1. Stereo R-CNN Network</h2>
+<p>　　Stereo R-CNN 是在 Faster R-CNN 基础上，同时检测与关联左右目图像 2D 框的微小差异。</p>
+<h3 id="stereo-rpn">1.1. Stereo RPN</h3>
+<p>　　在传统 RPN 网络的基础上，本文先对左右图做 paramid features 提取，然后将不同尺度的特征 concatenate 一起，进入 RPN 网络。 <img src="/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/target.png" width="60%" height="60%" title="图 2. 真值框定义方式"> 　　关键的一点是 objectness classification与 stereo box regression 的真值框定义不一样。如图 2 所示，</p>
+<ul>
+<li>对于 objectness classification，真值框定义为左右目真值框的外接合并（union GT box），一个 anchor 在与真值框的交并比（Intersection-over-Union）大于 0.7 时标记为正样本，小于 0.3 时标记为负样本。分类任务的候选框包含了左右目真值框区域的信息。</li>
+<li>对于 stereo box regression，真值框定义为左右目分别的真值框。待回归的参数定义为 \([u, w, u', w', v, h]\)，分别为左目的水平位置及宽，右目的水平位置及宽，垂直位置及高。因为输入为矫正过的左右目图像，所以可认为左右目的垂直方向上已经对齐。</li>
+</ul>
+<p>每个左右目的 proposal 都是通过同一个 anchor 产生的，自然左右目的 proposal 是关联的。通过 NMS 后，保留左右目都还存在的 proposal 关联对，取前 2000 个用于训练，测试时取前 300 个。</p>
+<h3 id="stereo-r-cnn">1.2. Stereo R-CNN</h3>
+<p><img src="/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/viewpoint.png" width="50%" height="50%" title="图 3. 各角度关系"> 　　网络头包含两大部分：</p>
+<ol type="1">
+<li><p> <strong>Stereo Regression</strong><br>
+左右目的 proposal 关联对，分别在左右目的 feature 上进行 RoI Align 的操作，然后 concatenate 输入到全链接层。左右目的 RoI 对与真值框的 IoU 均大于 0.5 时定位正样本，左右目的 RoI 对与真值框的 IoU 有一个小于 0.5 且大于 0.1，则定位负样本。用四个分支分别预测：</p>
+<ul>
+<li>object class；</li>
+<li>stereo bounding boxes，与 stereo rpn 中一致，左右目的高度已对齐；</li>
+<li>dimension，先统计平均的尺寸，然后预测相对量；</li>
+<li>viewpoint angle，如图 3 所示，\(\theta\) 为相机坐标系下的朝向角，\(\beta\) 为相机中心点下的方位角(azimuth)，这三个目标在相机视野下是一样的，所以我们回归的量是视野角(viewpoint angle) \(\alpha=\theta+\beta\)，其中 \(\beta=arctan\left(-\frac{x}{z} \right) \)。并且为了连续性，回归量为 \([sin\,\alpha,cos\,\alpha]\)。</li>
+</ul></li>
+</ol>
+<p><img src="/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/keypoints.png" width="70%" height="70%" title="图 4. 语义关键点"></p>
+<ol start="2" type="1">
+<li> <strong>Keypoint Prediction</strong><br>
+如图 4 所示，考虑 3D 框底部矩形的四个关键点，投影到图像平面后，最多只有一个关键点会在图像 2D 矩形框内。对左目图像进行关键点预测，类似 Mask R-CNN，在 6×28×28 的基础上，因为关键点只有图像坐标 u 方向才提供了额外的信息，所以对每列进行累加，最终输出 6×28 的向量。前 4 个通道代表每个关键点作为 perspective keypoint 投影到该 u 坐标下的概率；后 2 个通道代表该 u 坐标是左右边缘关键点(boundary keypoints)的概率。为了找出 perspective keypoint，softmax 应用于 4×28 的输出上；为了找出左右边缘关键点，softmax 分别应用于后两个 1×28 的输出上。训练的时候，4×28 中只有一个被赋予 perspective keypoint，忽略没有 perspective keypoint 的情况（遮挡等），然后最小化 cross-entropy loss；对于边缘关键点，则分别最小化 1×28 维度上的 cross-entropy loss，前景中也会被赋予边缘关键点。</li>
+</ol>
+<h2 id="d-box-estimation">2. 3D Box Estimation</h2>
+<p><img src="/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/projection.png" width="70%" height="70%" title="图 5. 关键点投影关系"> 　　已知关键点，2D 框，尺寸，朝向角，我们可以求解出 3D 框 \(\{x,y,z,\theta\}\)。求解目标是最小化 3D 框投影到 2D 框以及关键点的误差。如图 5 所示，已知 7 个观测量 \(z = \{u_l,v_t,u_r,v_b,u_l',u_r',u_p\}\)，分别代表左目 2D 框的左上坐标，右下坐标，右目 2D 框的左右 u 方向坐标，以及 perspective keypoint 的 u 方向坐标。在图 5 的情况下（其它视角下，注意符号变化），左上点投影关系如下： <span class="math display">\[\require{cancel}
+\begin{bmatrix}
+u_l\\
+v_t\\
+1\\
+\end{bmatrix}=K\cdot
+\begin{bmatrix}
+x_{cam}^{tl}\\
+y_{cam}^{tl}\\
+z_{cam}^{tl}\\
+\end{bmatrix}\doteq \xcancel{K} \cdot T_{cam}^{obj} \cdot 
+\begin{bmatrix}
+x_{obj}^{tl}\\
+y_{obj}^{tl}\\
+z_{obj}^{tl}\\
+\end{bmatrix}=\begin{bmatrix}
+x\\
+y\\
+z\\
+\end{bmatrix}+
+\begin{bmatrix}
+cos\theta &amp; 0 &amp;sin\theta\\
+0 &amp; 1 &amp; 0\\
+-sin\theta &amp; 0 &amp; cos\theta\\
+\end{bmatrix} \cdot
+\begin{bmatrix}
+-\frac{w}{2}\\
+-\frac{h}{2}\\
+-\frac{l}{2}\\
+\end{bmatrix}\]</span> 其中 \(K\) 为相机内参，\(T_{cam}^{obj}\) 为目标中心坐标系在相机坐标系下的表示，\((\cdot)_{cam/obj}\) 分别为点在相机坐标系，目标中心坐标系下的表示。同样的，这个视野下，右下点为： <span class="math display">\[\require{cancel}
+\begin{bmatrix}
+u_r\\
+v_b\\
+1\\
+\end{bmatrix}=K\cdot
+\begin{bmatrix}
+x_{cam}^{tl}\\
+y_{cam}^{tl}\\
+z_{cam}^{tl}\\
+\end{bmatrix}\doteq \xcancel{K} \cdot T_{cam}^{obj} \cdot 
+\begin{bmatrix}
+x_{obj}^{tl}\\
+y_{obj}^{tl}\\
+z_{obj}^{tl}\\
+\end{bmatrix}=\begin{bmatrix}
+x\\
+y\\
+z\\
+\end{bmatrix}+
+\begin{bmatrix}
+cos\theta &amp; 0 &amp;sin\theta\\
+0 &amp; 1 &amp; 0\\
+-sin\theta &amp; 0 &amp; cos\theta\\
+\end{bmatrix} \cdot
+\begin{bmatrix}
+\frac{w}{2}\\
+\frac{h}{2}\\
+-\frac{l}{2}\\
+\end{bmatrix}\]</span> 右目两个边缘点以及 perspective keypoint 点也可同样得到，由此可整理出 7 个方程组（论文中第一个公式符号有错）： <span class="math display">\[\left\{\begin{array}{l}
+u_l=(x- \frac{w}{2} cos\theta- \frac{l}{2} sin\theta) / (z+ \frac{w}{2} sin\theta - \frac{l}{2} cos\theta)\\
+v_t=(y- \frac{h}{2}) / (z+ \frac{w}{2} sin\theta - \frac{l}{2} cos\theta)\\
+u_r=(x+ \frac{w}{2} cos\theta+ \frac{l}{2} sin\theta) / (z- \frac{w}{2} sin\theta + \frac{l}{2} cos\theta)\\
+v_b=(y+ \frac{h}{2}) / (z- \frac{w}{2} sin\theta + \frac{l}{2} cos\theta)\\
+u&#39;_l=(x-b- \frac{w}{2} cos\theta- \frac{l}{2} sin\theta) / (z+ \frac{w}{2} sin\theta - \frac{l}{2} cos\theta)\\
+u&#39;_r=(x-b+ \frac{w}{2} cos\theta+ \frac{l}{2} sin\theta) / (z- \frac{w}{2} sin\theta + \frac{l}{2} cos\theta)\\
+u_p=(x+ \frac{w}{2} cos\theta- \frac{l}{2} sin\theta) / (z- \frac{w}{2} sin\theta - \frac{l}{2} cos\theta)\\
+\end{array}\right.\]</span> 其中 \(b\) 为双目的基线长(baseline)。以上方程组可用 Gauss-Newton 法求解。</p>
+<h2 id="dense-3d-box-alignment">3. Dense 3D Box Alignment</h2>
+<p>　　以上得到的目标 3D 位置是 object-level 求解得到的，利用像素信息，还可以进行优化精确求解。首先在图像 2D 目标框内扣取一块 RoI，要使 RoI 能较为确定的在目标上，扣取方式定义为：</p>
+<ul>
+<li>目标一半以下区域；</li>
+<li>perspective keypoint 与边缘关键点包围区域；</li>
+</ul>
+<p>关键点预测的时候只预测了 u 方向的坐标，边缘关键点无 v 方向的信息，看起来会使某些背景像素被划入为目标像素，更好的方法是加入 instance segmentation 信息。定义误差函数为： <span class="math display">\[E=\sum_{i=0}^N e_i=\sum_{i=0}^N \left\| I_l(u_i,v_i)-I_r(u_i-\frac{b}{z+\Delta z_i},v_i)\right\|\]</span> 可由三角测量关系 \(z=\) 推出。上式中，\(z_i=z_i-z\) 表示某个像素点 \(i\) 所对应的 3D 点与目标中心点之间的距离。最小化总误差即可求得最优的中心点距离 \(z\)。优化过程可以用 coarse-to-fine 的策略，先以 0.5m 的精度找 50 步，再以 0.05m 的精度找 20 次。<br>
+　　这个 dense alignment 模块是独立的，可以应用到任意的左右目 3D 检测的后处理中。因为目标 RoI 是物理约束，所以这个方法避免了深度估计中不连续、病态的问题，且对光照是鲁棒的，因为每个像素都会对估计起作用。这里，本文只做了中心点的 align，尺寸，甚至朝向角是否能加入优化?</p>
+<h2 id="other-details">4. Other Details</h2>
+<p><img src="/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/r1.png" width="110%" height="110%"> <img src="/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/r2.png" width="70%" height="70%"> <img src="/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/r3.png" width="100%" height="100%"> <img src="/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/r4.png" width="90%" height="90%"></p>
+<p><a id="1" href="#1ref">[1]</a> Li, Peiliang, Xiaozhi Chen, and Shaojie Shen. "Stereo R-CNN based 3D Object Detection for Autonomous Driving." arXiv preprint arXiv:1902.09738 (2019).</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+      <div>
+	    
+<div style="text-align:center;color: #ccc;font-size:14px;">
+----------------- END -----------------</div>
+      </div>
+    
+		
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>赞赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="Leijie WeChat Pay">
+        <p>WeChat Pay</p>
+      </div>
+    
+
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+	
+	
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:</strong>
+    Leijie
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link:</strong>
+    <a href="https://leijiezhang001.github.io/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/" title="[paper_reading]-" stereo r-cnn based 3d object detection for autonomous driving"">https://leijiezhang001.github.io/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice: </strong>
+    All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> unless stating additionally.
+  </li>
+</ul>
+
+      </div>
+    
+
+	
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Deep-Learning/" rel="tag"><i class="fa fa-tag"></i> Deep Learning</a>
+          
+            <a href="/tags/3D-Detection/" rel="tag"><i class="fa fa-tag"></i> 3D Detection</a>
+          
+            <a href="/tags/paper-reading/" rel="tag"><i class="fa fa-tag"></i> paper reading</a>
+          
+            <a href="/tags/autonomous-driving/" rel="tag"><i class="fa fa-tag"></i> autonomous driving</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/[paper_reading]-Stereo-Vision-based-Semantic-3D-Object-and-Ego-motion-Tracking-for-Autonomous-Driving/" rel="next" title="[paper_reading]-" stereo vision-based semantic 3d object and ego-motion tracking for autonomous driving"">
+                <i class="fa fa-chevron-left"></i> [paper_reading]-"Stereo Vision-based Semantic 3D Object and Ego-motion Tracking for Autonomous Driving"
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/[paper_reading]-Visual_Odometry_Part_I_II/" rel="prev" title="[paper_reading]-" visual odometry part i&ii"">
+                [paper_reading]-"Visual Odometry Part I&II" <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+
+
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC81MDYxNC8yNzA5Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+       
+        
+          <ul class="sidebar-nav motion-element">
+            <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+              Table of Contents
+            </li>
+            <li class="sidebar-nav-overview" data-target="site-overview">
+              Overview
+            </li>
+          </ul>
+        
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="Leijie">
+            
+              <p class="site-author-name" itemprop="name">Leijie</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">90</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">38</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/LeijieZhang001" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/yue-ti/activities" target="_blank" title="知乎">
+                      
+                        <i class="fa fa-fw fa-heartbeat"></i>知乎</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:ljzhang0220@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+
+        
+        <!--noindex-->
+          <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+            <div class="post-toc">
+
+              
+                
+              
+
+              
+                <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#stereo-r-cnn-network"><span class="nav-text">1. Stereo R-CNN Network</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#stereo-rpn"><span class="nav-text">1.1. Stereo RPN</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#stereo-r-cnn"><span class="nav-text">1.2. Stereo R-CNN</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#d-box-estimation"><span class="nav-text">2. 3D Box Estimation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dense-3d-box-alignment"><span class="nav-text">3. Dense 3D Box Alignment</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#other-details"><span class="nav-text">4. Other Details</span></a></li></ol></div>
+              
+
+            </div>
+          </section>
+        <!--/noindex-->
+        
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart" aria-hidden="true"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leijie</span>
+
+  
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">146.9k</span>
+  
+</div>
+<!--
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+-->
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<span>本站已运行<span id="showDays"></span></span>
+<script>
+  var seconds = 1000;
+  var minutes = seconds * 60;
+  var hours = minutes * 60;
+  var days = hours * 24;
+  var years = days * 365;
+  var birthDay = Date.UTC(2019,05,20,12,00,00); // 这里设置建站时间
+  setInterval(function() {
+    var today = new Date();
+    var todayYear = today.getFullYear();
+    var todayMonth = today.getMonth()+1;
+    var todayDate = today.getDate();
+    var todayHour = today.getHours();
+    var todayMinute = today.getMinutes();
+    var todaySecond = today.getSeconds();
+    var now = Date.UTC(todayYear,todayMonth,todayDate,todayHour,todayMinute,todaySecond);
+    var diff = now - birthDay;
+    var diffYears = Math.floor(diff/years);
+    var diffDays = Math.floor((diff/days)-diffYears*365);
+    var diffHours = Math.floor((diff-(diffYears*365+diffDays)*days)/hours);
+    var diffMinutes = Math.floor((diff-(diffYears*365+diffDays)*days-diffHours*hours)/minutes);
+    var diffSeconds = Math.floor((diff-(diffYears*365+diffDays)*days-diffHours*hours-diffMinutes*minutes)/seconds);
+      document.getElementById('showDays').innerHTML=" "+diffYears+" 年 "+diffDays+" 天 "+diffHours+" 小时 "+diffMinutes+" 分钟 "+diffSeconds+" 秒";
+  }, 1000);
+</script>
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i> 访问用户：
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i> 访问次数：
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+    window.livereOptions = {
+        refer: 'https://leijiezhang001.github.io' + location.pathname
+    };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "vertical";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

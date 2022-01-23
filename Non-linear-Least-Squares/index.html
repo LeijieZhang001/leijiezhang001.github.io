@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Optimization,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="LeijieZhang" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="非线性最小二乘(Non-linear Least Squares)问题应用非常广泛，尤其是在 SLAM 领域。LOAM，，Stereo-RCNN，Stereo Vision-based Semantic and Ego-motion Tracking for Autonomous Driving 等均需要求解非线性最小二乘问题。其中 LOAM 作为非常流行的激光 SLAM 框架，其后端是一个典">
+<meta name="keywords" content="Optimization">
+<meta property="og:type" content="article">
+<meta property="og:title" content="非线性最小二乘">
+<meta property="og:url" content="https://leijiezhang001.github.io/Non-linear-Least-Squares/index.html">
+<meta property="og:site_name" content="LeijieZhang">
+<meta property="og:description" content="非线性最小二乘(Non-linear Least Squares)问题应用非常广泛，尤其是在 SLAM 领域。LOAM，，Stereo-RCNN，Stereo Vision-based Semantic and Ego-motion Tracking for Autonomous Driving 等均需要求解非线性最小二乘问题。其中 LOAM 作为非常流行的激光 SLAM 框架，其后端是一个典">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2020-08-16T04:52:19.408Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="非线性最小二乘">
+<meta name="twitter:description" content="非线性最小二乘(Non-linear Least Squares)问题应用非常广泛，尤其是在 SLAM 领域。LOAM，，Stereo-RCNN，Stereo Vision-based Semantic and Ego-motion Tracking for Autonomous Driving 等均需要求解非线性最小二乘问题。其中 LOAM 作为非常流行的激光 SLAM 框架，其后端是一个典">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://leijiezhang001.github.io/Non-linear-Least-Squares/">
+
+
+
+
+
+  <title>非线性最小二乘 | LeijieZhang</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2129cd61363d382d1734d5e8c0ead722";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2129cd61363d382d1734d5e8c0ead722";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+      var _vds = _vds || [];
+      window._vds = _vds;
+      (function(){
+        _vds.push(['setAccountId', '87fe382bdb2695f2']);
+        (function() {
+          var vds = document.createElement('script');
+          vds.type='text/javascript';
+          vds.async = true;
+          vds.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'dn-growing.qbox.me/vds.js';
+          var s = document.getElementsByTagName('script')[0];
+          s.parentNode.insertBefore(vds, s);
+        })();
+      })();
+  </script>
+
+
+
+  <script type="text/javascript">
+      window.heap=window.heap||[],heap.load=function(e,t){window.heap.appid=e,window.heap.config=t=t||{};var r=t.forceSSL||"https:"===document.location.protocol,a=document.createElement("script");a.type="text/javascript",a.async=!0,a.src=(r?"https:":"http:")+"//cdn.heapanalytics.com/js/heap-"+e+".js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(a,n);for(var o=function(e){return function(){heap.push([e].concat(Array.prototype.slice.call(arguments,0)))}},p=["addEventProperties","addUserProperties","clearEventProperties","identify","removeEventProperty","setEventProperties","track","unsetEventProperty"],c=0;c<p.length;c++)heap[p[c]]=o(p[c])};
+      heap.load("256127732");
+  </script>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+<a href="https://github.com/LeijieZhang001" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewbox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+
+	  <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LeijieZhang</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://leijiezhang001.github.io/Non-linear-Least-Squares/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Leijie">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LeijieZhang">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">非线性最小二乘</h1>
+        
+
+        <div class="post-meta">
+          
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-05-18T09:19:54+08:00">
+                2020-05-18
+              </time>
+            
+            
+              <span class="post-updated">
+                &nbsp; | &nbsp; Updated on
+                <time itemprop="dateUpdated" datetime="2020-08-16T12:52:19+08:00" content="2020-08-16">
+                  2020-08-16
+                </time>
+              </span>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SLAM/" itemprop="url" rel="index">
+                    <span itemprop="name">SLAM</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i> 本文总阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>次
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Words count in article&#58;</span>
+                
+                <span title="Words count in article">
+                  4.4k 字
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Reading time &asymp;</span>
+                
+                <span title="Reading time">
+                  21 分钟
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>　　非线性最小二乘(Non-linear Least Squares)问题应用非常广泛，尤其是在 SLAM 领域。<a href="/LOAM/" title="LOAM">LOAM</a>，，<a href="/[paper_reading]-Stereo-RCNN-based-3D-Object-Detection-for-Autonomous-Driving/" title="Stereo-RCNN">Stereo-RCNN</a>，<a href="/[paper_reading]-Stereo-Vision-based-Semantic-3D-Object-and-Ego-motion-Tracking-for-Autonomous-Driving/" title="Stereo Vision-based Semantic and Ego-motion Tracking for Autonomous Driving">Stereo Vision-based Semantic and Ego-motion Tracking for Autonomous Driving</a> 等均需要求解非线性最小二乘问题。其中 <a href="/LOAM/" title="LOAM">LOAM</a> 作为非常流行的激光 SLAM 框架，其后端是一个典型的非线性最优化问题，本文会作为实践进行代码级讲解。</p>
+<h2 id="问题描述">1. 问题描述</h2>
+<p>　　在前端观测-后端优化框架下，设观测数据对集合为：\(\{y _ i,z _ i\} _ {i=1}^m\)，待求解的变量参数 \(x\in\mathbb{R}^n\) 定义了观测数据对的映射关系，即 \(z _ i=h(y _ i;x)\)，由此得到有 \(m\) 个参数方程 \(F(x)=[f _ 1(x),...,f _ m(x)]^T\)，其中 \(f _ i(x) = z _ i-h(y _ i;x)\)。我们要找到最优的参数 \(x\) 来描述观测数据对之间的关系，即求解的最优化问题为： <span class="math display">\[\begin{align}
+\mathop{\arg\min}\limits _ x \frac{1}{2}\Vert F(x)\Vert ^2 \iff \mathop{\arg\min}\limits _ x\frac{1}{2}\sum _ i \rho _ i\left(\Vert f _ i(x)\Vert ^ 2\right)\\
+L\leq x \leq U
+\end{align}\tag{1}\]</span> 其中 \(f _ i(\cdot)\) 为 Cost Function，\(\rho _ i(\cdot)\) 为 Loss Function，即核函数，用来减少离群点对非线性最小二乘优化的影响；\(L,U\) 分别为参数 \(x\) 的上下界。当核函数 \(\rho _ i(x)=x\) 时，就是常见的非线性最小二乘问题。<br>
+　　《视觉 SLAM 十四讲》<a href="#1" id="1ref"><sup>[1]</sup></a>在 SLAM 的状态估计问题中，从概率学角度导出了最大似然估计求解状态的方法，并进一步引出了最小二乘问题。回过头来看，本文很多内容在《视觉 SLAM 十四讲》中已经有非常清晰的描述，可作进一步参考。</p>
+<h2 id="问题求解">2. 问题求解</h2>
+<p>　　根据 \(F(x)\) 求得雅克比矩阵(Jacobian)：\(J(x) \in\mathbb{R}^{m\times n}\)，即 \(J _ {ij}(x)=\frac{\partial f _ i(x)}{\partial x _ j}\)。目标函数的梯度向量为 \(g(x) = \nabla\frac{1}{2}\Vert F(x)\Vert ^ 2=J(x)^TF(x)\)。在 \(x\) 处将目标函数线性化：\(F(x+\Delta x)\approx F(x)+J(x)\Delta x\)。由此非线性最小二乘问题可转换为线性最小二乘求解残差量 \(\Delta x\) 来近似求解： <span class="math display">\[\mathop{\arg\min}\limits _ {\Delta x}\frac{1}{2}\Vert J(x)\Delta x+F(x)\Vert ^ 2\tag{2}\]</span> 根据如何控制 \(\Delta x\) 的大小，非线性优化算法可分为两大类：</p>
+<ul>
+<li>Line Search
+<ul>
+<li>Gradient Descent</li>
+<li>Gaussian-Newton</li>
+</ul></li>
+<li>Trust Region
+<ul>
+<li>Levenberg-Marquardt</li>
+<li>Dogleg</li>
+<li>Inner Iterations</li>
+<li>Non-monotonic Steps</li>
+</ul></li>
+</ul>
+<p>Line Search 首先确定迭代方向，然后最小化 \(\Vert f(x+\alpha \Delta x)\Vert ^2\) 确定迭代步长；Trust Region 则划分一个局部区域，在该区域内求解最优值，然后根据近似程度，扩大或缩减该局部区域范围。Trust Region 相比 Linear Search，数值迭代会更加稳定。这里介绍几种有代表性的方法：属于 Line Search 的梯度下降法，高斯牛顿法，以及属于 Trust Region 的 LM 法。</p>
+<h3 id="梯度下降法">2.1. 梯度下降法</h3>
+<p>　　将目标函数式(1)在 \(x\) 附近泰勒展开： <span class="math display">\[ \Vert F(x+\Delta x)\Vert ^2 \approx \Vert F(x)\Vert ^2 + J(x)\Delta x+\frac{1}{2}\Delta x^TH\Delta x \tag{3}\]</span> 其中 \(H\) 是二阶导数(Hessian 矩阵)。<br>
+　　如果保留一阶导数，那么增量的解就为： <span class="math display">\[\Delta x = -\lambda J^T(x) \tag{4}\]</span> 其中 \(\lambda\) 为步长，可预先由相关策略设定。<br>
+　　如果保留二阶导数，那么增量方程为： <span class="math display">\[\mathop{\arg\min}\limits _ {\Delta x} \Vert F(x)\Vert ^2+J(x)\Delta x+\frac{1}{2}\Delta x^TH\Delta x\tag{5}\]</span> 对 \(\Delta x\) 求导即可求解增量的解为： <span class="math display">\[\Delta x = -H^{-1}J^T \tag{6}\]</span> 　　一阶梯度法又称为最速下降法，二阶梯度法又称为牛顿法。一阶和二阶法都是将函数在当前值下泰勒展开，然后线性得求解增量值。最速下降法过于贪心，容易走出锯齿路线，反而增加迭代步骤。牛顿法需要计算 \(H\) 矩阵，计算量较大且困难。</p>
+<h3 id="高斯牛顿法">2.2. 高斯牛顿法</h3>
+<p>　　 将式(2)对 \(\Delta x\) 求导并令其为零，可得： <span class="math display">\[\begin{align}
+&amp;J(x)^TJ(x)\Delta x=-J(x)^TF(x)\\
+\iff &amp; H\Delta x=g
+\end{align}\tag{7}\]</span> 相比牛顿法，高斯牛顿法不用计算 \(H\) 矩阵，直接用 \(J^TJ\) 来近似，所以节省了计算量。但是高斯牛顿法要求 \(H\) 矩阵是可逆且正定的，而实际计算的 \(J^TJ\) 是半正定的，所以 \(J^TJ\) 会出现奇异或病态的情况，此时增量的稳定性就会变差，导致迭代发散。另一方面，增量较大时，目标近似函数式(2)就会产生较大的误差，也会导致迭代发散。这是高斯牛顿法的缺陷。高斯牛顿法的步骤为：</p>
+<ol type="1">
+<li>根据式 (7) 求解迭代步长 \(\Delta x\)；</li>
+<li>变量迭代：\(x ^ * \leftarrow x+\Delta x\)；</li>
+<li>如果 \(\Vert F(x ^ * )-F(x)\Vert &lt; \epsilon\)，则收敛，退出迭代，否则重复步骤 1.；</li>
+</ol>
+<p>高斯牛顿法简单的将 \(\alpha\) 置为 1，而其它 Line Search 方法会最小化 \(\Vert f(x+\alpha \Delta x)\Vert ^2\) 来确定 \(\alpha\) 值。</p>
+<h3 id="lm-法">2.3. LM 法</h3>
+<p>　　Line Search 依赖线性化近似有较高的拟合度，但是有时候线性近似效果较差，导致迭代不稳定；Region Trust 就是解决了这种问题。高斯牛顿法中采用的近似二阶泰勒展开只在该点附近有较好的近似结果，对 \(\Delta x\) 添加一个信赖域区域，就变为 Trust Region 方法。其最优化问题转换为： <span class="math display">\[\begin{align}
+\mathop{\arg\min}\limits _ x \frac{1}{2}\Vert J(x)\Delta x+F(x)\Vert ^2 \\
+\Vert D(x)\Delta x\Vert ^2 \leq \mu\\
+L\leq x \leq U\\
+\end{align}\tag{8}\]</span> 用 Lagrange 乘子将其转换为无约束优化问题： <span class="math display">\[\mathop{\arg\min}\limits _ {\Delta x}\frac{1}{2}\Vert J(x)\Delta x+F(x)\Vert ^ 2+\frac{1}{\mu}\Vert D(x)\Delta x\Vert ^2 \tag{9}\]</span> 其中 Levenberg 提出的方法中 \(D=I\)，相当于把 \(\Delta x\) 约束在球中；Marquart 提出的方法中将 \(D\) 取为非负数对角阵，通常为 \(J(x)^TJ(x)\) 的对角元素平方根。<br>
+　　对于信赖域区域 \(\mu\) 的定义，一个比较好的方式是根据近似模型与实际函数之间的差异来确定这个范围：如果差异小，那么增大信赖域；反之减小信赖域。因此，考虑： <span class="math display">\[\rho = \frac{\Vert F(x+\Delta x)\Vert ^2-\Vert F(x)\Vert ^2}{\Vert J(x)\Delta x+F(x)\Vert ^2-\Vert F(x)\Vert ^2} \tag{10}\]</span> 　　 将式(9)对 \(\Delta x\) 求导并令其为零，可得： <span class="math display">\[\begin{align}
+&amp;\left(J(x)^TJ(x)+\frac{2}{\mu}D^T(x)D(x)\right)\Delta x=-J(x)^TF(x)\\
+\iff &amp; (H+\lambda D^TD)\Delta x=g
+\end{align}\tag{11}\]</span> 当 \(\lambda\) 较小时，接近于高斯牛顿法；当 \(\lambda\) 较大时，接近于最速下降法。LM 法的步骤为：</p>
+<ol type="1">
+<li>根据式(11)求解迭代步长 \(\Delta x\);</li>
+<li>根据式(10)求解 \(\rho\);</li>
+<li>若 \(\rho &gt; \eta _ 1\)，则 \(\mu = 2\mu\);</li>
+<li>若 \(\rho &lt; \eta _ 2\)，则 \(\mu = 0.5\mu\);</li>
+<li>若 \(\rho &gt; \epsilon\)，则 \(x ^ * \leftarrow x+\Delta x\)；</li>
+<li>如果满足收敛条件，则结束，否则继续步骤1.；</li>
+</ol>
+<h2 id="ceres-实践">3. Ceres 实践</h2>
+<p>　　Ceres 是谷歌开发的一个用于非线性优化的库，使用 Ceres 库有以下几个步骤：</p>
+<ul>
+<li>构建 Cost Function，式(1)中的 \(\rho _ i\left(\Vert f _ i(x)\Vert ^ 2\right)\) 即为代码中需要增加的 ResidualBlock；</li>
+<li>累加的 Cost Function 构成最终的 Loss Function 目标函数；</li>
+<li>配置求解器参数并求解问题；</li>
+</ul>
+<h3 id="例子-曲线拟合">3.1. 例子-曲线拟合</h3>
+<p>　　以下代码为拟合曲线参数的简单例子：</p>
+<p><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// copy from http://zhaoxuhui.top/blog/2018/04/04/ceres&amp;ls.html</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;opencv2/core/core.hpp&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;ceres/ceres.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> cv;</span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> ceres;</span><br><span class="line"></span><br><span class="line"><span class="comment">//vector,用于存放x、y的观测数据</span></span><br><span class="line"><span class="comment">//待估计函数为y=3.5x^3+1.6x^2+0.3x+7.8</span></span><br><span class="line"><span class="built_in">vector</span>&lt;<span class="keyword">double</span>&gt; xs;</span><br><span class="line"><span class="built_in">vector</span>&lt;<span class="keyword">double</span>&gt; ys;</span><br><span class="line"></span><br><span class="line"><span class="comment">//定义CostFunctor结构体用于描述代价函数</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">CostFunctor</span>&#123;</span></span><br><span class="line">  </span><br><span class="line">  <span class="keyword">double</span> x_guan,y_guan;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">//构造函数，用已知的x、y数据对其赋值</span></span><br><span class="line">  CostFunctor(<span class="keyword">double</span> x,<span class="keyword">double</span> y)</span><br><span class="line">  &#123;</span><br><span class="line">    x_guan = x;</span><br><span class="line">    y_guan = y;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">//重载括号运算符，两个参数分别是估计的参数和由该参数计算得到的残差</span></span><br><span class="line">  <span class="comment">//注意这里的const，一个都不能省略，否则就会报错</span></span><br><span class="line">  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line">  <span class="function"><span class="keyword">bool</span> <span class="title">operator</span><span class="params">()</span><span class="params">(<span class="keyword">const</span> T* <span class="keyword">const</span> params,T* residual)</span><span class="keyword">const</span></span></span><br><span class="line"><span class="function">  </span>&#123;</span><br><span class="line">    residual[<span class="number">0</span>]=y_guan-(params[<span class="number">0</span>]*x_guan*x_guan*x_guan+params[<span class="number">1</span>]*x_guan*x_guan+params[<span class="number">2</span>]*x_guan+params[<span class="number">3</span>]);</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;  </span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">//生成实验数据</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">generateData</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  RNG rng;</span><br><span class="line">  <span class="keyword">double</span> w_sigma = <span class="number">1.0</span>;</span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;<span class="number">100</span>;i++)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">double</span> x = i;</span><br><span class="line">    <span class="keyword">double</span> y = <span class="number">3.5</span>*x*x*x+<span class="number">1.6</span>*x*x+<span class="number">0.3</span>*x+<span class="number">7.8</span>;</span><br><span class="line">    xs.push_back(x);</span><br><span class="line">    ys.push_back(y+rng.gaussian(w_sigma));</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;xs.size();i++)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">cout</span>&lt;&lt;<span class="string">"x:"</span>&lt;&lt;xs[i]&lt;&lt;<span class="string">" y:"</span>&lt;&lt;ys[i]&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//简单描述我们优化的目的就是为了使我们估计参数算出的y'和实际观测的y的差值之和最小</span></span><br><span class="line"><span class="comment">//所以代价函数(CostFunction)就是y'-y，其对应每一组观测值与估计值的残差。</span></span><br><span class="line"><span class="comment">//由于我们优化的是残差之和，因此需要把代价函数全部加起来，使这个函数最小，而不是单独的使某一个残差最小</span></span><br><span class="line"><span class="comment">//默认情况下，我们认为各组的残差是等权的，也就是核函数系数为1。</span></span><br><span class="line"><span class="comment">//但有时可能会出现粗差等情况，有可能不等权，但这里不考虑。</span></span><br><span class="line"><span class="comment">//这个求和以后的函数便是我们优化的目标函数</span></span><br><span class="line"><span class="comment">//通过不断调整我们的参数值，使这个目标函数最终达到最小，即认为优化完成</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span> </span>&#123;</span><br><span class="line">  </span><br><span class="line">  generateData();</span><br><span class="line">  </span><br><span class="line">  <span class="comment">//创建一个长度为4的double数组用于存放参数</span></span><br><span class="line">  <span class="keyword">double</span> params[<span class="number">4</span>]=&#123;<span class="number">1.0</span>&#125;;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//第一步，创建Problem对象，并对每一组观测数据添加ResidualBlock</span></span><br><span class="line">  <span class="comment">//由于每一组观测点都会得到一个残差，而我们的目的是最小化所有残差的和</span></span><br><span class="line">  <span class="comment">//所以采用for循环依次把每个残差都添加进来</span></span><br><span class="line">  Problem problem;</span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;xs.size();i++)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="comment">//利用我们之前写的结构体、仿函数，创建代价函数对象，注意初始化的方式</span></span><br><span class="line">    <span class="comment">//尖括号中的参数分别为误差类型，输出维度(因变量个数)，输入维度(待估计参数的个数)</span></span><br><span class="line">    CostFunction* cost_function = <span class="keyword">new</span> AutoDiffCostFunction&lt;CostFunctor,<span class="number">1</span>,<span class="number">4</span>&gt;(<span class="keyword">new</span> CostFunctor(xs[i],ys[i]));</span><br><span class="line">    <span class="comment">//三个参数分别为代价函数、核函数和待估参数</span></span><br><span class="line">    problem.AddResidualBlock(cost_function,<span class="literal">NULL</span>,params);</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">//第二步，配置Solver</span></span><br><span class="line">  Solver::Options options;</span><br><span class="line">  <span class="comment">//配置增量方程的解法</span></span><br><span class="line">  options.linear_solver_type=ceres::DENSE_QR;</span><br><span class="line">  <span class="comment">//是否输出到cout</span></span><br><span class="line">  options.minimizer_progress_to_stdout=<span class="literal">true</span>;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">//第三步，创建Summary对象用于输出迭代结果</span></span><br><span class="line">  Solver::Summary summary;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">//第四步，执行求解</span></span><br><span class="line">  Solve(options,&amp;problem,&amp;summary);</span><br><span class="line">  </span><br><span class="line">  <span class="comment">//第五步，输出求解结果</span></span><br><span class="line">  <span class="built_in">cout</span>&lt;&lt;summary.BriefReport()&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">  </span><br><span class="line">  <span class="built_in">cout</span>&lt;&lt;<span class="string">"p0:"</span>&lt;&lt;params[<span class="number">0</span>]&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">  <span class="built_in">cout</span>&lt;&lt;<span class="string">"p1:"</span>&lt;&lt;params[<span class="number">1</span>]&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">  <span class="built_in">cout</span>&lt;&lt;<span class="string">"p2:"</span>&lt;&lt;params[<span class="number">2</span>]&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">  <span class="built_in">cout</span>&lt;&lt;<span class="string">"p3:"</span>&lt;&lt;params[<span class="number">3</span>]&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="例子-loam">3.2. 例子-LOAM</h3>
+<p>　　<a href="/LOAM/" title="LOAM">LOAM</a> 前端提取线和面特征，后端最小化线和面的匹配误差。其源码实现了整个最优化过程，ALOAM<a href="#2" id="2ref"><sup>[2]</sup></a> 将后端代码用 Ceres 实现，这里对其作理解与分析。</p>
+<p><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">LidarEdgeFactor</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	LidarEdgeFactor(Eigen::Vector3d curr_point_, Eigen::Vector3d last_point_a_,</span><br><span class="line">					Eigen::Vector3d last_point_b_, <span class="keyword">double</span> s_)</span><br><span class="line">		: curr_point(curr_point_), last_point_a(last_point_a_), last_point_b(last_point_b_), s(s_) &#123;&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line">	<span class="function"><span class="keyword">bool</span> <span class="title">operator</span><span class="params">()</span><span class="params">(<span class="keyword">const</span> T *q, <span class="keyword">const</span> T *t, T *residual)</span> <span class="keyword">const</span></span></span><br><span class="line"><span class="function">	</span>&#123;</span><br><span class="line"></span><br><span class="line">		Eigen::Matrix&lt;T, <span class="number">3</span>, <span class="number">1</span>&gt; cp&#123;T(curr_point.x()), T(curr_point.y()), T(curr_point.z())&#125;;</span><br><span class="line">		Eigen::Matrix&lt;T, <span class="number">3</span>, <span class="number">1</span>&gt; lpa&#123;T(last_point_a.x()), T(last_point_a.y()), T(last_point_a.z())&#125;;</span><br><span class="line">		Eigen::Matrix&lt;T, <span class="number">3</span>, <span class="number">1</span>&gt; lpb&#123;T(last_point_b.x()), T(last_point_b.y()), T(last_point_b.z())&#125;;</span><br><span class="line"></span><br><span class="line">		<span class="comment">//Eigen::Quaternion&lt;T&gt; q_last_curr&#123;q[3], T(s) * q[0], T(s) * q[1], T(s) * q[2]&#125;;</span></span><br><span class="line">		Eigen::Quaternion&lt;T&gt; q_last_curr&#123;q[<span class="number">3</span>], q[<span class="number">0</span>], q[<span class="number">1</span>], q[<span class="number">2</span>]&#125;;</span><br><span class="line">		Eigen::Quaternion&lt;T&gt; q_identity&#123;T(<span class="number">1</span>), T(<span class="number">0</span>), T(<span class="number">0</span>), T(<span class="number">0</span>)&#125;;</span><br><span class="line">		q_last_curr = q_identity.slerp(T(s), q_last_curr);</span><br><span class="line">		Eigen::Matrix&lt;T, <span class="number">3</span>, <span class="number">1</span>&gt; t_last_curr&#123;T(s) * t[<span class="number">0</span>], T(s) * t[<span class="number">1</span>], T(s) * t[<span class="number">2</span>]&#125;;</span><br><span class="line"></span><br><span class="line">		Eigen::Matrix&lt;T, <span class="number">3</span>, <span class="number">1</span>&gt; lp;</span><br><span class="line">		lp = q_last_curr * cp + t_last_curr;</span><br><span class="line"></span><br><span class="line">		Eigen::Matrix&lt;T, <span class="number">3</span>, <span class="number">1</span>&gt; nu = (lp - lpa).cross(lp - lpb);</span><br><span class="line">		Eigen::Matrix&lt;T, <span class="number">3</span>, <span class="number">1</span>&gt; de = lpa - lpb;</span><br><span class="line"></span><br><span class="line">		residual[<span class="number">0</span>] = nu.x() / de.norm();</span><br><span class="line">		residual[<span class="number">1</span>] = nu.y() / de.norm();</span><br><span class="line">		residual[<span class="number">2</span>] = nu.z() / de.norm();</span><br><span class="line"></span><br><span class="line">		<span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">static</span> ceres::<span class="function">CostFunction *<span class="title">Create</span><span class="params">(<span class="keyword">const</span> Eigen::Vector3d curr_point_, <span class="keyword">const</span> Eigen::Vector3d last_point_a_,</span></span></span><br><span class="line"><span class="function"><span class="params">									   <span class="keyword">const</span> Eigen::Vector3d last_point_b_, <span class="keyword">const</span> <span class="keyword">double</span> s_)</span></span></span><br><span class="line"><span class="function">	</span>&#123;</span><br><span class="line">		<span class="keyword">return</span> (<span class="keyword">new</span> ceres::AutoDiffCostFunction&lt;</span><br><span class="line">				LidarEdgeFactor, <span class="number">3</span>, <span class="number">4</span>, <span class="number">3</span>&gt;(</span><br><span class="line">			<span class="keyword">new</span> LidarEdgeFactor(curr_point_, last_point_a_, last_point_b_, s_)));</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	Eigen::Vector3d curr_point, last_point_a, last_point_b;</span><br><span class="line">	<span class="keyword">double</span> s;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>　　对于 Point2Line 误差，为了衡量该线特征上的点是否在地图对应的线特征上，在地图线特征上采样两个点，加上该点，组成两个向量，向量叉乘即可描述匹配误差。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">LidarPlaneFactor</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	LidarPlaneFactor(Eigen::Vector3d curr_point_, Eigen::Vector3d last_point_j_,</span><br><span class="line">					 Eigen::Vector3d last_point_l_, Eigen::Vector3d last_point_m_, <span class="keyword">double</span> s_)</span><br><span class="line">		: curr_point(curr_point_), last_point_j(last_point_j_), last_point_l(last_point_l_),</span><br><span class="line">		  last_point_m(last_point_m_), s(s_)</span><br><span class="line">	&#123;</span><br><span class="line">		ljm_norm = (last_point_j - last_point_l).cross(last_point_j - last_point_m);</span><br><span class="line">		ljm_norm.normalize();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line">	<span class="function"><span class="keyword">bool</span> <span class="title">operator</span><span class="params">()</span><span class="params">(<span class="keyword">const</span> T *q, <span class="keyword">const</span> T *t, T *residual)</span> <span class="keyword">const</span></span></span><br><span class="line"><span class="function">	</span>&#123;</span><br><span class="line"></span><br><span class="line">		Eigen::Matrix&lt;T, <span class="number">3</span>, <span class="number">1</span>&gt; cp&#123;T(curr_point.x()), T(curr_point.y()), T(curr_point.z())&#125;;</span><br><span class="line">		Eigen::Matrix&lt;T, <span class="number">3</span>, <span class="number">1</span>&gt; lpj&#123;T(last_point_j.x()), T(last_point_j.y()), T(last_point_j.z())&#125;;</span><br><span class="line">		<span class="comment">//Eigen::Matrix&lt;T, 3, 1&gt; lpl&#123;T(last_point_l.x()), T(last_point_l.y()), T(last_point_l.z())&#125;;</span></span><br><span class="line">		<span class="comment">//Eigen::Matrix&lt;T, 3, 1&gt; lpm&#123;T(last_point_m.x()), T(last_point_m.y()), T(last_point_m.z())&#125;;</span></span><br><span class="line">		Eigen::Matrix&lt;T, <span class="number">3</span>, <span class="number">1</span>&gt; ljm&#123;T(ljm_norm.x()), T(ljm_norm.y()), T(ljm_norm.z())&#125;;</span><br><span class="line"></span><br><span class="line">		<span class="comment">//Eigen::Quaternion&lt;T&gt; q_last_curr&#123;q[3], T(s) * q[0], T(s) * q[1], T(s) * q[2]&#125;;</span></span><br><span class="line">		Eigen::Quaternion&lt;T&gt; q_last_curr&#123;q[<span class="number">3</span>], q[<span class="number">0</span>], q[<span class="number">1</span>], q[<span class="number">2</span>]&#125;;</span><br><span class="line">		Eigen::Quaternion&lt;T&gt; q_identity&#123;T(<span class="number">1</span>), T(<span class="number">0</span>), T(<span class="number">0</span>), T(<span class="number">0</span>)&#125;;</span><br><span class="line">		q_last_curr = q_identity.slerp(T(s), q_last_curr);</span><br><span class="line">		Eigen::Matrix&lt;T, <span class="number">3</span>, <span class="number">1</span>&gt; t_last_curr&#123;T(s) * t[<span class="number">0</span>], T(s) * t[<span class="number">1</span>], T(s) * t[<span class="number">2</span>]&#125;;</span><br><span class="line"></span><br><span class="line">		Eigen::Matrix&lt;T, <span class="number">3</span>, <span class="number">1</span>&gt; lp;</span><br><span class="line">		lp = q_last_curr * cp + t_last_curr;</span><br><span class="line"></span><br><span class="line">		residual[<span class="number">0</span>] = (lp - lpj).dot(ljm);</span><br><span class="line"></span><br><span class="line">		<span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">static</span> ceres::<span class="function">CostFunction *<span class="title">Create</span><span class="params">(<span class="keyword">const</span> Eigen::Vector3d curr_point_, <span class="keyword">const</span> Eigen::Vector3d last_point_j_,</span></span></span><br><span class="line"><span class="function"><span class="params">									   <span class="keyword">const</span> Eigen::Vector3d last_point_l_, <span class="keyword">const</span> Eigen::Vector3d last_point_m_,</span></span></span><br><span class="line"><span class="function"><span class="params">									   <span class="keyword">const</span> <span class="keyword">double</span> s_)</span></span></span><br><span class="line"><span class="function">	</span>&#123;</span><br><span class="line">		<span class="keyword">return</span> (<span class="keyword">new</span> ceres::AutoDiffCostFunction&lt;</span><br><span class="line">				LidarPlaneFactor, <span class="number">1</span>, <span class="number">4</span>, <span class="number">3</span>&gt;(</span><br><span class="line">			<span class="keyword">new</span> LidarPlaneFactor(curr_point_, last_point_j_, last_point_l_, last_point_m_, s_)));</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	Eigen::Vector3d curr_point, last_point_j, last_point_l, last_point_m;</span><br><span class="line">	Eigen::Vector3d ljm_norm;</span><br><span class="line">	<span class="keyword">double</span> s;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>　　对于 Point2Plane 误差，为了衡量该面特征上的点是否在地图对应的面特征上，在地图面特征上采样一个点，加上该点，组成向量，然后点乘面的法向量即可衡量匹配误差。</p>
+<h3 id="例子-ba">3.3. 例子-BA</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// copy from https://www.jianshu.com/p/3df0c2e02b4c</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cmath&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstdio&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"ceres/ceres.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"ceres/rotation.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Read a Bundle Adjustment in the Large dataset.</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BALProblem</span> &#123;</span></span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  ~BALProblem() &#123;</span><br><span class="line">    <span class="keyword">delete</span>[] point_index_;</span><br><span class="line">    <span class="keyword">delete</span>[] camera_index_;</span><br><span class="line">    <span class="keyword">delete</span>[] observations_;</span><br><span class="line">    <span class="keyword">delete</span>[] parameters_;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">int</span> <span class="title">num_observations</span><span class="params">()</span>       <span class="keyword">const</span> </span>&#123; <span class="keyword">return</span> num_observations_;               &#125;</span><br><span class="line">  <span class="function"><span class="keyword">const</span> <span class="keyword">double</span>* <span class="title">observations</span><span class="params">()</span> <span class="keyword">const</span> </span>&#123; <span class="keyword">return</span> observations_;                   &#125;</span><br><span class="line">  <span class="function"><span class="keyword">double</span>* <span class="title">mutable_cameras</span><span class="params">()</span>          </span>&#123; <span class="keyword">return</span> parameters_;                     &#125;</span><br><span class="line">  <span class="function"><span class="keyword">double</span>* <span class="title">mutable_points</span><span class="params">()</span>           </span>&#123; <span class="keyword">return</span> parameters_  + <span class="number">9</span> * num_cameras_; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">double</span>* <span class="title">mutable_camera_for_observation</span><span class="params">(<span class="keyword">int</span> i)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> mutable_cameras() + camera_index_[i] * <span class="number">9</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">double</span>* <span class="title">mutable_point_for_observation</span><span class="params">(<span class="keyword">int</span> i)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> mutable_points() + point_index_[i] * <span class="number">3</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">bool</span> <span class="title">LoadFile</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* filename)</span> </span>&#123;</span><br><span class="line">    FILE* fptr = fopen(filename, <span class="string">"r"</span>);</span><br><span class="line">    <span class="keyword">if</span> (fptr == <span class="literal">NULL</span>) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    FscanfOrDie(fptr, <span class="string">"%d"</span>, &amp;num_cameras_);</span><br><span class="line">    FscanfOrDie(fptr, <span class="string">"%d"</span>, &amp;num_points_);</span><br><span class="line">    FscanfOrDie(fptr, <span class="string">"%d"</span>, &amp;num_observations_);</span><br><span class="line"></span><br><span class="line">    point_index_ = <span class="keyword">new</span> <span class="keyword">int</span>[num_observations_];</span><br><span class="line">    camera_index_ = <span class="keyword">new</span> <span class="keyword">int</span>[num_observations_];</span><br><span class="line">    observations_ = <span class="keyword">new</span> <span class="keyword">double</span>[<span class="number">2</span> * num_observations_];</span><br><span class="line"></span><br><span class="line">    num_parameters_ = <span class="number">9</span> * num_cameras_ + <span class="number">3</span> * num_points_;</span><br><span class="line">    parameters_ = <span class="keyword">new</span> <span class="keyword">double</span>[num_parameters_];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; num_observations_; ++i) &#123;</span><br><span class="line">      FscanfOrDie(fptr, <span class="string">"%d"</span>, camera_index_ + i);</span><br><span class="line">      FscanfOrDie(fptr, <span class="string">"%d"</span>, point_index_ + i);</span><br><span class="line">      <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; <span class="number">2</span>; ++j) &#123;</span><br><span class="line">        FscanfOrDie(fptr, <span class="string">"%lf"</span>, observations_ + <span class="number">2</span>*i + j);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; num_parameters_; ++i) &#123;</span><br><span class="line">      FscanfOrDie(fptr, <span class="string">"%lf"</span>, parameters_ + i);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">FscanfOrDie</span><span class="params">(FILE *fptr, <span class="keyword">const</span> <span class="keyword">char</span> *format, T *value)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> num_scanned = <span class="built_in">fscanf</span>(fptr, format, value);</span><br><span class="line">    <span class="keyword">if</span> (num_scanned != <span class="number">1</span>) &#123;</span><br><span class="line">      LOG(FATAL) &lt;&lt; <span class="string">"Invalid UW data file."</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">int</span> num_cameras_;</span><br><span class="line">  <span class="keyword">int</span> num_points_;</span><br><span class="line">  <span class="keyword">int</span> num_observations_;</span><br><span class="line">  <span class="keyword">int</span> num_parameters_;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">int</span>* point_index_;</span><br><span class="line">  <span class="keyword">int</span>* camera_index_;</span><br><span class="line">  <span class="keyword">double</span>* observations_;</span><br><span class="line">  <span class="keyword">double</span>* parameters_;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Templated pinhole camera model for used with Ceres.  The camera is</span></span><br><span class="line"><span class="comment">// parameterized using 9 parameters: 3 for rotation, 3 for translation, 1 for</span></span><br><span class="line"><span class="comment">// focal length and 2 for radial distortion. The principal point is not modeled</span></span><br><span class="line"><span class="comment">// (i.e. it is assumed be located at the image center).</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">SnavelyReprojectionError</span> &#123;</span></span><br><span class="line">  SnavelyReprojectionError(<span class="keyword">double</span> observed_x, <span class="keyword">double</span> observed_y)</span><br><span class="line">      : observed_x(observed_x), observed_y(observed_y) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line">  <span class="function"><span class="keyword">bool</span> <span class="title">operator</span><span class="params">()</span><span class="params">(<span class="keyword">const</span> T* <span class="keyword">const</span> camera,</span></span></span><br><span class="line"><span class="function"><span class="params">                  <span class="keyword">const</span> T* <span class="keyword">const</span> point,</span></span></span><br><span class="line"><span class="function"><span class="params">                  T* residuals)</span> <span class="keyword">const</span> </span>&#123;</span><br><span class="line">    <span class="comment">// camera[0,1,2] are the angle-axis rotation.</span></span><br><span class="line">    T p[<span class="number">3</span>];</span><br><span class="line">    ceres::AngleAxisRotatePoint(camera, point, p);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// camera[3,4,5] are the translation.</span></span><br><span class="line">    p[<span class="number">0</span>] += camera[<span class="number">3</span>];</span><br><span class="line">    p[<span class="number">1</span>] += camera[<span class="number">4</span>];</span><br><span class="line">    p[<span class="number">2</span>] += camera[<span class="number">5</span>];</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Compute the center of distortion. The sign change comes from</span></span><br><span class="line">    <span class="comment">// the camera model that Noah Snavely's Bundler assumes, whereby</span></span><br><span class="line">    <span class="comment">// the camera coordinate system has a negative z axis.</span></span><br><span class="line">    T xp = - p[<span class="number">0</span>] / p[<span class="number">2</span>];</span><br><span class="line">    T yp = - p[<span class="number">1</span>] / p[<span class="number">2</span>];</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Apply second and fourth order radial distortion.</span></span><br><span class="line">    <span class="keyword">const</span> T&amp; l1 = camera[<span class="number">7</span>];</span><br><span class="line">    <span class="keyword">const</span> T&amp; l2 = camera[<span class="number">8</span>];</span><br><span class="line">    T r2 = xp*xp + yp*yp;</span><br><span class="line">    T distortion = <span class="number">1.0</span> + r2  * (l1 + l2  * r2);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Compute final projected point position.</span></span><br><span class="line">    <span class="keyword">const</span> T&amp; focal = camera[<span class="number">6</span>];</span><br><span class="line">    T predicted_x = focal * distortion * xp;</span><br><span class="line">    T predicted_y = focal * distortion * yp;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// The error is the difference between the predicted and observed position.</span></span><br><span class="line">    residuals[<span class="number">0</span>] = predicted_x - observed_x;</span><br><span class="line">    residuals[<span class="number">1</span>] = predicted_y - observed_y;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Factory to hide the construction of the CostFunction object from</span></span><br><span class="line">  <span class="comment">// the client code.</span></span><br><span class="line">  <span class="keyword">static</span> ceres::<span class="function">CostFunction* <span class="title">Create</span><span class="params">(<span class="keyword">const</span> <span class="keyword">double</span> observed_x,</span></span></span><br><span class="line"><span class="function"><span class="params">                                     <span class="keyword">const</span> <span class="keyword">double</span> observed_y)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (<span class="keyword">new</span> ceres::AutoDiffCostFunction&lt;SnavelyReprojectionError, <span class="number">2</span>, <span class="number">9</span>, <span class="number">3</span>&gt;(</span><br><span class="line">                <span class="keyword">new</span> SnavelyReprojectionError(observed_x, observed_y)));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">double</span> observed_x;</span><br><span class="line">  <span class="keyword">double</span> observed_y;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span>** argv)</span> </span>&#123;</span><br><span class="line">  google::InitGoogleLogging(argv[<span class="number">0</span>]);</span><br><span class="line">  <span class="keyword">if</span> (argc != <span class="number">2</span>) &#123;</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">cerr</span> &lt;&lt; <span class="string">"usage: simple_bundle_adjuster &lt;bal_problem&gt;\n"</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  BALProblem bal_problem;</span><br><span class="line">  <span class="keyword">if</span> (!bal_problem.LoadFile(argv[<span class="number">1</span>])) &#123;</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">cerr</span> &lt;&lt; <span class="string">"ERROR: unable to open file "</span> &lt;&lt; argv[<span class="number">1</span>] &lt;&lt; <span class="string">"\n"</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">double</span>* observations = bal_problem.observations();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Create residuals for each observation in the bundle adjustment problem. The</span></span><br><span class="line">  <span class="comment">// parameters for cameras and points are added automatically.</span></span><br><span class="line">  ceres::Problem problem;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; bal_problem.num_observations(); ++i) &#123;</span><br><span class="line">    <span class="comment">// Each Residual block takes a point and a camera as input and outputs a 2</span></span><br><span class="line">    <span class="comment">// dimensional residual. Internally, the cost function stores the observed</span></span><br><span class="line">    <span class="comment">// image location and compares the reprojection against the observation.</span></span><br><span class="line"></span><br><span class="line">    ceres::CostFunction* cost_function =</span><br><span class="line">        SnavelyReprojectionError::Create(observations[<span class="number">2</span> * i + <span class="number">0</span>],</span><br><span class="line">                                         observations[<span class="number">2</span> * i + <span class="number">1</span>]);</span><br><span class="line">    problem.AddResidualBlock(cost_function,</span><br><span class="line">                             <span class="literal">NULL</span> <span class="comment">/* squared loss */</span>,</span><br><span class="line">                             bal_problem.mutable_camera_for_observation(i),</span><br><span class="line">                             bal_problem.mutable_point_for_observation(i));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Make Ceres automatically detect the bundle structure. Note that the</span></span><br><span class="line">  <span class="comment">// standard solver, SPARSE_NORMAL_CHOLESKY, also works fine but it is slower</span></span><br><span class="line">  <span class="comment">// for standard bundle adjustment problems.</span></span><br><span class="line">  ceres::Solver::Options options;</span><br><span class="line">  options.linear_solver_type = ceres::DENSE_SCHUR;</span><br><span class="line">  options.minimizer_progress_to_stdout = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">  ceres::Solver::Summary summary;</span><br><span class="line">  ceres::Solve(options, &amp;problem, &amp;summary);</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; summary.FullReport() &lt;&lt; <span class="string">"\n"</span>;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>　　这里使用了 Bundle Adjustment in the Large<a href="#3" id="3ref"><sup>[3]</sup></a> 数据集，观测量为图像坐标系下路标(特征)的像素坐标系，待优化的参数为各路标的 3D 坐标以及相机内外参，这里相机内外参有 9 个，其中位置及姿态 6 个，畸变系数 2 个，焦距 1 个。</p>
+<h2 id="reference">4. Reference</h2>
+<p><a id="1" href="#1ref">[1]</a> 高翔. 视觉 SLAM 十四讲: 从理论到实践. 电子工业出版社, 2017.<br>
+<a id="2" href="#2ref">[2]</a> https://github.com/HKUST-Aerial-Robotics/A-LOAM<br>
+<a id="3" href="#3ref">[3]</a> http://grail.cs.washington.edu/projects/bal/</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+      <div>
+	    
+<div style="text-align:center;color: #ccc;font-size:14px;">
+----------------- END -----------------</div>
+      </div>
+    
+		
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>赞赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="Leijie WeChat Pay">
+        <p>WeChat Pay</p>
+      </div>
+    
+
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+	
+	
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:</strong>
+    Leijie
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link:</strong>
+    <a href="https://leijiezhang001.github.io/Non-linear-Least-Squares/" title="非线性最小二乘">https://leijiezhang001.github.io/Non-linear-Least-Squares/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice: </strong>
+    All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> unless stating additionally.
+  </li>
+</ul>
+
+      </div>
+    
+
+	
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Optimization/" rel="tag"><i class="fa fa-tag"></i> Optimization</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/How-to-Build-An-ADAS/" rel="next" title="如何搭建一个 ADAS 产品">
+                <i class="fa fa-chevron-left"></i> 如何搭建一个 ADAS 产品
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/SA-SSD/" rel="prev" title="[paper_reading]-" sa-ssd: structure aware single-stage 3d object detection from point cloud"">
+                [paper_reading]-"SA-SSD: Structure Aware Single-stage 3D Object Detection from Point Cloud" <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+
+
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC81MDYxNC8yNzA5Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+       
+        
+          <ul class="sidebar-nav motion-element">
+            <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+              Table of Contents
+            </li>
+            <li class="sidebar-nav-overview" data-target="site-overview">
+              Overview
+            </li>
+          </ul>
+        
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="Leijie">
+            
+              <p class="site-author-name" itemprop="name">Leijie</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">90</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">38</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/LeijieZhang001" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/yue-ti/activities" target="_blank" title="知乎">
+                      
+                        <i class="fa fa-fw fa-heartbeat"></i>知乎</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:ljzhang0220@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+
+        
+        <!--noindex-->
+          <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+            <div class="post-toc">
+
+              
+                
+              
+
+              
+                <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题描述"><span class="nav-text">1. 问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题求解"><span class="nav-text">2. 问题求解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#梯度下降法"><span class="nav-text">2.1. 梯度下降法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#高斯牛顿法"><span class="nav-text">2.2. 高斯牛顿法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#lm-法"><span class="nav-text">2.3. LM 法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ceres-实践"><span class="nav-text">3. Ceres 实践</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#例子-曲线拟合"><span class="nav-text">3.1. 例子-曲线拟合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#例子-loam"><span class="nav-text">3.2. 例子-LOAM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#例子-ba"><span class="nav-text">3.3. 例子-BA</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#reference"><span class="nav-text">4. Reference</span></a></li></ol></div>
+              
+
+            </div>
+          </section>
+        <!--/noindex-->
+        
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart" aria-hidden="true"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leijie</span>
+
+  
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">146.9k</span>
+  
+</div>
+<!--
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+-->
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<span>本站已运行<span id="showDays"></span></span>
+<script>
+  var seconds = 1000;
+  var minutes = seconds * 60;
+  var hours = minutes * 60;
+  var days = hours * 24;
+  var years = days * 365;
+  var birthDay = Date.UTC(2019,05,20,12,00,00); // 这里设置建站时间
+  setInterval(function() {
+    var today = new Date();
+    var todayYear = today.getFullYear();
+    var todayMonth = today.getMonth()+1;
+    var todayDate = today.getDate();
+    var todayHour = today.getHours();
+    var todayMinute = today.getMinutes();
+    var todaySecond = today.getSeconds();
+    var now = Date.UTC(todayYear,todayMonth,todayDate,todayHour,todayMinute,todaySecond);
+    var diff = now - birthDay;
+    var diffYears = Math.floor(diff/years);
+    var diffDays = Math.floor((diff/days)-diffYears*365);
+    var diffHours = Math.floor((diff-(diffYears*365+diffDays)*days)/hours);
+    var diffMinutes = Math.floor((diff-(diffYears*365+diffDays)*days-diffHours*hours)/minutes);
+    var diffSeconds = Math.floor((diff-(diffYears*365+diffDays)*days-diffHours*hours-diffMinutes*minutes)/seconds);
+      document.getElementById('showDays').innerHTML=" "+diffYears+" 年 "+diffDays+" 天 "+diffHours+" 小时 "+diffMinutes+" 分钟 "+diffSeconds+" 秒";
+  }, 1000);
+</script>
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i> 访问用户：
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i> 访问次数：
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+    window.livereOptions = {
+        refer: 'https://leijiezhang001.github.io' + location.pathname
+    };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "vertical";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

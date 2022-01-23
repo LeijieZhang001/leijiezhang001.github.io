@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Deep Learning,3D Detection,Point Cloud,autonomous driving,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="LeijieZhang" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="基于激光点云的 3D 目标检测是自动驾驶系统中的核心感知模块。由于点云的稀疏性以及空间结构的无序性，一系列 Voxel-based 3D 检测方法得以发展：PointPillars，FaF，MVF 等。然而 Voxel-based 方法需要预定义空间栅格的分辨率，其特征提取的有效性依赖于空间分辨率。同时在点云语义分割领域，对点云的点级别特征提取方法研究较为广泛，PointCloud Featu">
+<meta name="keywords" content="Deep Learning,3D Detection,Point Cloud,autonomous driving">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Point-based 3D Detetection">
+<meta property="og:url" content="https://leijiezhang001.github.io/Point-based-3D-Det/index.html">
+<meta property="og:site_name" content="LeijieZhang">
+<meta property="og:description" content="基于激光点云的 3D 目标检测是自动驾驶系统中的核心感知模块。由于点云的稀疏性以及空间结构的无序性，一系列 Voxel-based 3D 检测方法得以发展：PointPillars，FaF，MVF 等。然而 Voxel-based 方法需要预定义空间栅格的分辨率，其特征提取的有效性依赖于空间分辨率。同时在点云语义分割领域，对点云的点级别特征提取方法研究较为广泛，PointCloud Featu">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://leijiezhang001.github.io/Point-based-3D-Det/ipod.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Point-based-3D-Det/proposal_feat.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Point-based-3D-Det/STD.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Point-based-3D-Det/PointRCNN.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Point-based-3D-Det/bin-based.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Point-based-3D-Det/canonical.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Point-based-3D-Det/3DSSD.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Point-based-3D-Det/candidate_pts.png">
+<meta property="og:updated_time" content="2020-08-16T04:52:19.416Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Point-based 3D Detetection">
+<meta name="twitter:description" content="基于激光点云的 3D 目标检测是自动驾驶系统中的核心感知模块。由于点云的稀疏性以及空间结构的无序性，一系列 Voxel-based 3D 检测方法得以发展：PointPillars，FaF，MVF 等。然而 Voxel-based 方法需要预定义空间栅格的分辨率，其特征提取的有效性依赖于空间分辨率。同时在点云语义分割领域，对点云的点级别特征提取方法研究较为广泛，PointCloud Featu">
+<meta name="twitter:image" content="https://leijiezhang001.github.io/Point-based-3D-Det/ipod.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://leijiezhang001.github.io/Point-based-3D-Det/">
+
+
+
+
+
+  <title>Point-based 3D Detetection | LeijieZhang</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2129cd61363d382d1734d5e8c0ead722";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2129cd61363d382d1734d5e8c0ead722";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+      var _vds = _vds || [];
+      window._vds = _vds;
+      (function(){
+        _vds.push(['setAccountId', '87fe382bdb2695f2']);
+        (function() {
+          var vds = document.createElement('script');
+          vds.type='text/javascript';
+          vds.async = true;
+          vds.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'dn-growing.qbox.me/vds.js';
+          var s = document.getElementsByTagName('script')[0];
+          s.parentNode.insertBefore(vds, s);
+        })();
+      })();
+  </script>
+
+
+
+  <script type="text/javascript">
+      window.heap=window.heap||[],heap.load=function(e,t){window.heap.appid=e,window.heap.config=t=t||{};var r=t.forceSSL||"https:"===document.location.protocol,a=document.createElement("script");a.type="text/javascript",a.async=!0,a.src=(r?"https:":"http:")+"//cdn.heapanalytics.com/js/heap-"+e+".js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(a,n);for(var o=function(e){return function(){heap.push([e].concat(Array.prototype.slice.call(arguments,0)))}},p=["addEventProperties","addUserProperties","clearEventProperties","identify","removeEventProperty","setEventProperties","track","unsetEventProperty"],c=0;c<p.length;c++)heap[p[c]]=o(p[c])};
+      heap.load("256127732");
+  </script>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+<a href="https://github.com/LeijieZhang001" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewbox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+
+	  <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LeijieZhang</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://leijiezhang001.github.io/Point-based-3D-Det/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Leijie">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LeijieZhang">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Point-based 3D Detetection</h1>
+        
+
+        <div class="post-meta">
+          
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-02-29T12:30:15+08:00">
+                2020-02-29
+              </time>
+            
+            
+              <span class="post-updated">
+                &nbsp; | &nbsp; Updated on
+                <time itemprop="dateUpdated" datetime="2020-08-16T12:52:19+08:00" content="2020-08-16">
+                  2020-08-16
+                </time>
+              </span>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/3D-Detection/" itemprop="url" rel="index">
+                    <span itemprop="name">3D Detection</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i> 本文总阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>次
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Words count in article&#58;</span>
+                
+                <span title="Words count in article">
+                  2.8k 字
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Reading time &asymp;</span>
+                
+                <span title="Reading time">
+                  11 分钟
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>　　基于激光点云的 3D 目标检测是自动驾驶系统中的核心感知模块。由于点云的稀疏性以及空间结构的无序性，一系列 Voxel-based 3D 检测方法得以发展：<a href="/paperreading-PointPillars/" title="PointPillars">PointPillars</a>，<a href="/paperreading-Fast-and-Furious/" title="FaF">FaF</a>，<a href="/paperreading-End-to-End-Multi-View-Fusion-for-3D-Object-Detection-in-LiDAR-Point-Clouds/" title="MVF">MVF</a> 等。然而 Voxel-based 方法需要预定义空间栅格的分辨率，其特征提取的有效性依赖于空间分辨率。同时在点云语义分割领域，对点云的点级别特征提取方法研究较为广泛，<a href="/PointCloud-Feature-Extraction/" title="PointCloud Feature Extraction">PointCloud Feature Extraction</a> 中已经较详细的介绍了针对点云的点级别特征提取方法，<a href="/paper-reading-Grid-GCN-for-Fast-and-Scalable-Point-Cloud-Learning/" title="Grid-GCN">Grid-GCN</a> 提出了几种策略来加速特征提取。<br>
+　　由此高效的 Point-based 3D 检测方法成为可能，这种方法首先提取点级别的特征(相比 Voxel-based，理论上没有信息损失)，然后用点级别的 Anchor-based 或 Anchor-free 方法作 3D 检测。</p>
+<h2 id="anchor-based">1. Anchor-based</h2>
+<h3 id="ipod1">1.1. IPOD<a href="#1" id="1ref"><sup>[1]</sup></a></h3>
+<p><img src="/Point-based-3D-Det/ipod.png" width="90%" height="90%" title="图 1. IPOD Framework"> 　　如图 1. 所示， IPOD 与 F-PointNet 类似，只不过 IPOD 在俯视图下生成 Proposal 取点，而 F-PointNet 是直接在锥形视野的点云中作分割。IPOD 由三部分组成：</p>
+<ol type="1">
+<li><strong>Semantic Segmentation</strong><br>
+目的是将点云中的背景点过滤掉，只生成前景点的 Anchor。作者采用图像语义分割的方法，这里也可直接用点云分割来做；</li>
+<li><strong>Point-based Proposal Generation</strong><br>
+生成点级别的候选框，去掉冗余的候选框；</li>
+<li><strong>Head for Classification and Regression</strong><br>
+根据候选框，提取特征，作分类和回归；</li>
+</ol>
+<p>这里的前两步是要得到少量但又能保证召回率的 Proposal，其中 Anchor 是根据每个点来设置的，然后作 NMS 操作，这里不做展开。 <img src="/Point-based-3D-Det/proposal_feat.png" width="80%" height="80%" title="图 2. Proposal Feature Generation"> 　　如图 2. 所示，每个 Proposal 提取出点云信息，然后通过 PointNet++ 直接来预测该 Proposal 的 3D 属性。这里用到了 T-Net(Spatial Transformation Network 的一种) 将点云变换到规范坐标系(Canonical coordinates)，这个套路用的也比较多。其它细节就是正常的 3D 属性回归策略，不作展开。</p>
+<h3 id="std2">1.2. STD<a href="#2" id="2ref"><sup>[2]</sup></a></h3>
+<p><img src="/Point-based-3D-Det/STD.png" width="80%" height="80%" title="图 3. STD Framework"> 　　如图 3. 所示，STD 模块有：</p>
+<ol type="1">
+<li><strong>Backbone</strong><br>
+用 PointNet++ 提取点级别特征以及作点级别的 Classification；</li>
+<li><strong>PGM(Proposal Generation Module)</strong><br>
+根据点级别的分类结果，对目标点设计球状 Spherical Anchor；不同类别设计不同的球状 Anchor 半径。将球状 Anchor 里面的点收集起来，作坐标规范化并且 concate 点级别特征，然后用 PointNet 来预测实际的矩形 proposal：包括中心 Offsets 以及 size offsets。同时对角度进行预测，角度预测通过分类加预测 Offsets 实现。</li>
+<li><strong>Proposal Feature Generation</strong><br>
+有了 proposal 后，其实可以直接通过 PointNet 作进一步的预测及分类，但是作者为了加速，这时候采用了 Voxel Feature Encoding。将 proposal 里面的点都转换到中心点坐标系，然后栅格化提取特征；</li>
+<li><strong>Box Prediction</strong><br>
+除了通常的类别预测以及 3D Box 相关属性的 Offsets 预测，作者还加入了与真值的 IoU 预测，该 IoU 值与类别分数相乘作为最终的该预测分数(这个在 2D Detection 中已经有应用)。</li>
+</ol>
+<h2 id="anchor-free">2. Anchor-free</h2>
+<h3 id="pointrcnn3">2.1. PointRCNN<a href="#3" id="3ref"><sup>[3]</sup></a></h3>
+<p><img src="/Point-based-3D-Det/PointRCNN.png" width="80%" height="80%" title="图 4. PointRCNN Framework"> 　　如图 4. 所示，PointRCNN 是一个 two-stage 3D 检测方法，类似 Faster-RCNN，其由 Bottom-up 3D Proposal Generation 和 Canonical 3D Box Refinement 两个模块组成。</p>
+<h4 id="bottom-up-3d-proposal-generation">2.1.1 Bottom-up 3D Proposal Generation</h4>
+<p>　　Proposal 的生成要求是，数量少，召回率高。3D Anchor 由于要覆盖 3D 空间，所以数量会很大(如 AVOD)，本文采用目标点生成 Proposal 的方法。与 IPOD，STD 类似，首先对点云进行点级别的特征提取并作前景分割(或语义分割)，对前景的每个点用 Bin-based 方法生成 3D proposal。由此在生成尽量少的 Proposal 下，保证目标的高召回率。<br>
+　　点级别的特征提取及前景分割，可以采用任意的语义分割网络，这里前景的真值即为目标框内的点云，用 Focal Loss 来平衡正负样本。<br>
+<img src="/Point-based-3D-Det/bin-based.png" width="60%" height="60%" title="图 5. Bin-based Localization"> 　　如图 5. 所示，对每个前景点用 Bin-based 方法生成 proposal。将平面的 \(x,z\) (与一般的雷达坐标系不同) 方向分成若干个 bin，然后对每个前景点，预测目标中心点属于哪个 bin，以及中心点与该 bin 的 Offsets(与角度处理的方式非常像)。针对尺寸，预测该类别平均尺寸的 Residual；针对角度，还是分解成分类加回归任务进行处理。最后再作 NMS 即可得到较少的 Proposal，给到下一模块作 refine。本模块的 Loss 设计为： <span class="math display">\[\begin{align}
+\mathcal{L} _ 1 &amp;= \mathcal{L} _ {seg} + \mathcal{L} _ {proposal} \\
+&amp;= \mathcal{L} _ {seg} + \frac{1}{N _ {pos}} \sum _ {p\in pos} \left(\mathcal{L} _ {bin} ^ {(p)} + \mathcal{L} _ {res} ^ {(p)}\right) \\
+&amp;= \mathcal{L} _ {seg} + \sum _ {u\in{\{x,z,\theta\}}} \left(\mathcal{F} _ {cls}(\widehat{bin} _ u^{(p)}, bin _ u^{(p)})+\mathcal{F} _ {reg}(\widehat{res} _ u^{(p)}, res _ u^{(p)})\right) + \sum _ {v\in\{y,h,w,l\}} \mathcal{F} _ {reg}(\widehat{res} _ v^{(p)}, res _ v^{(p)})\\
+\tag{1}
+\end{align}\]</span> 其中 \(\mathcal{F} _ {cls}, \mathcal{F} _ {reg}\) 分别为 cross-entropy Loss 和 smooth L1 Loss。</p>
+<h4 id="canonical-3d-box-refinement">2.1.2 Canonical 3D Box Refinement</h4>
+<p>　　有了 3D proposal 后，经过 Point Cloud Region Pooling 提取该 proposal 的点特征，步骤如下：先对 proposal 进行一定程度的扩大，然后提取内部点的 semantic features，foreground mask score，Point distance等。由此获得每个 proposal 的点及点特征，用来作 3D Box Refinement。<br>
+<img src="/Point-based-3D-Det/canonical.png" width="60%" height="60%" title="图 6. Canonical Transformation"> 　　如图 4. 所示，为了更好的学习 proposal 的局部空间特征，增加每个 proposal 在自身 Canonical 坐标系下的空间点。Canonical 变换如图 6. 所示，因为这里每个 proposal 的位置及角度已经有了，所以直接对其内的点作变换。如果没有，那就需要 STN(T-Net) 来学习这个变换。<br>
+　　Loss 也是在 Canonical 坐标系下计算的，假设 proposal：\(\mathrm{b _ i} = (x _ i,y _ i,z _ i,h _ i,w _ i,l _ i,\theta _ i)\)，真值: \(\mathrm{b} _ i^{gt} = (x _ i^{gt}, y _ i^{gt},z _ i^{gt},h _ i^{gt},w _ i^{gt},l _ i^{gt},\theta _ i^{gt})\)。那么两者变换到 Canonical 坐标系后： <span class="math display">\[\begin{align}
+\mathrm{\tilde{b}} _ i &amp;=(0,0,0,h _ i,w _ i,l _ i,0) \\
+\mathrm{\tilde{b}} _ i^{gt} &amp;= (x _ i^{gt}-x _ i, y _ i^{gt}-y _ i,z _ i^{gt}-z _ i,h _ i^{gt},w _ i^{gt},l _ i^{gt},\theta _ i^{gt}-\theta _ i)
+\tag{2}
+\end{align}\]</span> 对于中心点，还是 bin 分类加 Residual 回归，但是可以减少 bin 的尺度；对于尺寸，还是回归 Residual；对于角度，由于限定 positive 与 gt 的 IoU&gt;0.55，所以可以将回归的角度限定为 \((-\frac{\pi}{4},\frac{\pi}{4})\) 的范围，由此进行 bin 分类及 Residual 回归。最终本阶段的 Loss 为： <span class="math display">\[ \mathcal{L} _ 2= \frac{1}{N _ {pos}+ N _ {neg}} \sum _ {p\in all} \mathcal{L} _ {label} ^{(p)}+ \frac{1}{N _ {pos}} \sum _ {p\in pos} \left(\mathcal{\tilde{L}} _ {bin} ^ {(p)} + \mathcal{\tilde{L}} _ {res} ^ {(p)}\right) \tag{3}\]</span></p>
+<h3 id="dssd4">2.2. 3DSSD<a href="#4" id="4ref"><sup>[4]</sup></a></h3>
+<p><img src="/Point-based-3D-Det/3DSSD.png" width="100%" height="100%" title="图 7. 3DSSD Framework"> 　　如图 7. 所示，3DSSD 是 one-stage 网络，由 Backbone，Candidate Generation Layer，Head 构成。Backbone 作者提出了 Fusion Sampling 以提升前景点在采样时候的召回率。Candidate Generation Layer 中根据前景点，生成 3D box 预测的 Candidate 锚点。最后 Head 根据锚点，作 Anchor-free 的 3D Box 预测。</p>
+<h4 id="fusion-sampling">2.2.1 Fusion Sampling</h4>
+<p>　　为了扩大感受野提取局部特征，点云通常需要作下采样处理，一般采用 D-FPS 方法(点空间距离作为采样度量)，但是这样会使前景点大量丢失。前面几种方法不管是用图像分割还是点云分割，都会去除背景点云，保留前景点云以提高生成 Proposal 的召回率。<br>
+　　这里作者提出了 Feature-FPS，加入特征间的距离作为采样的度量方式。对于地面等背景，其特征基本类似，所以很容易就去除了；而对于目标区域，其点特征都不太一样，又得以保留。如果只保留同一目标的点，也会产生冗余，所以融合点特征距离及空间距离，设计采样度量方式为： <span class="math display">\[ C(A,B) = \lambda L _ d(A,B) + L _ f(A,B) \tag{4}\]</span> 　　因为 F-FPS 去除了大量的背景点，虽然有利于回归，但是不利于分类，所以设计了融合 D-FPS 和 F-FPS 的 Fusion Sampling 方法。如图 7. 所示，最终分别输出 F-FPS 与 D-FPS 的特征点。</p>
+<h4 id="candidate-generation-layer">2.2.2 Candidate Generation Layer</h4>
+<p><img src="/Point-based-3D-Det/candidate_pts.png" width="60%" height="60%" title="图 8. Candidate Generation"> 　　如图 8. 所示，根据 F-FPS 采样的点，在真值框中心点的监督下，用一个 T-Net 去学习采样点与中心点的变换。变换后的点即作为 Candidate 锚点。对每个 Candidate 点提取周围一定距离的 F-FPS 与 D-FPS(大量背景点利于分类)中点集的特征(空间坐标作归一化或变换到 Candidate 坐标系，类似 Canonical 坐标系)，然后作 MaxPool 提取该 Candidate 对应区域的特征。</p>
+<h4 id="prediction-head">2.2.3 Prediction Head</h4>
+<p>　　对于每个 Candidate 特征，作 3D Box 属性的回归。本文采用 Anchor-free 的方法。对于中心点，直接回归 Candidate 坐标点与真值框中心点的 Offsets；对于尺寸，直接回归与该类别平均尺寸的 Residual；对于角度，还是采用 bin 分类加 Residual 回归的策略。<br>
+　　这里期望的是 Candidate 点能接近目标框中心点，所以作者借鉴 FCOS(详见 <a href="/Anchor-Free-Detection/" title="Anchor-Free Detection">Anchor-Free Detection</a>)中的 Center-ness Loss 来选取靠近中心点的 Candidate，真值 Label 为: <span class="math display">\[l _ {ctrness}=\sqrt[3]{\frac{\mathrm{min}(f,b)}{\mathrm{max}(f,b)}+\frac{\mathrm{min}(l,r)}{\mathrm{max}(l,r)}+\frac{\mathrm{min}(t,d)}{\mathrm{max}(t,d)}} \tag{5}\]</span> 其中 \(f,b,l,r,t,d\) 分别表示前后左右上下与中心点的距离。FCOS 中，加了一个与分类平行的分支来预测 Center-ness，最终的预测 Score 是分类 Score 乘以 Center-ness 得到(与预测 IoU 套路一样，本质上都是引入与真值的距离度量)，该预测 Score 用于之后的 NMS 等处理。本文则没有显示的预测 Center-ness，其直接将真值 Center-ness 与真值类别相乘，作为类别真值，所以一个类别分支即得到最终的预测 Score。<br>
+　　最终的 Loss 为： <span class="math display">\[L = \frac{1}{N _ c}\sum _ iL _ c(s _ i, u _ i) + \lambda _ 1\frac{1}{N _ p}\sum _ i[u _ i&gt;0]L _ r + \lambda _ 2\frac{1}{N _ p}L _ s \tag{5}\]</span> 其中 \(s _ i\) 为预测的类别 Score，\(u _ i\) 为经过 Center-ness 处理后的类别真值；\(L _ c\) 表示类别预测 Loss；\(L _ r\) 表示 3D Box Loss，包括中心点距离，尺寸，角度，8个角点位置；\(L _ s\) 表示生成 Candidate 点的 shift 变换 Loss。</p>
+<h2 id="reference">3. Reference</h2>
+<p><a id="1" href="#1ref">[1]</a> Yang, Zetong, et al. "Ipod: Intensive point-based object detector for point cloud." arXiv preprint arXiv:1812.05276 (2018).<br>
+<a id="2" href="#2ref">[2]</a> Yang, Zetong, et al. "Std: Sparse-to-dense 3d object detector for point cloud." Proceedings of the IEEE International Conference on Computer Vision. 2019.<br>
+<a id="3" href="#3ref">[3]</a> Shi, Shaoshuai, Xiaogang Wang, and Hongsheng Li. "Pointrcnn: 3d object proposal generation and detection from point cloud." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.<br>
+<a id="4" href="#4ref">[4]</a> Yang, Zetong, et al. "3DSSD: Point-based 3D Single Stage Object Detector." arXiv preprint arXiv:2002.10187 (2020).</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+      <div>
+	    
+<div style="text-align:center;color: #ccc;font-size:14px;">
+----------------- END -----------------</div>
+      </div>
+    
+		
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>赞赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="Leijie WeChat Pay">
+        <p>WeChat Pay</p>
+      </div>
+    
+
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+	
+	
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:</strong>
+    Leijie
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link:</strong>
+    <a href="https://leijiezhang001.github.io/Point-based-3D-Det/" title="Point-based 3D Detetection">https://leijiezhang001.github.io/Point-based-3D-Det/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice: </strong>
+    All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> unless stating additionally.
+  </li>
+</ul>
+
+      </div>
+    
+
+	
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Deep-Learning/" rel="tag"><i class="fa fa-tag"></i> Deep Learning</a>
+          
+            <a href="/tags/3D-Detection/" rel="tag"><i class="fa fa-tag"></i> 3D Detection</a>
+          
+            <a href="/tags/Point-Cloud/" rel="tag"><i class="fa fa-tag"></i> Point Cloud</a>
+          
+            <a href="/tags/autonomous-driving/" rel="tag"><i class="fa fa-tag"></i> autonomous driving</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/MOT-Fusion/" rel="next" title="MOT Multimodal Fusion">
+                <i class="fa fa-chevron-left"></i> MOT Multimodal Fusion
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/GAN/" rel="prev" title="GAN">
+                GAN <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+
+
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC81MDYxNC8yNzA5Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+       
+        
+          <ul class="sidebar-nav motion-element">
+            <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+              Table of Contents
+            </li>
+            <li class="sidebar-nav-overview" data-target="site-overview">
+              Overview
+            </li>
+          </ul>
+        
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="Leijie">
+            
+              <p class="site-author-name" itemprop="name">Leijie</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">90</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">38</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/LeijieZhang001" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/yue-ti/activities" target="_blank" title="知乎">
+                      
+                        <i class="fa fa-fw fa-heartbeat"></i>知乎</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:ljzhang0220@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+
+        
+        <!--noindex-->
+          <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+            <div class="post-toc">
+
+              
+                
+              
+
+              
+                <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#anchor-based"><span class="nav-text">1. Anchor-based</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ipod1"><span class="nav-text">1.1. IPOD[1]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#std2"><span class="nav-text">1.2. STD[2]</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#anchor-free"><span class="nav-text">2. Anchor-free</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#pointrcnn3"><span class="nav-text">2.1. PointRCNN[3]</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#bottom-up-3d-proposal-generation"><span class="nav-text">2.1.1 Bottom-up 3D Proposal Generation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#canonical-3d-box-refinement"><span class="nav-text">2.1.2 Canonical 3D Box Refinement</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dssd4"><span class="nav-text">2.2. 3DSSD[4]</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#fusion-sampling"><span class="nav-text">2.2.1 Fusion Sampling</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#candidate-generation-layer"><span class="nav-text">2.2.2 Candidate Generation Layer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#prediction-head"><span class="nav-text">2.2.3 Prediction Head</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#reference"><span class="nav-text">3. Reference</span></a></li></ol></div>
+              
+
+            </div>
+          </section>
+        <!--/noindex-->
+        
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart" aria-hidden="true"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leijie</span>
+
+  
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">146.9k</span>
+  
+</div>
+<!--
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+-->
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<span>本站已运行<span id="showDays"></span></span>
+<script>
+  var seconds = 1000;
+  var minutes = seconds * 60;
+  var hours = minutes * 60;
+  var days = hours * 24;
+  var years = days * 365;
+  var birthDay = Date.UTC(2019,05,20,12,00,00); // 这里设置建站时间
+  setInterval(function() {
+    var today = new Date();
+    var todayYear = today.getFullYear();
+    var todayMonth = today.getMonth()+1;
+    var todayDate = today.getDate();
+    var todayHour = today.getHours();
+    var todayMinute = today.getMinutes();
+    var todaySecond = today.getSeconds();
+    var now = Date.UTC(todayYear,todayMonth,todayDate,todayHour,todayMinute,todaySecond);
+    var diff = now - birthDay;
+    var diffYears = Math.floor(diff/years);
+    var diffDays = Math.floor((diff/days)-diffYears*365);
+    var diffHours = Math.floor((diff-(diffYears*365+diffDays)*days)/hours);
+    var diffMinutes = Math.floor((diff-(diffYears*365+diffDays)*days-diffHours*hours)/minutes);
+    var diffSeconds = Math.floor((diff-(diffYears*365+diffDays)*days-diffHours*hours-diffMinutes*minutes)/seconds);
+      document.getElementById('showDays').innerHTML=" "+diffYears+" 年 "+diffDays+" 天 "+diffHours+" 小时 "+diffMinutes+" 分钟 "+diffSeconds+" 秒";
+  }, 1000);
+</script>
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i> 访问用户：
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i> 访问次数：
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+    window.livereOptions = {
+        refer: 'https://leijiezhang001.github.io' + location.pathname
+    };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "vertical";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

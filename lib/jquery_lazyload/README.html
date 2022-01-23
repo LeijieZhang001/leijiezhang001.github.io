@@ -1,0 +1,20 @@
+<h1 id="lazy-load-plugin-for-jquery">Lazy Load Plugin for jQuery</h1>
+<p>Lazy Load delays loading of images in long web pages. Images outside of viewport wont be loaded before user scrolls to them. This is opposite of image preloading.</p>
+<p>Using Lazy Load on long web pages containing many large images makes the page load faster. Browser will be in ready state after loading visible images. In some cases it can also help to reduce server load.</p>
+<p>Lazy Load is inspired by <a href="http://developer.yahoo.com/yui/imageloader/">YUI ImageLoader</a> Utility by Matt Mlinac.</p>
+<h2 id="how-to-use">How to Use?</h2>
+<p>Lazy Load depends on jQuery. Include them both in end of your HTML code:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode html"><code class="sourceCode html"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="kw">&lt;script</span><span class="ot"> src=</span><span class="st">&quot;jquery.js&quot;</span><span class="ot"> type=</span><span class="st">&quot;text/javascript&quot;</span><span class="kw">&gt;&lt;/script&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a><span class="kw">&lt;script</span><span class="ot"> src=</span><span class="st">&quot;jquery.lazyload.js&quot;</span><span class="ot"> type=</span><span class="st">&quot;text/javascript&quot;</span><span class="kw">&gt;&lt;/script&gt;</span></span></code></pre></div>
+<p>You must alter your HTML code. URL of the real image must be put into data-original attribute. It is good idea to give Lazy Loaded image a specific class. This way you can easily control which images plugin is binded to. Note that you should have width and height attributes in your image tag.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode html"><code class="sourceCode html"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a><span class="kw">&lt;img</span><span class="ot"> class=</span><span class="st">&quot;lazy&quot;</span><span class="ot"> data-original=</span><span class="st">&quot;img/example.jpg&quot;</span><span class="ot"> width=</span><span class="st">&quot;640&quot;</span><span class="ot"> height=</span><span class="st">&quot;480&quot;</span><span class="kw">&gt;</span></span></code></pre></div>
+<p>then in your code do:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a><span class="fu">$</span>(<span class="st">&quot;img.lazy&quot;</span>)<span class="op">.</span><span class="fu">lazyload</span>()<span class="op">;</span></span></code></pre></div>
+<p>This causes all images of class lazy to be lazy loaded.</p>
+<p>More information on <a href="http://www.appelsiini.net/projects/lazyload">Lazy Load</a> project page.</p>
+<h2 id="install">Install</h2>
+<p>You can install with <a href="http://bower.io/">bower</a> or <a href="https://www.npmjs.com/">npm</a>.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a>$ <span class="ex">bower</span> install jquery.lazyload</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true"></a>$ <span class="ex">npm</span> install jquery-lazyload</span></code></pre></div>
+<h1 id="license">License</h1>
+<p>All code licensed under the <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>. All images licensed under <a href="http://creativecommons.org/licenses/by/3.0/deed.en_US">Creative Commons Attribution 3.0 Unported License</a>. In other words you are basically free to do whatever you want. Just don't remove my name from the source.</p>

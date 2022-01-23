@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Deep Learning,Model Compression,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="LeijieZhang" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="量化(Quantization)是模型压缩主要技术之一。因为模型训练后的权重及特征图基本符合高斯分布(特征图可能是混合高斯分布)，所以将 32-bit 的张量量化到低比特后也能保持模型输出的准确度。如果只量化模型的权重，那么只是减少了模型的存储及传输大小；只有同时量化权重及特征图(Weight &amp;amp; Activation)，才能同时减少计算量。本文来详细描述下模型量化的细节。 1. Qu">
+<meta name="keywords" content="Deep Learning,Model Compression">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Model Compression - &#39;Quantization&#39;">
+<meta property="og:url" content="https://leijiezhang001.github.io/Quantization/index.html">
+<meta property="og:site_name" content="LeijieZhang">
+<meta property="og:description" content="量化(Quantization)是模型压缩主要技术之一。因为模型训练后的权重及特征图基本符合高斯分布(特征图可能是混合高斯分布)，所以将 32-bit 的张量量化到低比特后也能保持模型输出的准确度。如果只量化模型的权重，那么只是减少了模型的存储及传输大小；只有同时量化权重及特征图(Weight &amp;amp; Activation)，才能同时减少计算量。本文来详细描述下模型量化的细节。 1. Qu">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://leijiezhang001.github.io/Quantization/asymmetric.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Quantization/conv.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Quantization/symmetric.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Quantization/quantization-aware.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/Quantization/quantized_alg.png">
+<meta property="og:updated_time" content="2020-08-16T04:52:19.446Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Model Compression - &#39;Quantization&#39;">
+<meta name="twitter:description" content="量化(Quantization)是模型压缩主要技术之一。因为模型训练后的权重及特征图基本符合高斯分布(特征图可能是混合高斯分布)，所以将 32-bit 的张量量化到低比特后也能保持模型输出的准确度。如果只量化模型的权重，那么只是减少了模型的存储及传输大小；只有同时量化权重及特征图(Weight &amp;amp; Activation)，才能同时减少计算量。本文来详细描述下模型量化的细节。 1. Qu">
+<meta name="twitter:image" content="https://leijiezhang001.github.io/Quantization/asymmetric.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://leijiezhang001.github.io/Quantization/">
+
+
+
+
+
+  <title>Model Compression - 'Quantization' | LeijieZhang</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2129cd61363d382d1734d5e8c0ead722";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2129cd61363d382d1734d5e8c0ead722";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+      var _vds = _vds || [];
+      window._vds = _vds;
+      (function(){
+        _vds.push(['setAccountId', '87fe382bdb2695f2']);
+        (function() {
+          var vds = document.createElement('script');
+          vds.type='text/javascript';
+          vds.async = true;
+          vds.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'dn-growing.qbox.me/vds.js';
+          var s = document.getElementsByTagName('script')[0];
+          s.parentNode.insertBefore(vds, s);
+        })();
+      })();
+  </script>
+
+
+
+  <script type="text/javascript">
+      window.heap=window.heap||[],heap.load=function(e,t){window.heap.appid=e,window.heap.config=t=t||{};var r=t.forceSSL||"https:"===document.location.protocol,a=document.createElement("script");a.type="text/javascript",a.async=!0,a.src=(r?"https:":"http:")+"//cdn.heapanalytics.com/js/heap-"+e+".js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(a,n);for(var o=function(e){return function(){heap.push([e].concat(Array.prototype.slice.call(arguments,0)))}},p=["addEventProperties","addUserProperties","clearEventProperties","identify","removeEventProperty","setEventProperties","track","unsetEventProperty"],c=0;c<p.length;c++)heap[p[c]]=o(p[c])};
+      heap.load("256127732");
+  </script>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+<a href="https://github.com/LeijieZhang001" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewbox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+
+	  <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LeijieZhang</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://leijiezhang001.github.io/Quantization/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Leijie">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LeijieZhang">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Model Compression - 'Quantization'</h1>
+        
+
+        <div class="post-meta">
+          
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-02-11T16:25:15+08:00">
+                2020-02-11
+              </time>
+            
+            
+              <span class="post-updated">
+                &nbsp; | &nbsp; Updated on
+                <time itemprop="dateUpdated" datetime="2020-08-16T12:52:19+08:00" content="2020-08-16">
+                  2020-08-16
+                </time>
+              </span>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Model-Compression/" itemprop="url" rel="index">
+                    <span itemprop="name">Model Compression</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i> 本文总阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>次
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Words count in article&#58;</span>
+                
+                <span title="Words count in article">
+                  4.1k 字
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Reading time &asymp;</span>
+                
+                <span title="Reading time">
+                  18 分钟
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>　　量化(Quantization)是模型压缩主要技术之一。因为模型训练后的权重及特征图基本符合高斯分布(特征图可能是混合高斯分布)，所以将 32-bit 的张量量化到低比特后也能保持模型输出的准确度。如果只量化模型的权重，那么只是减少了模型的存储及传输大小；只有同时量化权重及特征图(Weight &amp; Activation)，才能同时减少计算量。本文来详细描述下模型量化的细节。</p>
+<h2 id="quantization-scheme">1. Quantization Scheme</h2>
+<h3 id="fixed-point-approximation">1.1. Fixed Point Approximation</h3>
+<p>　　设 Fixed Point 近似法中表示整数与小数的比特数分别为 \(\mathrm{IL,FL}\)，那么其可表达的浮点数范围为<a href="#1" id="1ref"><sup>[1]</sup></a><a href="#2" id="2ref"><sup>[2]</sup></a>：\([-2^{\mathrm{IL-1}}, 2 ^ {\mathrm{IL-1}}-2 ^ {-\mathrm{FL}}]\)。这种方法很明显，精度较差且表达的浮点数范围有限。更进一步，可以针对不同的张量，用不同的 \(\mathrm{IL,FL}\)，即 Dynamic Fixed Point 近似法<a href="#1" id="1ref"><sup>[1]</sup></a>。综上，Fixed Point 近似法将一个浮点数表示为： <span class="math display">\[(-1)^s\cdot 2^{-\mathrm{FL}}\sum _ {i=0}^{\mathrm{IL+FL-2}}2^i\cdot x _ i \tag{1}\]</span> 其中 \(x_i\) 为第 \(i\) 比特位的值。<br>
+　　对于 Dynamic Fixed Point，首先保证整数部分不溢出，所以量化张量 \(X\) 时设计： <span class="math display">\[\mathrm{IL}=\lceil\mathrm{lg} _ 2(\mathop{\max}\limits _ {S} X + 1)\rceil \tag{2}\]</span> 剩下的比特位即为符号位与小数位。<br>
+　　用这种定点方式量化后，由式(1)可知，两数相乘可以转换为 bits shifts &amp; add 操作，极大提升计算效率。<br>
+　　Fixed Point 近似法精度有限，尤其是当所要表示的值较大时，小数位 \(\mathrm{FL}\) 只能分到很小，所以精度必然有较大损失。</p>
+<h3 id="range-based-linear-approximation">1.2. Range-Based Linear Approximation</h3>
+<p>　　不同于 Fixed Point 近似中小数位有一定限制(导致精度较差)，Range-Based Linear 近似法直接将浮点数通过一个高精度的 Scale 值映射到对应量化位数中，所以能保持非常高的精度。</p>
+<h4 id="asymmetric-mode">1.2.1. Asymmetric Mode</h4>
+<p><img src="/Quantization/asymmetric.png" width="40%" height="40%" title="图 1. Asymmetric Quantization"> 　　如图 1. 所示，设浮点数为 \(r\)，那么 Asymmetric Linear Approximation 过程为<a href="#3" id="3ref"><sup>[3]</sup></a>： <span class="math display">\[q = round\left((r-r _ {min})\cdot\frac{2^n-1}{r _ {max}-r _ {min}}\right) = round(\frac{r}{S}-\frac{r _ {min}}{S}) \tag{3}\]</span> 等价于<a href="#4" id="4ref"><sup>[4]</sup></a>： <span class="math display">\[r = S(q-Z) \tag{4}\]</span> 其中 \(S\) 为映射的 Scale 参数，\(Z\) 表示零值被量化的值。 <img src="/Quantization/conv.png" width="40%" height="40%" title="图 2. Convolution Operator"> 　　如图 2. 所示，卷积操作可转化为矩阵相乘运算，接下来我们来推导量化后的矩阵相乘运算。假设两个 \(N\times N\) 矩阵相乘：\(r _ 3=r _ 1\cdot r _ 2\)。令 \(r _ \alpha ^{(i,j)}\) 表示矩阵 \(r _ \alpha\) 第 \((i,j)\) 个元素，\(1\leq i,j\leq N\)。矩阵张量对应的量化参数为 \(S _ \alpha,Z _ \alpha\)，对应的量化后的元素表示为 \(q _ \alpha ^{(i,j)}\)： <span class="math display">\[r _ \alpha ^{(i,j)} = S _ \alpha\left(q _ \alpha ^{(i,j)}-Z _ \alpha\right) \tag{5}\]</span> bias 量化参数设为 \(S _ b=S _ 1S _ 2,Z _ b=0\)，那么卷积运算(矩阵相乘)可表示为： <span class="math display">\[S _ 3\left(q _ 3 ^{(i,k)}-Z _ 3\right) = \sum _ {j=1} ^N S _ 1\left(q _ 1 ^{(i,j)}-Z _ 1\right)S _ 2\left(q _ 2 ^{(j,k)}-Z _ 2\right) + S _ b(q _ b^{(i)} - Z _ b)\tag{6}\]</span> 等价于： <span class="math display">\[\begin{align}
+q _ 3 ^{(i,k)} &amp;= Z _ 3+M\left(\sum _ {j=1} ^N \left(q _ 1 ^{(i,j)}-Z _ 1\right)\left(q _ 2 ^{(j,k)}-Z _ 2\right)+ \frac{S _ b}{S _ 1S _ 2}q _ b^{(i)}\right) \\
+&amp;= Z _ 3+M\left(NZ _ 1Z _ 2- Z _ 1\sum _ {j=1}^Nq _ 2^{(j,k)}-Z _ 2\sum _ {j=1}^Nq _ 1^{(i,j)}+\sum _ {j=1}^N q _ 1^{(i,j)}q _ 2^{(j,k)}+ \frac{S _ b}{S _ 1S _ 2}q _ b^{(i)}\right)  \\
+&amp;= Z _ 3+M\left(NZ _ 1Z _ 2- Z _ 1\sum _ {j=1}^Nq _ 2^{(j,k)}-Z _ 2\sum _ {j=1}^Nq _ 1^{(i,j)}+\sum _ {j=1}^N q _ 1^{(i,j)}q _ 2^{(j,k)}+ q _ b^{(i)}\right)
+\tag{7}
+\end{align}\]</span> 其中 \(M=\frac{S _ 1S _ 2}{S _ 3}\) 可以离线计算，为上式唯一的浮点数。经验上可知 \(M\in(0,1)\)，进一步可将其表示为： <span class="math display">\[M\approx 2^{-n}M _ 0 \tag{8}\]</span> 假设 \(m\) 是能表示 \(M _ 0\) 的位数( int32 硬件下，\(m\) 可为 32)，那么有 \(2 ^ {n} M \leq 2 ^m -1\)，故： <span class="math display">\[\left\{\begin{array}{l}
+n = \left\lfloor\mathrm{log} _ 2\frac{2 ^ m-1}{M}\right\rfloor \\
+M _ 0 = \left\lfloor 2 ^ nM\right\rfloor
+\end{array}\tag{9}\right.\]</span> 由此，乘以 \(M _ 0\) 可以用定点乘法实现，乘以 \(2 ^{-n}\) 可以用高效的位运算实现。式(7)中核心的计算为两个量化向量的乘加运算：\(\sum _ {j=1}^N q _ 1^{(i,j)}q _ 2^{(j,k)}\)，其可通过传统的特定位数的 BLAS 库完成。<br>
+　　具体的，令矩阵张量(卷积滤波器权重及特征图)量化为 8-bit，那么 8-bit 乘法需要用 32-bit 的累加器，即： <span class="math display">\[\mathrm{int32 += uint8 * uint8} \tag{10}\]</span> 所以式(7)中每一项累加时都是 32-bit 的，bias 也是量化为 32-bit 或是 rescale 到 32-bit，即 \(S _ b=S _ 1S _ 2,Z _ b=0\)。</p>
+<h4 id="symmetric-mode">1.2.2. Symmetric Mode</h4>
+<p><img src="/Quantization/symmetric.png" width="40%" height="40%" title="图 3. Symmetric Quantization"> 　　这种模式下最大最小值绝对值取相同值 \(R\) (该值可为任意值)，那么量化表示为： <span class="math display">\[r = Sq \tag{11}\]</span> Full Range 下 \(S = \frac{R}{(2^n-1)/2}\)(8-bit 则量化范围为 [-128,127]，Range 范围为 255)，Restricted Range 则 \(S = \frac{R}{2^{n-1}-1}\)(8-bit 量化范围为[-127,127]，Range 范围为 254)。Full Range 精度更高，PyTorch，ONNX 采用这种方式；TensorFlow，TensorRT，MKL-DNN 则采用 Restricted Range 量化方式。<br>
+　　由此式(7)简化为： <span class="math display">\[q _ 3 ^{(i,k)} = M\left(\sum _ {j=1}^N q _ 1^{(i,j)}q _ 2^{(j,k)}+ q _ b^{(i)}\right) \tag{12}\]</span> 实现更加简单。</p>
+<h2 id="quantization-alogorithm">2. Quantization Alogorithm</h2>
+<h3 id="post-training-quantization">2.1. Post-Training Quantization</h3>
+<p>　　训练好的模型，可以直接对其权重进行量化，而对于特征的量化，则需要一个 Calibration 数据集来统计特征数值的分布，然后对其进行量化。<br>
+　　量化参数的搜索，可以根据量化后的模型好坏进行 Loss 构建：</p>
+<ol type="1">
+<li><strong>任务级别损失函数</strong>：直接根据特定任务的指标来搜索及评价量化参数；</li>
+<li><strong>张量级别损失函数</strong>：设计量化后的张量与原始张量的分布相似度，或者说信息损失度，如 KL-divergence 等度量方法；</li>
+</ol>
+<h3 id="quantization-aware-training">2.2. Quantization-Aware Training</h3>
+<p>　　将训练好的模型直接进行量化，可能会导致对应的任务准确度下降，尤其对表达能力有限的小模型而言，以下情况会导致量化后模型准确度下降：</p>
+<ol type="1">
+<li>权重张量中数值差异 100 倍以上，导致小数值的量化误差较大；</li>
+<li>权重张量中有 outlier 值，导致其它值的量化误差较大；</li>
+</ol>
+<p>而直接在训练的时候进行量化，可以保证完成模型训练也就得到了对应的高准确率的量化模型。 <img src="/Quantization/quantization-aware.png" width="80%" height="80%" title="图 4. Quantization-Aware Training Framework"> 　　如图 4. 所示，<a href="#4" id="3ref">[4]</a> 提出了一种 Quantization-Aware Training 的框架，权重和特征图均维护 float32 及 int8 数值，前向传播采用 int8 伪量化运算，反向传播更新权重的 float32 值，并作量化。 <img src="/Quantization/quantized_alg.png" width="60%" height="60%" title="图 5. Quantization-Aware Training Pipline"> 　　如图 5. 所示，<a href="#4" id="3ref">[4]</a> 基于 TensorFlow 实现了一种 Quantization-Aware Training 的算法，其步骤为：</p>
+<ol type="1">
+<li>建立一个浮点模型的 graph；</li>
+<li>在 graph 中加入伪量化操作；</li>
+<li>用伪量化的方式训练得到精度与浮点模型差不多的量化模型；</li>
+<li>建立并优化量化的 Inference 模型 graph；</li>
+<li>在量化引擎上作模型的 Inference；</li>
+</ol>
+<h4 id="simulated-quantization">2.2.1. Simulated Quantization</h4>
+<p>　　这里采用 Asymmetric Linear Approximation 量化策略。对于权重，卷积运算时，先做伪量化操作，并且如果有 batch-normalization，则将其合并入卷积核权重中；对于特征图(Activations)，前向传播时都先做伪量化操作。伪量化操作如下<a href="#4" id="4ref"><sup>[4]</sup></a><a href="#5" id="5ref"><sup>[5]</sup></a>： <span class="math display">\[\begin{align}
+\mathrm{clamp}(r\;;a,b) &amp;:= \mathrm{min}(\mathrm{max}(r,a),b) \\
+s(a,b,n) &amp;:= \frac{b-a}{2 ^n-1} \\
+q(r\;;a,b,n) &amp;:= \left\lfloor\frac{\mathrm{clamp}(r\;;a,b)-a}{s(a,b,n)}\right\rceil s(a,b,n)+a\\
+\tag{13}
+\end{align}\]</span> 其中 \([a,b]\) 是 被量化的浮点范围(可以是 \([r _ {min}, r _ {max}]\))，\(q(r\;;a,b,n)\) 即为浮点数 \(r\) 的伪量化表示，也是浮点数。</p>
+<h4 id="learning-quantization-ranges">2.2.2. Learning Quantization Ranges</h4>
+<p>　　训练时，每次迭代，权重与特征图都要作伪量化处理，所以每次要确定量化参数。对于权重，因为其服从均值为零的高斯分布，所以 \([a,b]\) 直接设为其最大值与最小值即可；对于特征图，其数值与输入相关，所以策略为：刚开始训练的时候不对其作量化处理，之后用 EMA(Exponential Moving Averages) 对量化参数进行平滑，去除特征图输出突变的影响。</p>
+<h4 id="batch-normalization-folding">2.2.3. Batch Normalization Folding</h4>
+<p>　　作 Inference 或者说前向传播时，BN 可以合并入卷积核权重中，所以在量化前，先要将其合并，然后权重就仅限于卷积操作中。对于每个卷积 filter，其生成特征图以及 BN 过程如下： <span class="math display">\[\begin{align}
+\hat{x} _ i &amp;\gets wx _ i+b\\
+\mu _ B &amp;\gets \frac{1}{m}\sum _ {i=1}^m \hat{x} _ i\\
+\sigma^2 _ B &amp;\gets \frac{1}{m}\sum _ {i=1}^m(\hat{x} _ i-\mu _ B)^2\\
+y _ i &amp;\gets \gamma\frac{\hat{x} _ i-\mu _ B}{\sqrt{\sigma^2 _ B+\epsilon}} + \beta\\
+\tag{14}
+\end{align}\]</span> 由此可得： <span class="math display">\[\begin{align}
+y _ i &amp;\gets \gamma\frac{\hat{x} _ i-\mu _ B}{\sqrt{\sigma^2 _ B+\epsilon}} + \beta\\
+&amp;\gets \gamma\frac{wx _ i+b-\mu _ B}{\sqrt{\sigma^2 _ B+\epsilon}} + \beta\\
+&amp;\gets \frac{\gamma wx _ i}{\sqrt{\sigma^2 _ B+\epsilon}} +\frac{\gamma(b-\mu _ B)}{\sqrt{\sigma^2 _ B+\epsilon}}+ \beta\\
+\tag{15}
+\end{align}\]</span> 由此可知作 Inference 时，BN 参数 \(\mu _ B,\sigma^2 _ B,\gamma, \beta\) 可合并到卷积 Filter 参数中： <span class="math display">\[\left\{\begin{array}{l}
+\hat{w} = \frac{\gamma w}{\sqrt{\sigma^2 _ B+\epsilon}}\\
+\hat{b} = \frac{\gamma(b-\mu _ B)}{\sqrt{\sigma^2 _ B+\epsilon}}+ \beta\\
+\end{array}\tag{16}\right.\]</span></p>
+<h3 id="trained-quantization-thresholds">2.3. Trained Quantization Thresholds</h3>
+<p>　　Post-Training Quantization 以及 Quantization-Aware Training 都是直接对张量的分析来搜索或近似求解量化参数的，Trained Quantization Thresholds 则在训练的时候同时训练得到量化参数。</p>
+<h4 id="pact">2.3.1. PACT</h4>
+<p>　　PACT<a href="#13" id="13ref"><sup>[13]</sup></a> 定义了激活函数输出的最大值，该最大值就是 Symmetric 量化中的激活层量化参数 Scale。具体的，改进 Relu： <span class="math display">\[ y = \mathrm{PACT}(x) = 0.5(|x|-|x-\alpha|+\alpha)=
+\left\{\begin{array}{l}
+0, \;\;x\in(-\infty,0)\\
+x, \;\;x\in[0,\alpha]\\
+\alpha, \;\;x\in[\alpha, +\infty)
+\end{array}\tag{17}\right.\]</span> 对应的量化参数偏导为： <span class="math display">\[\frac{\partial y _ q(x;\,\alpha)}{\partial \alpha}=
+\left\{\begin{array}{l}
+0, \;\;x\in(-\infty, \alpha)\\
+1, \;\;x\in[\alpha,+\infty)
+\end{array}\tag{18}\right.\]</span></p>
+<h4 id="tqt">2.3.2. TQT</h4>
+<p>　　TQT(Trained Quantization Thresholds)<a href="#14" id="14ref"><sup>[14]</sup></a>则提出了一种同时学习权重和激活函数的量化参数的方法。为了简化，其采用 Linear Symmetric Approximation，且 Scale 参数限定为 \(s=2 ^ {-f}\)，由式(8,9)可知，消除了定点乘法运算。前向传播与式(13)并无差异，对每个权重即激活层作 scale，round，saturate，de-quant 操作。反向传播则需要对量化值 \(q(x;s)\) 求导，量化值表示为： <span class="math display">\[q(x;s)=
+\left\{\begin{array}{l}
+\left\lfloor\frac{x}{s}\right\rceil \cdot s, \;\; n\leq\left\lfloor\frac{x}{s}\right\rceil\leq p\\
+n\cdot s, \;\;\;\;\left\lfloor\frac{x}{s}\right\rceil &lt; n\\
+p\cdot s, \;\;\;\;\left\lfloor\frac{x}{s}\right\rceil &gt; p\\
+\end{array}\tag{19}\right.\]</span> 其中 \(n,p\) 分别为量化值域的最小最大值。定义 \(\frac{\partial \lfloor x\rceil}{\partial x} = 1\)，那么对 Scale 的偏导为： <span class="math display">\[\nabla _ sq(x;s)=
+\left\{\begin{array}{l}
+\left\lfloor\frac{x}{s}\right\rceil - \frac{x}{s}, &amp;\; n\leq\left\lfloor\frac{x}{s}\right\rceil\leq p\\
+n, &amp;\;\left\lfloor\frac{x}{s}\right\rceil &lt; n\\
+p, &amp;\;\left\lfloor\frac{x}{s}\right\rceil &gt; p\\
+\end{array}\tag{20}\right.\]</span> 为了稳定性，令 \(\nabla _ {(\mathrm{log} _ 2 t)} s = s\, \mathrm{In}(2)\)，则： <span class="math display">\[\nabla _ {(\mathrm{log} _ 2t)}q(x;s)= s\,\mathrm{In}(2)\cdot
+\left\{\begin{array}{l}
+\left\lfloor\frac{x}{s}\right\rceil - \frac{x}{s}, &amp;\; n\leq\left\lfloor\frac{x}{s}\right\rceil\leq p\\
+n, &amp;\;\left\lfloor\frac{x}{s}\right\rceil &lt; n\\
+p, &amp;\;\left\lfloor\frac{x}{s}\right\rceil &gt; p\\
+\end{array}\tag{21}\right.\]</span> 对应的，对输入 \(x\) 的偏导数为： <span class="math display">\[\nabla _ xq(x;s)=
+\left\{\begin{array}{l}
+1,&amp;\; n\leq\left\lfloor\frac{x}{s}\right\rceil\leq p\\
+0, &amp;\;otherwise\\
+\end{array}\tag{22}\right.\]</span></p>
+<p>　　由此可与网络权重一起训练得到量化参数。Graffitist<a href="#15" id="15ref"><sup>[15]</sup></a>基于 TensorFlow 实现了上述算法；NNCF<a href="#16" id="16ref"><sup>[16]</sup></a>基于 Pytorch 实现了类似算法。</p>
+<h2 id="quantized-framework">3. Quantized Framework</h2>
+<p>　　不管是 Post-Training Quantization 还是 Quantization-Aware Training，算法端都还是用伪量化操作实现的，部署时就必须用 INT8 引擎。据我所知目前 INT8 引擎有：</p>
+<ol type="1">
+<li>DSP/加速芯片平台<br>
+目测没有开源的，大家自个玩自个的；</li>
+<li>CPU 平台<br>
+Google 的 TensorFlow Lite<a href="#6" id="6ref"><sup>[6]</sup></a>，Facebook 的 QNNPACK<a href="#8" id="8ref"><sup>[8]</sup></a>，Tencent 的 NCNN<a href="#9" id="9ref"><sup>[9]</sup></a>。</li>
+<li>GPU 平台<br>
+NVIDIA 的 TensorRT<a href="#10" id="10ref"><sup>[10]</sup></a>，TVM<a href="#11" id="11ref"><sup>[11]</sup></a>。</li>
+</ol>
+<p>而伪量化框架则在深度学习框架(caffe，pytorch，tensorflow)中开源的较多，如基于 pytorch 的 distiller<a href="#3" id="3ref"><sup>[3]</sup></a>，NNCF<a href="#16" id="16ref"><sup>[16]</sup></a>。<br>
+　　对于 ARM 平台，INT8 引擎会通过 NEON 指令集加速；对于 x86 平台，INT8 引擎会通过 SSE 加速；对于 NVIDIA GPU 平台，则通过 dp4a<a href="#12" id="12ref"><sup>[12]</sup></a> 矩阵运算库加速。dp4a 实现了基础的 INT8 矩阵相乘操作，目前 cuDNN，cuBLAS，TensorRT 均采用该指令集。下面对 INT8 引擎作简要阐述。</p>
+<h3 id="ristretto1">3.1. Ristretto<a href="#1" id="1ref"><sup>[1]</sup></a></h3>
+<p>　　Ristretto 是一种基于 (Dynamix) Fixed Point Approximation, Post-Training Quantization 的量化框架，其精度有限，量化的 Inference 引擎可用 bits shifts &amp; add 操作实现，比较适合应用于 DSP 等嵌入式平台。</p>
+<h3 id="tensorflow-lite6qnnpack8ncnn9">3.2. TensorFlow Lite<a href="#6" id="6ref"><sup>[6]</sup></a>/QNNPACK<a href="#8" id="8ref"><sup>[8]</sup></a>/NCNN<a href="#9" id="9ref"><sup>[9]</sup></a></h3>
+<p>　　TensorFlow Lite 是 Google 基于 TensorFlow 开发的针对移动嵌入式 CPU 平台的模型(量化)加速框架，其实现在 2.2 小节中已有详细的描述，有较高精度，<a href="#4" id="4ref">[4]</a> 实现了 Quantization-Aware Training。其中 INT8 矩阵运算采用了 gemmlowp<a href="#7" id="7ref"><sup>[7]</sup></a>。<br>
+　　移动端的 CPU 的量化计算引擎开源的也比较多，如 Facebook 的 QNNPACK<a href="#8" id="8ref"><sup>[8]</sup></a>，腾讯的 ncnn-int8<a href="#9" id="9ref"><sup>[9]</sup></a>。</p>
+<h3 id="tensorrt10">3.3. TensorRT<a href="#10" id="10ref"><sup>[10]</sup></a></h3>
+<p>　　TensorRT 是 NVIDIA 基于 GPU 平台的模型(量化)加速框架，其基于 Symmetric Linear Approximation 量化策略，并且只支持 Post-Training Quantization，其内部可能直接调用 dp4a，也可能调用 cuDNN 或 cuBLAS。TVM<a href="#11" id="11ref"><sup>[11]</sup></a> 调用 dp4a 实现了基于 python 的 INT8 引擎，对于部署来讲没有 TensorRT 高效。<br>
+　　对于特征图的量化参数 \(S\) 的搜索，其使用张量级别的损失函数，最小化量化前后特征图值分布差异性的方式，KL-divergency，即两个分布的相对熵。假设连个分布 \(P,Q\)，那么两者的相对熵为： <span class="math display">\[E(P,Q) = \sum _ i P(i)\cdot\mathrm{log}\left(\frac{P(i)}{Q(i)}\right) \tag{23}\]</span> 熵越大，表示两个分布差异性越大，即量化后信息损失越大。这里也可以采用其它能描述两个分布差异性的方式，如 EMD。整个量化参数搜索过程为：</p>
+<ol type="1">
+<li>准备训练好的 FP32 模型，以及一个作校正(Calibration)的数据集；</li>
+<li>用 FP32 模型跑数据集，统计每个特征图的值分布；</li>
+<li>对不同的量化参数，根据式(17)计算量化前后的相对熵；选择最优的量化参数；</li>
+<li>根据最优的量化参数量化特征图得到量化模型(权重值分布比较集中，所以可以直接用最大值作为量化参数，具体还得看 TensorRT 怎么做的)；</li>
+<li>保存量化参数为 Calibration Table，载入该值即可启动 INT8 引擎作量化 Inference；</li>
+</ol>
+<h2 id="reference">4. Reference</h2>
+<p><a id="1" href="#1ref">[1]</a> Gysel, Philipp. "Ristretto: Hardware-oriented approximation of convolutional neural networks." arXiv preprint arXiv:1605.06402 (2016).<br>
+<a id="2" href="#2ref">[2]</a> Gupta, Suyog, et al. "Deep learning with limited numerical precision." International Conference on Machine Learning. 2015.<br>
+<a id="3" href="#3ref">[3]</a> https://nervanasystems.github.io/distiller/index.html<br>
+<a id="4" href="#4ref">[4]</a> Jacob, Benoit, et al. "Quantization and training of neural networks for efficient integer-arithmetic-only inference." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2018.<br>
+<a id="5" href="#5ref">[5]</a> Krishnamoorthi, Raghuraman. "Quantizing deep convolutional networks for efficient inference: A whitepaper." arXiv preprint arXiv:1806.08342 (2018).<br>
+<a id="6" href="#6ref">[6]</a> https://www.tensorflow.org/mobile/tflite<br>
+<a id="7" href="#7ref">[7]</a> https://github.com/google/gemmlowp<br>
+<a id="8" href="#8ref">[8]</a> https://github.com/pytorch/QNNPACK<br>
+<a id="9" href="#9ref">[9]</a> https://github.com/Tencent/ncnn/pull/487<br>
+<a id="10" href="#10ref">[10]</a> Migacz, Szymon. "8-bit inference with tensorrt." GPU technology conference. Vol. 2. No. 4. 2017.<br>
+<a id="11" href="#11ref">[11]</a> https://tvm.apache.org/2019/04/29/opt-cuda-quantized<br>
+<a id="12" href="#12ref">[12]</a> https://devblogs.nvidia.com/mixed-precision-programming-cuda-8/<br>
+<a id="13" href="#13ref">[13]</a> Choi, Jungwook, et al. "Pact: Parameterized clipping activation for quantized neural networks." arXiv preprint arXiv:1805.06085 (2018).<br>
+<a id="14" href="#14ref">[14]</a> Jain, Sambhav R., et al. "Trained quantization thresholds for accurate and efficient neural network inference on fixed-point hardware." arXiv preprint arXiv:1903.08066 (2019).<br>
+<a id="15" href="#15ref">[15]</a> https://github.com/Xilinx/graffitist<br>
+<a id="16" href="#16ref">[16]</a> Kozlov, Alexander, et al. "Neural Network Compression Framework for fast model inference." arXiv preprint arXiv:2002.08679 (2020).</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+      <div>
+	    
+<div style="text-align:center;color: #ccc;font-size:14px;">
+----------------- END -----------------</div>
+      </div>
+    
+		
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>赞赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="Leijie WeChat Pay">
+        <p>WeChat Pay</p>
+      </div>
+    
+
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+	
+	
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:</strong>
+    Leijie
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link:</strong>
+    <a href="https://leijiezhang001.github.io/Quantization/" title="Model Compression - 'Quantization'">https://leijiezhang001.github.io/Quantization/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice: </strong>
+    All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> unless stating additionally.
+  </li>
+</ul>
+
+      </div>
+    
+
+	
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Deep-Learning/" rel="tag"><i class="fa fa-tag"></i> Deep Learning</a>
+          
+            <a href="/tags/Model-Compression/" rel="tag"><i class="fa fa-tag"></i> Model Compression</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/LOAM/" rel="next" title="LOAM(Lidar Odometry and Mapping)">
+                <i class="fa fa-chevron-left"></i> LOAM(Lidar Odometry and Mapping)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/MOT-Fusion/" rel="prev" title="MOT Multimodal Fusion">
+                MOT Multimodal Fusion <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+
+
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC81MDYxNC8yNzA5Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+       
+        
+          <ul class="sidebar-nav motion-element">
+            <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+              Table of Contents
+            </li>
+            <li class="sidebar-nav-overview" data-target="site-overview">
+              Overview
+            </li>
+          </ul>
+        
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="Leijie">
+            
+              <p class="site-author-name" itemprop="name">Leijie</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">90</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">38</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/LeijieZhang001" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/yue-ti/activities" target="_blank" title="知乎">
+                      
+                        <i class="fa fa-fw fa-heartbeat"></i>知乎</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:ljzhang0220@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+
+        
+        <!--noindex-->
+          <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+            <div class="post-toc">
+
+              
+                
+              
+
+              
+                <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#quantization-scheme"><span class="nav-text">1. Quantization Scheme</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#fixed-point-approximation"><span class="nav-text">1.1. Fixed Point Approximation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#range-based-linear-approximation"><span class="nav-text">1.2. Range-Based Linear Approximation</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#asymmetric-mode"><span class="nav-text">1.2.1. Asymmetric Mode</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#symmetric-mode"><span class="nav-text">1.2.2. Symmetric Mode</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#quantization-alogorithm"><span class="nav-text">2. Quantization Alogorithm</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#post-training-quantization"><span class="nav-text">2.1. Post-Training Quantization</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#quantization-aware-training"><span class="nav-text">2.2. Quantization-Aware Training</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#simulated-quantization"><span class="nav-text">2.2.1. Simulated Quantization</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#learning-quantization-ranges"><span class="nav-text">2.2.2. Learning Quantization Ranges</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#batch-normalization-folding"><span class="nav-text">2.2.3. Batch Normalization Folding</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#trained-quantization-thresholds"><span class="nav-text">2.3. Trained Quantization Thresholds</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#pact"><span class="nav-text">2.3.1. PACT</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tqt"><span class="nav-text">2.3.2. TQT</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#quantized-framework"><span class="nav-text">3. Quantized Framework</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ristretto1"><span class="nav-text">3.1. Ristretto[1]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tensorflow-lite6qnnpack8ncnn9"><span class="nav-text">3.2. TensorFlow Lite[6]/QNNPACK[8]/NCNN[9]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tensorrt10"><span class="nav-text">3.3. TensorRT[10]</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#reference"><span class="nav-text">4. Reference</span></a></li></ol></div>
+              
+
+            </div>
+          </section>
+        <!--/noindex-->
+        
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart" aria-hidden="true"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leijie</span>
+
+  
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">146.9k</span>
+  
+</div>
+<!--
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+-->
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<span>本站已运行<span id="showDays"></span></span>
+<script>
+  var seconds = 1000;
+  var minutes = seconds * 60;
+  var hours = minutes * 60;
+  var days = hours * 24;
+  var years = days * 365;
+  var birthDay = Date.UTC(2019,05,20,12,00,00); // 这里设置建站时间
+  setInterval(function() {
+    var today = new Date();
+    var todayYear = today.getFullYear();
+    var todayMonth = today.getMonth()+1;
+    var todayDate = today.getDate();
+    var todayHour = today.getHours();
+    var todayMinute = today.getMinutes();
+    var todaySecond = today.getSeconds();
+    var now = Date.UTC(todayYear,todayMonth,todayDate,todayHour,todayMinute,todaySecond);
+    var diff = now - birthDay;
+    var diffYears = Math.floor(diff/years);
+    var diffDays = Math.floor((diff/days)-diffYears*365);
+    var diffHours = Math.floor((diff-(diffYears*365+diffDays)*days)/hours);
+    var diffMinutes = Math.floor((diff-(diffYears*365+diffDays)*days-diffHours*hours)/minutes);
+    var diffSeconds = Math.floor((diff-(diffYears*365+diffDays)*days-diffHours*hours-diffMinutes*minutes)/seconds);
+      document.getElementById('showDays').innerHTML=" "+diffYears+" 年 "+diffDays+" 天 "+diffHours+" 小时 "+diffMinutes+" 分钟 "+diffSeconds+" 秒";
+  }, 1000);
+</script>
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i> 访问用户：
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i> 访问次数：
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+    window.livereOptions = {
+        refer: 'https://leijiezhang001.github.io' + location.pathname
+    };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "vertical";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

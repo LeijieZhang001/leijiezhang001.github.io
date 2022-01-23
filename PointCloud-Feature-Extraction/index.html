@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Deep Learning,Point Cloud,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="LeijieZhang" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="机器学习中，特征提取是非常重要的一个环节（认为是最重要的一环也不为过）。对图像数据的特征提取操作已经较为成熟，如卷积；而点云数据由于无序性，所以对其进行高效的特征提取则比较困难。 一个好的点云特征提取操作需要具备以下特征：  能提取点云的局部以及全局特征； 计算高效；  　　目前已知的点云特征提取方法可分为两大类：Voxel-level，以及 Point-level。Voxel-Level 的">
+<meta name="keywords" content="Deep Learning,Point Cloud">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PointCloud Feature Extraction">
+<meta property="og:url" content="https://leijiezhang001.github.io/PointCloud-Feature-Extraction/index.html">
+<meta property="og:site_name" content="LeijieZhang">
+<meta property="og:description" content="机器学习中，特征提取是非常重要的一个环节（认为是最重要的一环也不为过）。对图像数据的特征提取操作已经较为成熟，如卷积；而点云数据由于无序性，所以对其进行高效的特征提取则比较困难。 一个好的点云特征提取操作需要具备以下特征：  能提取点云的局部以及全局特征； 计算高效；  　　目前已知的点云特征提取方法可分为两大类：Voxel-level，以及 Point-level。Voxel-Level 的">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://leijiezhang001.github.io/PointCloud-Feature-Extraction/DGCNN.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/PointCloud-Feature-Extraction/TANet.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/PointCloud-Feature-Extraction/PointConv.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/PointCloud-Feature-Extraction/PointConv2.png">
+<meta property="og:image" content="https://leijiezhang001.github.io/PointCloud-Feature-Extraction/BCL.png">
+<meta property="og:updated_time" content="2020-08-16T04:52:19.430Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PointCloud Feature Extraction">
+<meta name="twitter:description" content="机器学习中，特征提取是非常重要的一个环节（认为是最重要的一环也不为过）。对图像数据的特征提取操作已经较为成熟，如卷积；而点云数据由于无序性，所以对其进行高效的特征提取则比较困难。 一个好的点云特征提取操作需要具备以下特征：  能提取点云的局部以及全局特征； 计算高效；  　　目前已知的点云特征提取方法可分为两大类：Voxel-level，以及 Point-level。Voxel-Level 的">
+<meta name="twitter:image" content="https://leijiezhang001.github.io/PointCloud-Feature-Extraction/DGCNN.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://leijiezhang001.github.io/PointCloud-Feature-Extraction/">
+
+
+
+
+
+  <title>PointCloud Feature Extraction | LeijieZhang</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2129cd61363d382d1734d5e8c0ead722";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2129cd61363d382d1734d5e8c0ead722";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+      var _vds = _vds || [];
+      window._vds = _vds;
+      (function(){
+        _vds.push(['setAccountId', '87fe382bdb2695f2']);
+        (function() {
+          var vds = document.createElement('script');
+          vds.type='text/javascript';
+          vds.async = true;
+          vds.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'dn-growing.qbox.me/vds.js';
+          var s = document.getElementsByTagName('script')[0];
+          s.parentNode.insertBefore(vds, s);
+        })();
+      })();
+  </script>
+
+
+
+  <script type="text/javascript">
+      window.heap=window.heap||[],heap.load=function(e,t){window.heap.appid=e,window.heap.config=t=t||{};var r=t.forceSSL||"https:"===document.location.protocol,a=document.createElement("script");a.type="text/javascript",a.async=!0,a.src=(r?"https:":"http:")+"//cdn.heapanalytics.com/js/heap-"+e+".js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(a,n);for(var o=function(e){return function(){heap.push([e].concat(Array.prototype.slice.call(arguments,0)))}},p=["addEventProperties","addUserProperties","clearEventProperties","identify","removeEventProperty","setEventProperties","track","unsetEventProperty"],c=0;c<p.length;c++)heap[p[c]]=o(p[c])};
+      heap.load("256127732");
+  </script>
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+<a href="https://github.com/LeijieZhang001" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewbox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+
+	  <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LeijieZhang</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://leijiezhang001.github.io/PointCloud-Feature-Extraction/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Leijie">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LeijieZhang">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">PointCloud Feature Extraction</h1>
+        
+
+        <div class="post-meta">
+          
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-12-07T14:52:30+08:00">
+                2019-12-07
+              </time>
+            
+            
+              <span class="post-updated">
+                &nbsp; | &nbsp; Updated on
+                <time itemprop="dateUpdated" datetime="2020-08-16T12:52:19+08:00" content="2020-08-16">
+                  2020-08-16
+                </time>
+              </span>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Deep-Learning/" itemprop="url" rel="index">
+                    <span itemprop="name">Deep Learning</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i> 本文总阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>次
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Words count in article&#58;</span>
+                
+                <span title="Words count in article">
+                  2.8k 字
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Reading time &asymp;</span>
+                
+                <span title="Reading time">
+                  12 分钟
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>　　机器学习中，特征提取是非常重要的一个环节（认为是最重要的一环也不为过）。对图像数据的特征提取操作已经较为成熟，如卷积；而点云数据由于无序性，所以对其进行高效的特征提取则比较困难。 一个好的点云特征提取操作需要具备以下特征：</p>
+<ul>
+<li>能提取点云的<strong>局部以及全局特征</strong>；</li>
+<li>计算高效；</li>
+</ul>
+<p>　　目前已知的点云特征提取方法可分为两大类：Voxel-level，以及 Point-level。Voxel-Level 的特征提取也已经相当成熟，基本思路是将点云空间网格化，每个网格进行手工特征填充或者 Point-level 的特征提取，然后就可以应用标准的 2D/3D 卷积操作进行局部及全局特征提取。这种方法提取的特征细粒度取决于空间栅格化的分辨率，针对点级别的任务（如 semantic segmentation，Scene flow等），其特征的细粒度还是不够的。<br>
+　　本文主要介绍 Point-level 的方法，这种方法能提取点级别的局部、全局特征信息，是处理点云的有效手段。这种方法首先要将无序的点云进行一定的结构化组织，由此可分为若干方法，如下阐述。</p>
+<h2 id="基于原始三维空间操作">1. 基于原始三维空间操作</h2>
+<p>　　在三维空间下进行点的局部特征提取，需要快速找到每个点周围的点，所以需要对点云构建 Kd-tree(或 Ball-tree)，来加速邻近点的快速查询。Kd-tree 的算法复杂度为：</p>
+<ul>
+<li>构建：\(\mathcal{O}(\mathrm{log}^2n)\)</li>
+<li>插入：\(\mathcal{O}(\mathrm{log}n)\)</li>
+<li>删除：\(\mathcal{O}(\mathrm{log}n)\)</li>
+<li>查询：\(\mathcal{O}(n^{1-\frac{1}{k}}+m)\)，其中 \(m\) 为要查询的最近点个数</li>
+</ul>
+<h3 id="问题描述">1.1. 问题描述</h3>
+<p>　　设点云集合：\(P=\{p_1,...,p_n\}\in R^{F}\)，每个点有 \(F\) 维的特征，以及每个点的三维坐标为：\(p_i=(x_i,y_i,z_i)\)（注意，坐标也可作为特征包含于 \(F\) 维中）。因为点云的无序性，定义点云集合的最近邻图(k-nearest neighbor graph) \(\mathcal{G=(V,E)}\)，其中 \(\mathcal{V}\) 表示点云中的点，\(\mathcal{E}\) 表示点 \(p_i\) 与最近的 \(k\) 个点 \(P_i^k=\{p_j ^ {i1},...,p_j ^ {ik}\}\) 所构成的有向边集合 \(\{(i,j_{i1}),...,(i,j_{ik})\}\)。由此定义<strong>点级别特征提取操作</strong>： <span class="math display">\[ p_i&#39; = \displaystyle\Box_{j:(i,j)\in\mathcal{E}} h_\Theta(p_i,p_j) \tag{1}\]</span> 其中 \(h _ {\Theta}\) 表示非线性映射函数，将特征空间：\(\mathbb{R} ^ F \times \mathbb{R} ^ F \to \mathbb{R} ^ {F'}\)；\(\Box\) 为用于特征聚合的对称函数。该操作类似图像二维卷积操作，将输入的点云集合：\(P=\{p_1,...,p_n\}\in R^{F}\) 映射到相同点数的：\(P'=\{p_1',...,p_n'\}\in R^{F'}\)。</p>
+<h3 id="hbox-的选择">1.2. \(h,\Box\) 的选择</h3>
+<h4 id="euclidean-conv">1.2.1. Euclidean Conv</h4>
+<p>　　设计 \(h_{\Theta}(p_i,p_j)=\theta_jp_j\)，\(\Box=\sum\)，得到传统的 Euclidean convolution： <span class="math display">\[ p_i&#39; = \displaystyle\sum_{j:(i,j)\in\mathcal{E}}(\theta_jp_j) \tag{2}\]</span> 其中 \(\Theta=(\theta_i,...,\theta_k)\) 为滤波器的权重。</p>
+<h4 id="pointnet1">1.2.2. PointNet<a href="#1" id="1ref"><sup>[1]</sup></a></h4>
+<p>　　设计 \(h_{\Theta}(p_i,p_j)=h_{\Theta}(p_i) = \mathrm{MLP}(p_i)\)，\(\Box=\mathrm{MAX} 或 \sum\)，得到 PointNet 中的操作： <span class="math display">\[ p_i&#39; = \displaystyle\left\{ \sum|\mathrm{MAX}\right\}(\theta_ip_i) = \displaystyle\left\{\sum|\mathrm{MAX}\right\}\, \mathrm{MLP}(p_i) \tag{3}\]</span> 感知机的权重可以共享。</p>
+<h4 id="deep-parametric-continuous-convoluion2">1.2.3. Deep Parametric Continuous Convoluion<a href="#2" id="2ref"><sup>[2]</sup></a></h4>
+<p>　　设计 \(h_{\Theta}(p_i,p_j)=\mathrm{MLP}(p_j^{xyz}-p _ i^{xyz})\cdot p _ j^{\mathrm{exclude}\,xyz}\)，\(\Box=\mathrm{\sum}\)，得到 Deep Parametric Continuous Convolution 操作： <span class="math display">\[ p_i&#39; = \displaystyle\sum_{j:(i,j)\in\mathcal{E}}\left(\mathrm{MLP}(p_j^{xyz}-p _ i^{xyz})\cdot p _ j^{\mathrm{exclude}\,xyz}\right) \tag{4}\]</span> 根据邻近点的距离，显示的来学习其对中心点的特征贡献。Continuous Fusion Layer 中证明没必要显示的学习，直接将相对距离 Concate 到特征上，隐式的学习同样有效。</p>
+<h4 id="pointnet3flownet3d4continuous-fusion-layer5">1.2.4. PointNet++<a href="#3" id="3ref"><sup>[3]</sup></a>/FlowNet3D<a href="#4" id="4ref"><sup>[4]</sup></a>/Continuous Fusion Layer<a href="#5" id="5ref"><sup>[5]</sup></a></h4>
+<p>　　设计 \(h _ {\Theta}(p_i,p_j)=\mathrm{MLP}\,\left(p _ j^{\mathrm{exclude}\,xyz}\oplus (p _ j ^ {xyz}-p _ i^{xyz})\right)\)，\(\Box=\left\{\mathrm{MAX}|\sum\right\}\)，得到 PointNet++/FlowNet3D/Continuous Fusion Layer(前两者是 \(\mathrm{MAX}\)，后者是 \(\sum\) 操作) 中的操作： <span class="math display">\[ p_i&#39; = \displaystyle\left\{\mathrm{MAX}|\sum\right\}_{j:(i,j)\in\mathcal{E}}\mathrm{MLP}\,\left(p _ j^{\mathrm{exclude}\,xyz}\oplus (p _ j ^ {xyz}-p _ i^{xyz})\right) \tag{5}\]</span> 将点 \(p_j\) 中的坐标都转换到以中心点 \(p_i\) 为参考的局部坐标。这样能更好的提取局部信息，但是丢失了点的绝对坐标信息。</p>
+<h4 id="edgeconvdgcnn6">1.2.5. EdgeConv(DGCNN)<a href="#6" id="6ref"><sup>[6]</sup></a></h4>
+<p>　　设计 \(h _ {\Theta}(p_i,p_j)=\mathrm{MLP}\,\left(p _ j^{\mathrm{exclude}\,xyz}\oplus (p _ j ^ {xyz}-p _ i^{xyz})\oplus p _ i^{xyz}\right)\)(这里只是猜测是这么做的，EdgeConv paper 中没有具体说怎么做的)，\(\Box=\mathrm{MAX}\)，得到 EdgeConv 中的操作： <span class="math display">\[ p_i&#39; = \displaystyle\mathrm{MAX}_{j:(i,j)\in\mathcal{E}}\mathrm{MLP}\,\left(p _ j^{\mathrm{exclude}\,xyz}\oplus( p _ j ^ {xyz}-p _ i^{xyz})\oplus p _ i^{xyz}\right) \tag{6}\]</span> 额外加上点　\(p_i\) 的世界坐标，保留点的全局信息。 <img src="/PointCloud-Feature-Extraction/DGCNN.png" width="80%" height="80%" title="图 1. DGCNN"> 　　如图 1. 所示，DGCNN 网络结构与 PointNet 网络差不多，区别就在核心的点特征提取操作。<br>
+　　代码实现可参考<a href="#14" id="14ref">[14]</a>, <a href="#15" id="15ref">[15]</a>，其中 <a href="#15" id="15ref">[15]</a>是完整的 DGCNN，每次卷积操作都是要在该点的新特征下取寻找 \(k\) 个最近邻，而 <a href="#14" id="14ref">[14]</a> 是简化版，最近邻点是固定的，分析代码可知其步骤：</p>
+<ol type="1">
+<li>针对每个点 \(p_i\)，首先找到该点最近的 \(k\) 个点及对应的特征，得到 tensor 维度：\(B\times N\times k\times F\);</li>
+<li>然后将本点 \(p_i\) 的特征 concate 到对应的 \(k\) 个点特征，得到 tensor 维度： \(B\times N\times k\times 2F\)；</li>
+<li>不同层 conv，bn，relu 的作用，得到多个 tensor，其维度：\(B\times N\times k\times \{F'|F'_1,...,F'_s\}\)；</li>
+<li>对 \(k\) 个点作最大化聚合，得到各 tensor 维度：\(B\times N\times \{F'|F_1',...,F_s'\}\)</li>
+<li>每个点的特征进行 concate，然后作 conv，bn，relu 操作，最终得到点的特征 tensor，维度为 \(B\times N\times F^{final}\)；</li>
+</ol>
+<p>该实现与式 (6) 有点出入，该实现没有显示计算本点坐标与对应的 \(k\) 个点坐标的差值。但是总体思想一致。</p>
+<h4 id="randla-net7">1.2.6. RandLA-Net<a href="#7" id="7ref"><sup>[7]</sup></a></h4>
+<p>　　设计 \(h _ {\Theta}(p_i,p_j)=\mathrm{MLP}\,\left(p _ j^{\mathrm{exclude}\,xyz}\oplus\left\Vert p _ j^{xyz}-p _ i^{xyz}\right\Vert\oplus (p _ j ^ {xyz}-p _ i^{xyz})\oplus p _ j^{xyz}\oplus p _ i^{xyz}\right)\)，\(\Box=\sum \mathrm{softmax\,MLP}(h_{\Theta}(p_i,p_j))\)，得到 RandLA-Net 中的操作(详见 <a href="/paper-reading-RandLA-Net/" title="RandLA-Net">RandLA-Net</a>)： <span class="math display">\[ p_i&#39; = \displaystyle\sum_{j:(i,j)\in\mathcal{E}}\left(\mathrm{softmax\,MLP&#39;}\,\left(p _ j^{\mathrm{exclude}\,xyz}\oplus\left\Vert p _ j^{xyz}-p _ i^{xyz}\right\Vert\oplus (p _ j ^ {xyz}-p _ i^{xyz})\oplus p _ j^{xyz}\oplus p _ i^{xyz}\right)\right)\cdot \left(\mathrm{MLP}\,\left(p _ j^{\mathrm{exclude}\,xyz}\oplus\left\Vert p _ j^{xyz}-p _ i^{xyz}\right\Vert\oplus (p _ j ^ {xyz}-p _ i^{xyz})\oplus p _ j^{xyz}\oplus p _ i^{xyz}\right)\right) \tag{7}\]</span> 这里的 \(\Box\) 函数称为 Attention Pooling，即将特征维度进行加权求和。</p>
+<h4 id="tanet12">1.2.7. TANet<a href="#12" id="12ref"><sup>[12]</sup></a></h4>
+<p><img src="/PointCloud-Feature-Extraction/TANet.png" width="40%" height="40%" title="图 2. TANet"> 　　如图 2. 所示，TANet 中提出了 TA Module，该模块包含三种注意力机制：point-wise，channel-wise，voxel-wise。其中前两种注意力可用于任意点的特征提取。对应的前两种注意力构成了 \(h _ {\Theta}(p_i,p_j)\) 函数： <span class="math display">\[h_{\Theta} = \left(\mathrm{MLP_1}(\mathrm{MaxPool_{feats}}\,P_i^k) \times \mathrm{MLP_2}(\mathrm{MaxPool_{points}}\, P_i^k)\right) \cdot P_i^k \tag{8}\]</span> 其中 point-wise attention 为 \(\mathrm{MLP_1}(\mathrm{MaxPool_{feats}}\,P_i^k) = S \in \mathbb{R}^{K\times 1}\)；channel-wise attention 为 \(\mathrm{MLP_2}(\mathrm{MaxPool_{points}}\,P_i^k) = T \in \mathbb{R}^{F\times 1}\)；由此构成 \(M=S\times T\in\mathbb{R}^{K\times F}\)，作为权重作用于 \(P_i^k\)，最后用 \(\sum |\mathrm{MAX}\) 操作对点维度进行特征聚合。注意，这里的 point-wise attention 是与点的顺序有关的，看起来这里经过训练，可以消除点顺序的影响。</p>
+<h4 id="pointconv13">1.2.8. PointConv<a href="#13" id="13ref"><sup>[13]</sup></a></h4>
+<p><img src="/PointCloud-Feature-Extraction/PointConv.png" width="60%" height="60%" title="图 3. PointConv"> <img src="/PointCloud-Feature-Extraction/PointConv2.png" width="60%" height="60%" title="图 4. Efficient PointConv"> 　　如图 3. 以及 4. 所示，PointConv 设计的 \(h_{\Theta}\) 有两部分组成。一是根据 \(P_i^k\) 点集计算权重矩阵 \(W\)；二是用核密度函数(Kernel Density Estimation)计算点的密度，然后根据密度计算权重。这里加入基于点密度的权重，是因为，点密度高的区域，需要显式地降低其特征权重，避免最终特征学不到稀疏点的特征。图 4. 是高效版本。</p>
+<h2 id="基于映射空间操作">2. 基于映射空间操作</h2>
+<p>　　基于原始三维空间的点特征提取操作，<strong>其算法复杂度直接依赖点数</strong>；而如果将其映射到高维空间，则点数只会影响映射与反映射的过程，核心特征提取操作将不受点的个数影响。<br>
+　　三维空间下点云无法有序组织，将点云映射到更高维空间，在高维空间下进行结构化组织后，即可应用传统的卷积操作进行特征提取。</p>
+<h3 id="bilateral-convolutional-layerbcl8splatnet9hplflownet10">2.1. Bilateral Convolutional Layer(BCL<a href="#8" id="8ref"><sup>[8]</sup></a>)(SPLATNet<a href="#9" id="9ref"><sup>[9]</sup></a>/HPLFlowNet<a href="#10" id="10ref"><sup>[10]</sup></a>)</h3>
+<p><img src="/PointCloud-Feature-Extraction/BCL.png" width="60%" height="60%" title="图 3. BCL"> 　　如图 3. 所示，BCL 操作有三部分组成：</p>
+<ul>
+<li><strong>Splat</strong><br>
+将三维空间的点 \(p_i^{xyz}\) 投影到高维空间，实际操作中直接乘以一个预定义的 \(4\times 3\) 矩阵。4 维空间的晶格顶点聚合晶格内映射点的信息，聚合过程中以映射点与格点的距离作为权重；</li>
+<li><strong>Convolve</strong><br>
+因为晶格空间内空间是栅格化的，所以直接进行传统的 2D 卷积操作；</li>
+<li><strong>Slice</strong><br>
+卷积得到的是晶格空间的特征图，反映射到三维空间，即得到点级别的包含周围信息的特征向量；</li>
+</ul>
+<p>　　映射与反映射的操作实现上需要建立哈希表作点的快速查询，需要记录的辅助信息也比较多。后期有时间再对着代码分析。</p>
+<h2 id="参考文献">3. 参考文献</h2>
+<p><a id="1" href="#1ref">[1]</a> Qi, Charles R., et al. "Pointnet: Deep learning on point sets for 3d classification and segmentation." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2017.<br>
+<a id="2" href="#2ref">[2]</a> Wang, S., Suo, S., Ma, W.C., Urtasun, R.: Deep parameteric convolutional neural networks. In: CVPR (2018)<br>
+<a id="3" href="#3ref">[3]</a> Qi, Charles Ruizhongtai, et al. "Pointnet++: Deep hierarchical feature learning on point sets in a metric space." Advances in neural information processing systems. 2017.<br>
+<a id="4" href="#4ref">[4]</a> Liu, Xingyu, Charles R. Qi, and Leonidas J. Guibas. "Flownet3d: Learning scene flow in 3d point clouds." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.<br>
+<a id="5" href="#5ref">[5]</a> Liang, Ming, et al. "Deep continuous fusion for multi-sensor 3d object detection." Proceedings of the European Conference on Computer Vision (ECCV). 2018.<br>
+<a id="6" href="#6ref">[6]</a> Wang, Yue, et al. "Dynamic graph cnn for learning on point clouds." ACM Transactions on Graphics (TOG) 38.5 (2019): 146.<br>
+<a id="7" href="#7ref">[7]</a> Hu, Qingyong, et al. "RandLA-Net: Efficient Semantic Segmentation of Large-Scale Point Clouds." arXiv preprint arXiv:1911.11236 (2019).<br>
+<a id="8" href="#8ref">[8]</a> Kiefel, Martin, Varun Jampani, and Peter V. Gehler. "Permutohedral lattice cnns." arXiv preprint arXiv:1412.6618 (2014).<br>
+<a id="9" href="#9ref">[9]</a> Su, Hang, et al. "Splatnet: Sparse lattice networks for point cloud processing." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2018.<br>
+<a id="10" href="#10ref">[10]</a> Gu, Xiuye, et al. "Hplflownet: Hierarchical permutohedral lattice flownet for scene flow estimation on large-scale point clouds." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.<br>
+<a id="11" href="#11ref">[11]</a> Xie, Liang, et al. "PI-RCNN: An Efficient Multi-sensor 3D Object Detector with Point-based Attentive Cont-conv Fusion Module." arXiv preprint arXiv:1911.06084 (2019).<br>
+<a id="12" href="#12ref">[12]</a> Liu, Zhe, et al. "TANet: Robust 3D Object Detection from Point Clouds with Triple Attention." arXiv preprint arXiv:1912.05163 (2019).<br>
+<a id="13" href="#13ref">[13]</a> Wu, Wenxuan, Zhongang Qi, and Li Fuxin. "Pointconv: Deep convolutional networks on 3d point clouds." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019.<br>
+<a id="14" href="#14ref">[14]</a> https://github.com/WangYueFt/dcp/blob/master/model.py<br>
+<a id="15" href="#15ref">[15]</a> https://github.com/WangYueFt/dgcnn/blob/master/pytorch/model.py</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+      <div>
+	    
+<div style="text-align:center;color: #ccc;font-size:14px;">
+----------------- END -----------------</div>
+      </div>
+    
+		
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>赞赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="Leijie WeChat Pay">
+        <p>WeChat Pay</p>
+      </div>
+    
+
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+	
+	
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:</strong>
+    Leijie
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link:</strong>
+    <a href="https://leijiezhang001.github.io/PointCloud-Feature-Extraction/" title="PointCloud Feature Extraction">https://leijiezhang001.github.io/PointCloud-Feature-Extraction/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice: </strong>
+    All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> unless stating additionally.
+  </li>
+</ul>
+
+      </div>
+    
+
+	
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Deep-Learning/" rel="tag"><i class="fa fa-tag"></i> Deep Learning</a>
+          
+            <a href="/tags/Point-Cloud/" rel="tag"><i class="fa fa-tag"></i> Point Cloud</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/paper-reading-RandLA-Net/" rel="next" title="[paper_reading]-" randla-net"">
+                <i class="fa fa-chevron-left"></i> [paper_reading]-"RandLA-Net"
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/ADH-Tracker/" rel="prev" title="ADH(Annealed Dynamic Histograms) Tracker">
+                ADH(Annealed Dynamic Histograms) Tracker <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+
+
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC81MDYxNC8yNzA5Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+       
+        
+          <ul class="sidebar-nav motion-element">
+            <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+              Table of Contents
+            </li>
+            <li class="sidebar-nav-overview" data-target="site-overview">
+              Overview
+            </li>
+          </ul>
+        
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="Leijie">
+            
+              <p class="site-author-name" itemprop="name">Leijie</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">90</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">38</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/LeijieZhang001" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.zhihu.com/people/yue-ti/activities" target="_blank" title="知乎">
+                      
+                        <i class="fa fa-fw fa-heartbeat"></i>知乎</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:ljzhang0220@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+
+        
+        <!--noindex-->
+          <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+            <div class="post-toc">
+
+              
+                
+              
+
+              
+                <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#基于原始三维空间操作"><span class="nav-text">1. 基于原始三维空间操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#问题描述"><span class="nav-text">1.1. 问题描述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hbox-的选择"><span class="nav-text">1.2. \(h,\Box\) 的选择</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#euclidean-conv"><span class="nav-text">1.2.1. Euclidean Conv</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pointnet1"><span class="nav-text">1.2.2. PointNet[1]</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#deep-parametric-continuous-convoluion2"><span class="nav-text">1.2.3. Deep Parametric Continuous Convoluion[2]</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pointnet3flownet3d4continuous-fusion-layer5"><span class="nav-text">1.2.4. PointNet++[3]/FlowNet3D[4]/Continuous Fusion Layer[5]</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#edgeconvdgcnn6"><span class="nav-text">1.2.5. EdgeConv(DGCNN)[6]</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#randla-net7"><span class="nav-text">1.2.6. RandLA-Net[7]</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tanet12"><span class="nav-text">1.2.7. TANet[12]</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pointconv13"><span class="nav-text">1.2.8. PointConv[13]</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基于映射空间操作"><span class="nav-text">2. 基于映射空间操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#bilateral-convolutional-layerbcl8splatnet9hplflownet10"><span class="nav-text">2.1. Bilateral Convolutional Layer(BCL[8])(SPLATNet[9]/HPLFlowNet[10])</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考文献"><span class="nav-text">3. 参考文献</span></a></li></ol></div>
+              
+
+            </div>
+          </section>
+        <!--/noindex-->
+        
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart" aria-hidden="true"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leijie</span>
+
+  
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">146.9k</span>
+  
+</div>
+<!--
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+-->
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<span>本站已运行<span id="showDays"></span></span>
+<script>
+  var seconds = 1000;
+  var minutes = seconds * 60;
+  var hours = minutes * 60;
+  var days = hours * 24;
+  var years = days * 365;
+  var birthDay = Date.UTC(2019,05,20,12,00,00); // 这里设置建站时间
+  setInterval(function() {
+    var today = new Date();
+    var todayYear = today.getFullYear();
+    var todayMonth = today.getMonth()+1;
+    var todayDate = today.getDate();
+    var todayHour = today.getHours();
+    var todayMinute = today.getMinutes();
+    var todaySecond = today.getSeconds();
+    var now = Date.UTC(todayYear,todayMonth,todayDate,todayHour,todayMinute,todaySecond);
+    var diff = now - birthDay;
+    var diffYears = Math.floor(diff/years);
+    var diffDays = Math.floor((diff/days)-diffYears*365);
+    var diffHours = Math.floor((diff-(diffYears*365+diffDays)*days)/hours);
+    var diffMinutes = Math.floor((diff-(diffYears*365+diffDays)*days-diffHours*hours)/minutes);
+    var diffSeconds = Math.floor((diff-(diffYears*365+diffDays)*days-diffHours*hours-diffMinutes*minutes)/seconds);
+      document.getElementById('showDays').innerHTML=" "+diffYears+" 年 "+diffDays+" 天 "+diffHours+" 小时 "+diffMinutes+" 分钟 "+diffSeconds+" 秒";
+  }, 1000);
+</script>
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i> 访问用户：
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i> 访问次数：
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+    window.livereOptions = {
+        refer: 'https://leijiezhang001.github.io' + location.pathname
+    };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "vertical";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
