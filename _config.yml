@@ -100,6 +100,6 @@ encrypt:
 deploy:
   type: git
   repo:
-      github: https://github.com/LeijieZhang001/leijiezhang001.github.io.git
-      coding: https://e.coding.net/leijiezhang001/leijiezhang001/leijiezhang001.git
+      github: git@github.com:LeijieZhang001/leijiezhang001.github.io.git
+      # coding: https://e.coding.net/leijiezhang001/leijiezhang001/leijiezhang001.git
   branch: master
