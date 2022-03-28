@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://leijiezhang001.github.io/"/>
-  <updated>2021-04-20T01:34:12.000Z</updated>
+  <updated>2021-03-18T01:34:12.000Z</updated>
   <id>https://leijiezhang001.github.io/</id>
   
   <author>
@@ -15,44 +15,6 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
-  
-  <entry>
-    <title>Transformer Analysis</title>
-    <link href="https://leijiezhang001.github.io/Transformer-Analysis/"/>
-    <id>https://leijiezhang001.github.io/Transformer-Analysis/</id>
-    <published>2021-04-13T01:45:40.000Z</published>
-    <updated>2021-04-20T01:34:12.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>　　基于 Attention 的 Transformer 已经从 NLP 领域逐渐要统治图像，点云领域，本文详述了其原理机制，以及在图像，点云中的一些应用。</p><h2 id="attention-to-transformer1">1. Attention to Transformer<a href="#1" id="1ref"><sup>[1]</sup></a></h2><h3 id="attention">1.1. Attention</h3><p><img src="/Transformer-Analysis/attention.png" width="80%" height="80%" title="图 1. Attention"></p><p>　　Attention 的机制在于能自动关注到输入序列中的重要部分。如图 1. 左图，设输入 query \(Q\in\mathbb{R} ^ {N\times d _ k}\)，key-value \(K\in\mathbb{R} ^ {N _ k\times d _ k}, V\in\mathbb{R} ^ {N _ k\times d _ v}\)，那么 Attention 映射方程 \(\mathcal{A}(\cdot)\) 将其映射为输出 \(\mathbb{R} ^ {N\times d _ k}\)。具体的： <span class="math display">\[\begin{align}\mathcal{A}(Q,K,V) &amp;= \mathrm{score}(Q,K)V \\&amp;= \mathrm{softmax}\left(\frac{QK ^ T}{\sqrt{d _ k}}\right)V\end{align} \tag{1}\]</span> 当 \(d _ k\) 较大时，\(QK ^ T\) 的幅值会较大，导致 softmax 的反传梯度会趋于很小，为了降低这种影响，引入尺度变换 \(\frac{1}{\sqrt{d _ k}}\)。以上矩阵运算的维度变化为： <span class="math display">\[\begin{align}\mathrm{score}(\cdot):&amp;\;\; \mathbb{R} ^ {N\times d _ q}, \mathbb{R} ^ {N _ k\times d _ k} \rightarrow \mathbb{R} ^ {N\times N _ k}，其中\; d _ k=d _ q=d _ m\\\mathcal{A}(Q,K,V):&amp;\;\; \mathbb{R} ^ {N\times d _ k}, \mathbb{R} ^ {N _ k\times d _ k}, \mathbb{R} ^ {N _ k\times d _ v} \rightarrow \mathbb{R} ^ {N\times d _ k}\end{align} \tag{2}\]</span> 　　如图 1. 右图，实践中，采用 MultiHead Attention 形式，在不同的子空间不同的位置编码中学习特征，然后再作整合： <span class="math display">\[ \mathrm{MultiHead(Q,K,V)} =\mathrm{Concat(head _ 1,..., head _ h)}W ^ o \tag{3}\]</span> 其中 \(\mathrm{head _ i} = \mathcal{A}(QW _ i ^ Q,KW _ i ^ K,VW _ i ^ V)\)，参数 \(W _ i ^ Q\in\mathbb{R} ^ {d _ m\times d _ k},W _ i ^ K\in\mathbb{R} ^ {d _ m\times d _ k},W _ i ^ V\in\mathbb{R} ^ {d _ m\times d _ v}\)；\(W ^ o\in\mathbb{R} ^ {hd _ v\times d _ m}\)，为了与 Attention 计算复杂度类似，令 \(d _ k=d _ v=d _ m/h\)。</p><h3 id="transformer">1.2. Transformer</h3><p><img src="/Transformer-Analysis/transformer.png" width="45%" height="45%" title="图 2. Transformer"></p><p>　　如图 2. 所示，Transformer 结构有 Encoder，Decoder 构成，基本层由 Multi-head Attention 和 point-wise Fully Connected Layer 构成，称之为 Multi-head Attention： <span class="math display">\[\begin{align}\mathcal{A} ^ {MH}(X,Y)=\mathrm{LayerNorm}(S + \mathrm{rFF}(S)) \\S = \mathrm{LayerNorm}(X+\mathrm{Multihead(X,Y,Y)})\end{align} \tag{4}\]</span> 其中 \(\mathrm{rFF}\) 表示 row-wise fead-forward network。N 个该基础层叠加组成 Encoder 网络，其维度变换为： <span class="math display">\[\mathcal{A} ^ {MH}:\; \mathbb{R} ^ {N\times d _ m}, \mathbb{R} ^ {N _ k\times d _ m} \rightarrow \mathbb{R} ^ {N\times d _ m} \tag{5}\]</span></p><h3 id="positional-encoding">1.3. Positional Encoding</h3><p>　　由于 Transformer 对输入没有提取序列信息的能力，所以需要对输入作位置编码。位置编码可以通过学习得到，也可以用函数编码： <span class="math display">\[\begin{align}PE _ {pos,2i} &amp;= sin(pos/10000 ^ {2i/d _ {model}}) \\PE _ {pos,2i+1} &amp;= cos(pos/10000 ^ {2i/d _ {model}})\end{align} \tag{6}\]</span></p><p>其中 pos 表示位置，i 表示特征维度。</p><h3 id="why-self-attention">1.4. Why Self-Attention</h3><p><img src="/Transformer-Analysis/complex.png" width="80%" height="80%" title="图 3. Complexity"></p><p>　　如图 3. 所示，Attention 相比 Recurrent，Convolution，其在计算复杂度，并行化，输入序列间的最大距离上有较好的优势。</p><h2 id="vision-transformer2">2. Vision Transformer<a href="#2" id="2ref"><sup>[2]</sup></a></h2><p><img src="/Transformer-Analysis/vision_transformer.png" width="80%" height="80%" title="图 4. Vision Transformer"> 　　如图 4. 所示，首先将图像 \(\mathbf{x}\in\mathbb{R} ^ {H\times W\times C}\) 变换成 patch 序列 \(\mathbf{x} _ p\in\mathbb{R} ^ {N\times (P ^ 2\cdot C)}\)，其中 \((P,P)\) 是 patch 尺寸，\(N=HW/P ^ 2\)。然后用线性变换 \(\mathbf{E}\in\mathbb{R} ^ {(P ^ 2\cdot C)\times D}\) 将每个 patch 的特征维度映射到 D 维。最终的 Transformer 数学形式为： <span class="math display">\[\begin{align}\mathbf{z} _ 0 &amp;=[\mathbf{x} _ {class};\;\mathbf{x} _ p^1\mathbf{E};\;\mathbf{x} _ p^2\mathbf{E};\;\cdots;\;\mathbf{x} _ p^N\mathbf{E}]+\mathbf{E} _ {pos}, \;\;&amp; \mathbf{E}\in\mathbb{R} ^ {(P^2\cdot C)\times D},\;\mathbf{E} _ {pos}\in\mathbb{R} ^ {(N+1)\times D}\\\mathbf{z} _ l&#39; &amp;= \mathrm{MultiHeadAttention(LN(}\mathbf{z} _ {l-1}))+\mathbf{z} _ {l-1}, \;\;&amp; l=1\cdots L\\\mathbf{z} _ l &amp;= \mathrm{MLP(LN(}\mathbf{z})) _ l&#39;+\mathbf{z} _ l&#39;, \;\;&amp; l=1\cdots L\\\mathbf{y} &amp;= \mathrm{LN}(\mathbf{z}) _ L ^0\\\end{align} \tag{7}\]</span> 这里的关键是，在输入序列中串联了分类结果 \(\mathbf{z} _ 0 ^ 0= \mathbf{x} _ {class}\)，经过 \(L\) 次查询迭代后，获得最终的分类结果 \(\mathbf{z} _ L ^ 0\)。</p><h2 id="detr3">3. DETR<a href="#3" id="3ref"><sup>[3]</sup></a></h2><p><img src="/Transformer-Analysis/detr.png" width="80%" height="80%" title="图 5. DETR"></p><p><img src="/Transformer-Analysis/detr2.png" width="80%" height="80%" title="图 6. DETR"> 　　如图 5.6. 所示，DETR 首先用 CNN 网络作图像特征提取，然后用 Transformer Encoder 作特征序列化融合，接着用 Transformer Decoder 作目标框查询，得到检测结果。</p><p><img src="/Transformer-Analysis/detr_transformer.png" width="80%" height="80%" title="图 7. DETR Transformer"></p><h2 id="point-transformer4">4. Point Transformer<a href="#4" id="4ref"><sup>[4]</sup></a></h2><h2 id="group-free-3d-object-detection5">5. Group-Free 3D Object Detection<a href="#5" id="5ref"><sup>[5]</sup></a></h2><h2 id="reference">4. Reference</h2><p><a id="1" href="#1ref">[1]</a></p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;　　基于 Attention 的 Transformer 已经从 NLP 领域逐渐要统治图像，点云领域，本文详述了其原理机制，以及在图像，点云中的一些应用。&lt;/p&gt;
-&lt;h2 id=&quot;attention-to-transformer1&quot;&gt;1. Attention to Tra
-      
-    
-    </summary>
-    
-      <category term="Deep Learning" scheme="https://leijiezhang001.github.io/categories/Deep-Learning/"/>
-    
-      <category term="Transformer" scheme="https://leijiezhang001.github.io/categories/Deep-Learning/Transformer/"/>
-    
-    
-      <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
-    
-      <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
-    
-      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
-    
-      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
-    
-      <category term="Detection" scheme="https://leijiezhang001.github.io/tags/Detection/"/>
-    
-      <category term="Transformer" scheme="https://leijiezhang001.github.io/tags/Transformer/"/>
-    
-  </entry>
   
   <entry>
     <title>Offboard 3D Object Detection from Point Cloud Sequences</title>
@@ -79,13 +41,13 @@
     
       <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
     
-      <category term="3D Detection" scheme="https://leijiezhang001.github.io/tags/3D-Detection/"/>
+      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
     
       <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
     
-      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
+      <category term="3D Detection" scheme="https://leijiezhang001.github.io/tags/3D-Detection/"/>
     
-      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
+      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
     
   </entry>
   
@@ -114,11 +76,11 @@
     
       <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
     
+      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
+    
       <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
     
       <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
-    
-      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
     
       <category term="Point Cloud Registration" scheme="https://leijiezhang001.github.io/tags/Point-Cloud-Registration/"/>
     
@@ -147,15 +109,15 @@
       <category term="Instance Segmentation" scheme="https://leijiezhang001.github.io/categories/Segmentation/Instance-Segmentation/"/>
     
     
+      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
+    
       <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
+    
+      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
     
       <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
     
       <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
-    
-      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
-    
-      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
     
       <category term="Instance Segmentation" scheme="https://leijiezhang001.github.io/tags/Instance-Segmentation/"/>
     
@@ -184,17 +146,17 @@
       <category term="Segmentation" scheme="https://leijiezhang001.github.io/categories/Deep-Learning/Segmentation/"/>
     
     
+      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
+    
       <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
-    
-      <category term="3D Detection" scheme="https://leijiezhang001.github.io/tags/3D-Detection/"/>
-    
-      <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
-    
-      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
     
       <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
     
-      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
+      <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
+    
+      <category term="3D Detection" scheme="https://leijiezhang001.github.io/tags/3D-Detection/"/>
+    
+      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
     
   </entry>
   
@@ -224,9 +186,9 @@
     
       <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
     
-      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
-    
       <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
+    
+      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
     
       <category term="Depth Prediction" scheme="https://leijiezhang001.github.io/tags/Depth-Prediction/"/>
     
@@ -259,13 +221,13 @@
     
       <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
     
-      <category term="3D Detection" scheme="https://leijiezhang001.github.io/tags/3D-Detection/"/>
+      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
     
       <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
     
-      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
+      <category term="3D Detection" scheme="https://leijiezhang001.github.io/tags/3D-Detection/"/>
     
-      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
+      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
     
       <category term="Multi-modal Fusion" scheme="https://leijiezhang001.github.io/tags/Multi-modal-Fusion/"/>
     
@@ -295,17 +257,17 @@
       <category term="Review" scheme="https://leijiezhang001.github.io/categories/Deep-Learning/Review/"/>
     
     
+      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
+    
       <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
-    
-      <category term="3D Detection" scheme="https://leijiezhang001.github.io/tags/3D-Detection/"/>
-    
-      <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
-    
-      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
     
       <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
     
-      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
+      <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
+    
+      <category term="3D Detection" scheme="https://leijiezhang001.github.io/tags/3D-Detection/"/>
+    
+      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
     
       <category term="Multi-modal Fusion" scheme="https://leijiezhang001.github.io/tags/Multi-modal-Fusion/"/>
     
@@ -365,15 +327,15 @@
       <category term="Instance Segmentation" scheme="https://leijiezhang001.github.io/categories/Segmentation/Instance-Segmentation/"/>
     
     
+      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
+    
       <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
+    
+      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
     
       <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
     
       <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
-    
-      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
-    
-      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
     
       <category term="Instance Segmentation" scheme="https://leijiezhang001.github.io/tags/Instance-Segmentation/"/>
     
@@ -435,15 +397,15 @@
       <category term="Instance Segmentation" scheme="https://leijiezhang001.github.io/categories/Segmentation/Instance-Segmentation/"/>
     
     
+      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
+    
       <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
+    
+      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
     
       <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
     
       <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
-    
-      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
-    
-      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
     
       <category term="Instance Segmentation" scheme="https://leijiezhang001.github.io/tags/Instance-Segmentation/"/>
     
@@ -504,17 +466,17 @@
       <category term="Review" scheme="https://leijiezhang001.github.io/categories/Deep-Learning/Review/"/>
     
     
+      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
+    
       <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
-    
-      <category term="3D Detection" scheme="https://leijiezhang001.github.io/tags/3D-Detection/"/>
-    
-      <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
-    
-      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
     
       <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
     
-      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
+      <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
+    
+      <category term="3D Detection" scheme="https://leijiezhang001.github.io/tags/3D-Detection/"/>
+    
+      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
     
   </entry>
   
@@ -572,15 +534,15 @@
       <category term="Instance Segmentation" scheme="https://leijiezhang001.github.io/categories/Segmentation/Instance-Segmentation/"/>
     
     
+      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
+    
       <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
+    
+      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
     
       <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
     
       <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
-    
-      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
-    
-      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
     
       <category term="Instance Segmentation" scheme="https://leijiezhang001.github.io/tags/Instance-Segmentation/"/>
     
@@ -609,11 +571,11 @@
     
       <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
     
+      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
+    
       <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
     
       <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
-    
-      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
     
       <category term="MOT" scheme="https://leijiezhang001.github.io/tags/MOT/"/>
     
@@ -644,15 +606,15 @@
       <category term="Instance Segmentation" scheme="https://leijiezhang001.github.io/categories/Segmentation/Instance-Segmentation/"/>
     
     
+      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
+    
       <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
+    
+      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
     
       <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
     
       <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
-    
-      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
-    
-      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
     
       <category term="Instance Segmentation" scheme="https://leijiezhang001.github.io/tags/Instance-Segmentation/"/>
     
@@ -681,15 +643,15 @@
       <category term="Instance Segmentation" scheme="https://leijiezhang001.github.io/categories/Segmentation/Instance-Segmentation/"/>
     
     
+      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
+    
       <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
+    
+      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
     
       <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
     
       <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
-    
-      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
-    
-      <category term="Segmentation" scheme="https://leijiezhang001.github.io/tags/Segmentation/"/>
     
       <category term="Instance Segmentation" scheme="https://leijiezhang001.github.io/tags/Instance-Segmentation/"/>
     
@@ -718,17 +680,49 @@
     
       <category term="Deep Learning" scheme="https://leijiezhang001.github.io/tags/Deep-Learning/"/>
     
-      <category term="3D Detection" scheme="https://leijiezhang001.github.io/tags/3D-Detection/"/>
+      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
     
       <category term="Point Cloud" scheme="https://leijiezhang001.github.io/tags/Point-Cloud/"/>
     
-      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
+      <category term="3D Detection" scheme="https://leijiezhang001.github.io/tags/3D-Detection/"/>
     
-      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
+      <category term="paper reading" scheme="https://leijiezhang001.github.io/tags/paper-reading/"/>
     
       <category term="MOT" scheme="https://leijiezhang001.github.io/tags/MOT/"/>
     
       <category term="Prediction" scheme="https://leijiezhang001.github.io/tags/Prediction/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>自动驾驶系统之 Sensing</title>
+    <link href="https://leijiezhang001.github.io/Self-Driving-Sensing/"/>
+    <id>https://leijiezhang001.github.io/Self-Driving-Sensing/</id>
+    <published>2020-09-10T03:09:33.000Z</published>
+    <updated>2020-09-10T03:19:12.000Z</updated>
+    
+    <content type="html"><![CDATA[<div id="hbe-security">  <div class="hbe-input-container">  <input type="password" class="hbe-form-control" id="pass" placeholder="本文介绍了自动驾驶中基于多传感器融合的 Sensing 模块，请输入密码查看：">    <label for="pass">本文介绍了自动驾驶中基于多传感器融合的 Sensing 模块，请输入密码查看：</label>    <div class="bottom-line"></div>  </div></div><div id="decryptionError" style="display: none;">Incorrect Password!</div><div id="noContentError" style="display: none;">No content to display!</div><div id="encrypt-blog" style="display:none">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</div><script src="/lib/crypto-js.js"></script><script src="/lib/blog-encrypt.js"></script><link href="/css/blog-encrypt.css" rel="stylesheet" type="text/css">]]></content>
+    
+    <summary type="html">
+    
+      从零到一构建自动驾驶系统之 Sensing。
+    
+    </summary>
+    
+      <category term="Autonomous Driving System" scheme="https://leijiezhang001.github.io/categories/Autonomous-Driving-System/"/>
+    
+      <category term="Sensing" scheme="https://leijiezhang001.github.io/categories/Autonomous-Driving-System/Sensing/"/>
+    
+    
+      <category term="Autonomous Driving" scheme="https://leijiezhang001.github.io/tags/Autonomous-Driving/"/>
+    
+      <category term="Detection" scheme="https://leijiezhang001.github.io/tags/Detection/"/>
+    
+      <category term="MOT" scheme="https://leijiezhang001.github.io/tags/MOT/"/>
+    
+      <category term="Tracking" scheme="https://leijiezhang001.github.io/tags/Tracking/"/>
+    
+      <category term="Sensing" scheme="https://leijiezhang001.github.io/tags/Sensing/"/>
     
   </entry>
   

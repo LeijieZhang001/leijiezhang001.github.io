@@ -2,13 +2,6 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://leijiezhang001.github.io/Transformer-Analysis/</loc>
-    
-    <lastmod>2021-04-20T01:34:12.000Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://leijiezhang001.github.io/A-Comprehensive-Survey-on-Point-Cloud-Registration/</loc>
     
     <lastmod>2021-03-25T01:34:12.000Z</lastmod>
@@ -212,14 +205,14 @@
   </url>
   
   <url>
-    <loc>https://leijiezhang001.github.io/categories/index.html</loc>
+    <loc>https://leijiezhang001.github.io/tags/index.html</loc>
     
     <lastmod>2020-08-16T04:52:19.626Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://leijiezhang001.github.io/tags/index.html</loc>
+    <loc>https://leijiezhang001.github.io/categories/index.html</loc>
     
     <lastmod>2020-08-16T04:52:19.626Z</lastmod>
     
