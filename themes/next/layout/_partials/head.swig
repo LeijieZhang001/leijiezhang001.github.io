@@ -155,4 +155,7 @@
   <link rel="canonical" href="{{ config.url }}/{{ page.canonical_path.replace('index.html', '') }}"/>
 {% endif %}
 
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4316992414324571"
+     crossorigin="anonymous"></script>
+
 {% include 'head/custom-head.swig' %}

@@ -32,6 +32,9 @@
   {{ sidebar_template.render(true) }}
 {% endblock %}
 
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4316992414324571"
+     crossorigin="anonymous"></script>
+
 {% block script_extra %}
   {% include '_scripts/pages/post-details.swig' %}
 {% endblock %}
